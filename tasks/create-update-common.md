@@ -72,12 +72,6 @@ on:
 jobs:
   update-common:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-      GITHUB_EMAIL: ${{ secrets.GITHUB_EMAIL }}
-      GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -87,19 +81,21 @@ jobs:
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
-          sudo ./aws/install
+          sudo ./aws/install --update
 
       - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          aws configure set default.region ap-northeast-1
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Get secrets from AWS SecretsManager
-        id: get_secrets
-        run: |
-          SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id your-secret-id --query SecretString --output text)
-          echo "$SECRET_JSON" > secret.json
+      - name: Get Secrets from AWS SecretsManager
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: |
+            GitHub
+          parse-json-secrets: true
 
       - name: Setup git remote
         run: |
