@@ -59,9 +59,10 @@ jobs:
 
       - name: Reset specific files
         run: |
-          git reset -- .github/workflows/apply-template.yml
-          git reset -- .github/workflows/update-template.yml
           git reset -- README.md
+          git restore README.md
+          git clean -f .github/workflows/apply-template.yml
+          git clean -f .github/workflows/update-template.yml
 
       - name: Resolve conflicts
         run: |
