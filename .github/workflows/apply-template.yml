@@ -56,6 +56,7 @@ jobs:
       - name: Reset specific files
         run: |
           git reset -- README.md
+          git restore README.md
 
       - name: Resolve conflicts
         run: |
