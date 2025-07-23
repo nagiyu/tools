@@ -55,7 +55,7 @@ jobs:
           git fetch sample
 
       - name: Merge Sample
-        run: git merge -X theirs sample/master --allow-unrelated-histories || true
+        run: git merge -X theirs --no-commit sample/master --allow-unrelated-histories || true
 
       - name: Reset specific files
         run: git reset -- .github/workflows/update-common.yml
