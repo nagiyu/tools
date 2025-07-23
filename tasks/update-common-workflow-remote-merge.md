@@ -18,6 +18,51 @@ update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-ser
 - この方式は変更管理が煩雑になりやすく、運用効率が低い可能性があります。
 - また、actions/checkout@v3 でチェックアウトするリポジトリは作業元リポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-sample.git）であり、テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）ではありません。
 
+### 改善案
+- テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）の master ブランチをクローンし、作業元リポジトリにマージする方式に変更する。
+- これにより、テンプレートの最新状態を直接取り込み、管理を一元化できる。
+
+### 実装例
+以下は .github/workflows/update-common.yml を修正する例です。
+
+```yaml
+name: Update Common Workflow
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-common:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout nagiyu-aws-serverless-template
+        uses: actions/checkout@v3
+        with:
+          repository: nagiyu/nagiyu-aws-serverless-template
+          ref: master
+          path: template
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Merge template into current repository
+        run: |
+          git remote add template ./template
+          git fetch template
+          git merge template/master --allow-unrelated-histories -m "Merge template master branch"
+
+      - name: Push changes
+        run: |
+          git push origin HEAD:refs/heads/main
+```
+
+### 注意点
+- マージ時のコンフリクト対応が必要になる可能性がある。
+- 運用ルールとして、テンプレートリポジトリの更新を定期的に反映することを推奨する。
+
 ### 新方式の概要
 - https://github.com/nagiyu/nagiyu-aws-serverless-template.git の master ブランチを直接クローンし、
   その上で作業元リポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-sample.git）をリモートとして追加します。
@@ -33,19 +78,48 @@ update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-ser
 
 ### 実装例（update-common.yml の一部変更例）
 ```yaml
-jobs:
-  update-common:
-    runs-on: ubuntu-latest
+      - name: Checkout current repository
+        uses: actions/checkout@v3
 
-    steps:
+      - name: Add nagiyu remote
+        run: git remote add nagiyu https://github.com/nagiyu/nagiyu-aws-serverless-template.git
+
+      - name: Fetch nagiyu master
+        run: git fetch nagiyu master
+
+      - name: Merge nagiyu master
+        run: git merge nagiyu/master --allow-unrelated-histories -m "Merge nagiyu master branch"
+
+      - name: Push changes
+        run: git push origin HEAD:refs/heads/main
+```
+
+---
+
+この計画は、テンプレートリポジトリの最新状態を効率的に取り込み、管理を一元化することを目的としています。運用時にはマージコンフリクトの対応や定期的な更新反映を考慮してください。
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Clone template repository
+        uses: actions/checkout@v3
+        with:
+          repository: nagiyu/nagiyu-aws-serverless-template
+          ref: master
+          path: template
+
+      - name: Configure Git
         run: |
-          git clone https://github.com/nagiyu/nagiyu-aws-serverless-template.git template-repo
-          cd template-repo
-          git remote add sample https://github.com/nagiyu/nagiyu-aws-serverless-sample.git
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Merge template into current repository
+        run: |
+          git remote add template ./template
+          git fetch template
+          git merge template/master --allow-unrelated-histories -m "Merge template master branch"
+
+      - name: Push changes
+        run: |
           git fetch sample
           git merge sample/master
           # 必要に応じてマージ後の処理
