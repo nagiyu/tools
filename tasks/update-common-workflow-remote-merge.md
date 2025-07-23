@@ -16,11 +16,13 @@ update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-ser
 ### 現状の問題点
 - 現状の update-common.yml は actions/checkout@v3 でリポジトリをチェックアウトし、変更を add & commit してプッシュし、プルリクエストを作成する方式です。
 - この方式は変更管理が煩雑になりやすく、運用効率が低い可能性があります。
+- また、actions/checkout@v3 でチェックアウトするリポジトリは作業元リポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-sample.git）であり、テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）ではありません。
 
 ### 新方式の概要
-- https://github.com/nagiyu/nagiyu-aws-serverless-template.git の master ブランチをリモートとして追加し、
-  そこから最新の変更をフェッチしてマージする方式に変更します。
-- これにより、変更はリモートの master ブランチから直接取り込み、ローカルでのコミットやプッシュ操作を減らせます。
+- https://github.com/nagiyu/nagiyu-aws-serverless-template.git の master ブランチを直接クローンし、
+  その上で作業元リポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-sample.git）をリモートとして追加します。
+- そこから最新の変更をフェッチしてマージする方式に変更します。
+- これにより、テンプレートリポジトリの最新の master ブランチを正確に取得し、作業元リポジトリの変更と効率的に統合できます。
 
 ### 具体的な手順
 1. actions/checkout@v3 でリポジトリをチェックアウト
@@ -47,6 +49,28 @@ jobs:
 
       # 以降は必要に応じて追加のステップを記述
 ```
+
+### 実装例（update-common.yml の一部変更例）
+```yaml
+jobs:
+  update-common:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Clone template repository
+        run: |
+          git clone https://github.com/nagiyu/nagiyu-aws-serverless-template.git template-repo
+          cd template-repo
+          git remote add sample https://github.com/nagiyu/nagiyu-aws-serverless-sample.git
+          git fetch sample
+          git merge sample/master
+          # 必要に応じてマージ後の処理
+          git push origin master
+```
+
 
 ### 注意点
 - マージ時にコンフリクトが発生した場合の対応方法を検討する必要があります。
