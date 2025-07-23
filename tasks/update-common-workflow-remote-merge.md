@@ -41,25 +41,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup git remote
-        run: |
-          git remote add nagiyu https://github.com/nagiyu/nagiyu-aws-serverless-template.git
-          git fetch nagiyu master
-          git merge nagiyu/master
-
-      # 以降は必要に応じて追加のステップを記述
-```
-
-### 実装例（update-common.yml の一部変更例）
-```yaml
-jobs:
-  update-common:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       - name: Clone template repository
         run: |
           git clone https://github.com/nagiyu/nagiyu-aws-serverless-template.git template-repo
