@@ -1,7 +1,7 @@
-# update-common.yml ワークフローのリモート master マージ方式への移行計画
+# tasks/update-common-workflow-remote-merge.md
 
 ## 概要
-update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-serverless-template.git の master ブランチをクローンし、@nagiyu/nagiyu-aws-serverless-sample からマージする方式に変更する計画。
+update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-serverless-template.git の master ブランチをクローンし、@nagiyu/nagiyu-aws-serverless-sample からマージする方式に変更する計画です。
 
 ## 詳細
 - 現状は actions/checkout@v3 でチェックアウトしたリポジトリに対して操作しています。
@@ -19,8 +19,8 @@ update-common.yml ワークフローを https://github.com/nagiyu/nagiyu-aws-ser
 - また、actions/checkout@v3 でチェックアウトするリポジトリは作業元リポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-sample.git）であり、テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）ではありません。
 
 ### 改善案
-- テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）の master ブランチをクローンし、作業元リポジトリにマージする方式に変更する。
-- これにより、テンプレートの最新状態を直接取り込み、管理を一元化できる。
+- テンプレートリポジトリ（https://github.com/nagiyu/nagiyu-aws-serverless-template.git）の master ブランチをクローンし、作業元リポジトリにマージする方式に変更します。
+- これにより、テンプレートの最新状態を直接取り込み、管理を一元化できます。
 
 ### 実装例
 以下は .github/workflows/update-common.yml を修正する例です。
@@ -42,6 +42,23 @@ jobs:
           repository: nagiyu/nagiyu-aws-serverless-template
           ref: master
           path: template
+
+      - name: Checkout current repository
+        uses: actions/checkout@v3
+        with:
+          path: current
+
+      - name: Merge template master into current
+        run: |
+          cd current
+          git remote add template ../template
+          git fetch template master
+          git merge template/master
+
+      - name: Push changes
+        run: |
+          cd current
+          git push origin main
 
       - name: Configure Git
         run: |
