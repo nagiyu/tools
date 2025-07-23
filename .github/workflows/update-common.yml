@@ -49,15 +49,28 @@ jobs:
           git config user.name ${{ env.GITHUB_USERNAME }}
           git config user.email ${{ env.GITHUB_EMAIL }}
 
-      - name: Commit changes
+      - name: Check for staged changes
+        id: staged
         run: |
           git add .
           git reset -- .github/workflows/update-common.yml
+          if [ -z "$(git diff --cached --name-only)" ]; then
+            echo "skip_commit=true" >> $GITHUB_ENV
+            echo "No staged changes to commit."
+          else
+            echo "skip_commit=false" >> $GITHUB_ENV
+            echo "Staged changes detected."
+          fi
+
+      - name: Commit changes
+        if: env.skip_commit == 'false'
+        run: |
           git commit -m "Update common workflow"
           git push nagiyu HEAD:$BRANCH_NAME
 
       - name: Create draft pull request
         uses: peter-evans/create-pull-request@v4
+        if: env.skip_commit == 'false'
         with:
           token: ${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}
           title: "[Draft] Update common workflow"
