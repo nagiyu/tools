@@ -37,6 +37,8 @@ jobs:
         with:
           repository: nagiyu/nagiyu-aws-serverless-template
           token: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
+        secrets:
+          GITHUB_PERSONAL_ACCESS_TOKEN: ${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}
 
       - name: Configure git user
         run: |
