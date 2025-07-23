@@ -93,56 +93,6 @@ jobs:
 4. git merge nagiyu/master を実行してローカルの master ブランチにマージ
 5. 必要に応じてコンフリクト解消や追加の操作を行う
 
-### 実装例（update-common.yml の一部変更例）
-```yaml
-      - name: Checkout current repository
-        uses: actions/checkout@v3
-
-      - name: Add nagiyu remote
-        run: git remote add nagiyu https://github.com/nagiyu/nagiyu-aws-serverless-template.git
-
-      - name: Fetch nagiyu master
-        run: git fetch nagiyu master
-
-      - name: Merge nagiyu master
-        run: git merge nagiyu/master --allow-unrelated-histories -m "Merge nagiyu master branch"
-
-      - name: Push changes
-        run: git push origin HEAD:refs/heads/main
-```
-
----
-
-この計画は、テンプレートリポジトリの最新状態を効率的に取り込み、管理を一元化することを目的としています。運用時にはマージコンフリクトの対応や定期的な更新反映を考慮してください。
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Clone template repository
-        uses: actions/checkout@v3
-        with:
-          repository: nagiyu/nagiyu-aws-serverless-template
-          ref: master
-          path: template
-
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-
-      - name: Merge template into current repository
-        run: |
-          git remote add template ./template
-          git fetch template
-          git merge template/master --allow-unrelated-histories -m "Merge template master branch"
-
-      - name: Push changes
-        run: |
-          git fetch sample
-          git merge sample/master
-          # 必要に応じてマージ後の処理
-          git push origin master
-```
-
 
 ### 注意点
 - マージ時にコンフリクトが発生した場合の対応方法を検討する必要があります。
