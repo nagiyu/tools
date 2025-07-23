@@ -104,5 +104,5 @@ jobs:
           title: "[Draft] Update Template"
           body: "This is an automated draft PR to template."
           base: master
-          head: ${{ env.BRANCH_NAME }}
+          branch: ${{ env.BRANCH_NAME }}
           draft: true
