@@ -1,4 +1,4 @@
-name: Update Common
+name: Update Template
 
 on:
   push:
@@ -7,13 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-common:
+  update-template:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       - name: Install AWS CLI
         run: |
           cd /tmp
@@ -35,46 +32,76 @@ jobs:
             GitHub
           parse-json-secrets: true
 
-      - name: Setup git remote
-        run: |
-          git remote add nagiyu https://github.com/nagiyu/nagiyu-aws-serverless-template.git
-
-      - name: Create and checkout branch
-        run: |
-          BRANCH_NAME=feature/update-common-$(date +'%Y%m%d-%H%M%S')
-          git checkout -b $BRANCH_NAME
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          repository: nagiyu/nagiyu-aws-serverless-template
+          token: ${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}
 
       - name: Configure git user
         run: |
           git config user.name ${{ env.GITHUB_USERNAME }}
           git config user.email ${{ env.GITHUB_EMAIL }}
 
-      - name: Check for staged changes
-        id: staged
+      - name: Set branch name
+        run: echo "BRANCH_NAME=feature/update-common-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+
+      - name: Create and checkout branch
+        run: git checkout -b ${{ env.BRANCH_NAME }}
+
+      - name: Setup git remote
         run: |
-          git add .
-          git reset -- .github/workflows/update-common.yml
-          if [ -z "$(git diff --cached --name-only)" ]; then
-            echo "skip_commit=true" >> $GITHUB_ENV
-            echo "No staged changes to commit."
-          else
-            echo "skip_commit=false" >> $GITHUB_ENV
-            echo "Staged changes detected."
+          git remote add sample https://github.com/nagiyu/nagiyu-aws-serverless-sample.git
+          git fetch sample
+
+      - name: Merge Sample
+        run: git merge -X theirs --no-commit sample/master --allow-unrelated-histories || true
+
+      - name: Reset specific files
+        run: git reset -- .github/workflows/update-common.yml
+
+      - name: Resolve conflicts
+        run: |
+          if [ -f .git/MERGE_HEAD ]; then
+            # 削除競合を削除
+            git status --porcelain | grep '^DU ' | awk '{print $2}' | while read file; do
+              git rm -f "$file"
+            done
+
+            git diff --name-only --diff-filter=U | while read file; do
+              # "theirs"側にバージョンがなければ git rm、それ以外は checkout --theirs
+              if git show ":3:$file" > /dev/null 2>&1; then
+                git checkout --theirs "$file"
+                git add "$file"
+              else
+                git rm -f "$file"
+              fi
+            done
           fi
 
-      - name: Commit changes
-        if: env.skip_commit == 'false'
+      - name: Check for changes
+        id: changes
         run: |
-          git commit -m "Update common workflow"
-          git push nagiyu HEAD:$BRANCH_NAME
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes_detected=true" >> $GITHUB_ENV
+            echo "Changes detected."
+          else
+            echo "changes_detected=false" >> $GITHUB_ENV
+            echo "No changes detected."
+          fi
 
-      - name: Create draft pull request
-        uses: peter-evans/create-pull-request@v4
-        if: env.skip_commit == 'false'
-        with:
-          token: ${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}
-          title: "[Draft] Update common workflow"
-          body: "This is an automated draft PR to update common workflow."
-          base: main
-          head: $BRANCH_NAME
-          draft: true
+      - name: Commit and Push
+        if: env.changes_detected == 'true'
+        run: |
+          git commit -m "Update Template"
+          git push origin ${{ env.BRANCH_NAME }}
+
+      - name: Create Pull Request
+        run: |
+          export GH_TOKEN="${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}"
+          gh pr create \
+            --title "[Draft] Update Template" \
+            --body "This is an automated draft PR to template." \
+            --base master \
+            --head ${{ env.BRANCH_NAME }} \
+            --draft || true
