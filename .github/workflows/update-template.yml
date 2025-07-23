@@ -44,7 +44,7 @@ jobs:
           git config user.email ${{ env.GITHUB_EMAIL }}
 
       - name: Set branch name
-        run: echo "BRANCH_NAME=feature/update-common-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=feature/update-template-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
 
       - name: Create and checkout branch
         run: git checkout -b ${{ env.BRANCH_NAME }}
@@ -58,7 +58,7 @@ jobs:
         run: git merge -X theirs --no-commit sample/master --allow-unrelated-histories || true
 
       - name: Reset specific files
-        run: git reset -- .github/workflows/update-common.yml
+        run: git reset -- .github/workflows/update-template.yml
 
       - name: Resolve conflicts
         run: |
