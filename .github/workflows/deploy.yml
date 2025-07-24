@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - develop
   workflow_dispatch:
 
 jobs:
@@ -56,14 +55,14 @@ jobs:
 
     - name: Rewrite sw.js endpoint from secrets
       run: |
-        sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/tools/public/sw.js
+        sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/nextjs-sample/public/sw.js
 
     - name: Deploy
       run: |
         aws ecr get-login-password --region ${{ env.AWS_SECRETS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com
         docker build \
           --build-arg PROCESS_ENV=${{ github.ref == 'refs/heads/master' && 'production' || 'development' }} \
-          --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'Tools' || 'DevTools' }} \
+          --build-arg PROJECT_SECRET=${{ github.ref == 'refs/heads/master' && 'AWSServerlessSample' || 'AWSServerlessSample' }} \
           --build-arg PROJECT_AWS_ACCESS_KEY=${{ env.PROJECT_AWS_ACCESS_KEY }} \
           --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
           --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
