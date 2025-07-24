@@ -5,9 +5,9 @@
   "containerEnv": {
     "PROCESS_ENV": "local",
     "PROJECT_SECRET": "NextjsSample",
-    "TOOLS_AWS_ACCESS_KEY": "",
-    "TOOLS_AWS_SECRET_ACCESS_KEY": "",
-    "TOOLS_AWS_REGION": "",
+    "PROJECT_AWS_ACCESS_KEY": "",
+    "PROJECT_AWS_SECRET_ACCESS_KEY": "",
+    "PROJECT_AWS_REGION": "",
     "NEXTAUTH_URL": "http://localhost:3000"
   },
   "workspaceFolder": "/workspaces/nagiyu-aws-serverless-sample/client/nextjs-sample/nextjs-sample.code-workspace",
