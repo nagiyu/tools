@@ -4,7 +4,7 @@
   "remoteUser": "node",
   "containerEnv": {
     "PROCESS_ENV": "local",
-    "PROJECT_SECRET": "NextjsSample",
+    "PROJECT_SECRET": "AWSServerlessSample",
     "PROJECT_AWS_ACCESS_KEY": "",
     "PROJECT_AWS_SECRET_ACCESS_KEY": "",
     "PROJECT_AWS_REGION": "",
