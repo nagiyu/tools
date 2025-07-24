@@ -63,6 +63,8 @@ jobs:
           git clean -f .github/workflows/apply-template.yml
           git reset -- .github/workflows/update-template.yml
           git clean -f .github/workflows/update-template.yml
+          git reset -- client/nextjs-sample
+          git clean -f client/nextjs-sample
           git reset -- README.md
           git restore README.md
 
