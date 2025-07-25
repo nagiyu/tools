@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import BasicSelect, { Option } from '@client-common/components/inputs/Selects/BasicSelect';
 
