@@ -27,7 +27,6 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   const session = await AuthUtil.getServerSession();
 
   const menuItems = [
-  { label: 'Sample Radio Group', path: '/sample-radio-group' },
     { title: 'Home', url: '/' },
     { title: 'Sample Button', url: '/sample-button' },
     { title: 'Sample Date Picker', url: '/sample-date-picker' },
