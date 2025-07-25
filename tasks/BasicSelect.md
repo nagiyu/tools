@@ -28,6 +28,8 @@ BasicSelect コンポーネント（client/common/components/inputs/Selects/Basi
 ## 実装例
 ### sample-select/page.tsx
 ```tsx
+'use client';
+
 import React, { useState } from 'react';
 import BasicSelect from 'client/common/components/inputs/Selects/BasicSelect';
 
