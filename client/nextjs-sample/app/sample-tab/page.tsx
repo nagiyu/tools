@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import SimpleTab from '@client-common/components/navigations/Tabs/SimpleTab';
 
