@@ -51,11 +51,11 @@ jobs:
 
       - name: Setup git remote
         run: |
-          git remote add sample https://github.com/nagiyu/nagiyu-aws-serverless-sample.git
-          git fetch sample
+          git remote add finance https://github.com/nagiyu/finance.git
+          git fetch finance
 
-      - name: Merge Sample
-        run: git merge -X theirs --no-commit sample/master --allow-unrelated-histories || true
+      - name: Merge Finance
+        run: git merge -X theirs --no-commit finance/develop --allow-unrelated-histories || true
 
       - name: Reset specific files
         run: |
