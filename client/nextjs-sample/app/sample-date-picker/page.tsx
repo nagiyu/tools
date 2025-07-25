@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState } from 'react';
-import { BasicDatePicker } from '@client-common/components/inputs/Dates/BasicDatePicker';
+import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
 
 export default function SampleDatePickerPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
