@@ -21,9 +21,6 @@ Material UI の Radio Group をラップした SimpleRadioGroup コンポーネ�
 ## 参考情報
 - [Material UI Radio Button](https://mui.com/material-ui/react-radio-button/)
 
-## 完了条件
-- 本計画書が日本語で作成されていること
-
 ---
 
 ## 補足
