@@ -34,7 +34,9 @@ async function getMenuItems(): Promise<MenuItemData[]> {
     menuItems.push({ title: 'User Data', url: '/user-data' });
   }
 
+  menuItems.push({ title: 'Sample Button', url: '/sample-button' });
   return menuItems;
+
 }
 
 export default async function RootLayout({
