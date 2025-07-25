@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
 import MultilineTextField from '@client-common/components/inputs/TextFields/MultilineTextField';
