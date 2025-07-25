@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 import TradingView, { PricePeriod } from '@mathieuc/tradingview';
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const result = await new Promise((resolve, reject) => {
-      const client = new TradingView.Client(); // Creates a websocket client
-      const chart = new client.Session.Chart(); // Init a Chart session
+    const { exchange, ticker } = await req.json();
+    const market = `${exchange}:${ticker}`;
 
-      chart.setMarket('NASDAQ:NVDA', { // Set the market
+    const result = await new Promise((resolve, reject) => {
+      const client = new TradingView.Client();
+      const chart = new client.Session.Chart();
+
+      chart.setMarket(market, {
         timeframe: '1',
       });
 
