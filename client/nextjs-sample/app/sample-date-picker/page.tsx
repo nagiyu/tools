@@ -12,7 +12,7 @@ export default function SampleDatePickerPage() {
         value={selectedDate}
         onChange={setSelectedDate}
       />
-      <p>\u9078\u629e\u3055\u308c\u305f\u65e5\u4ed8: {selectedDate ? selectedDate.toLocaleDateString() : '\u306a\u3057'}</p>
+      <p>日付: {selectedDate ? selectedDate.toLocaleDateString() : '\u306a\u3057'}</p>
     </main>
   );
 }
