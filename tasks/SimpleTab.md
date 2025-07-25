@@ -29,40 +29,6 @@
 
 ## 実装例
 
-### sample-tab/page.tsx
-```tsx
-import React, { useState } from 'react';
-import SimpleTab from '@/common/components/navigations/Tabs/SimpleTab';
-
-const SampleTabPage = () => {
-  const [activeTab, setActiveTab] = useState('tab1');
-
-  const menuItems = [
-    { id: 'tab1', label: 'Tab 1' },
-    { id: 'tab2', label: 'Tab 2' },
-    { id: 'tab3', label: 'Tab 3' },
-  ];
-
-  return (
-    <div>
-      <h1>SimpleTab サンプルページ</h1>
-      <SimpleTab
-        menuItems={menuItems}
-        activeTab={activeTab}
-        onChange={setActiveTab}
-      />
-      <div style={{ marginTop: 20 }}>
-        {activeTab === 'tab1' && <p>Tab 1 の内容です。</p>}
-        {activeTab === 'tab2' && <p>Tab 2 の内容です。</p>}
-        {activeTab === 'tab3' && <p>Tab 3 の内容です。</p>}
-      </div>
-    </div>
-  );
-};
-
-export default SampleTabPage;
-```
-
 ### layout.tsx の menuItems 追加例
 ```tsx
 const menuItems = [
