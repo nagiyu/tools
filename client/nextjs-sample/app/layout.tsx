@@ -31,8 +31,8 @@ async function getMenuItems(): Promise<MenuItemData[]> {
     { title: 'Sample Button', url: '/sample-button' },
     { title: 'Sample Date Picker', url: '/sample-date-picker' },
     { title: 'Sample Stacks', url: '/sample-stacks' },
-    { title: 'Sample Select', url: '/sample-select' }
-    { title: 'Sample Tab', url: '/sample-tab' },
+    { title: 'Sample Select', url: '/sample-select' },
+    { title: 'Sample Tab', url: '/sample-tab' }
   ];
 
   if (session) {
