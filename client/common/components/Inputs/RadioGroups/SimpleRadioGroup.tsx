@@ -21,7 +21,23 @@ export interface SimpleRadioGroupProps {
   disabled?: boolean;
 }
 
-const SimpleRadioGroup: React.FC<SimpleRadioGroupProps> = ({
+export interface SimpleRadioGroupOption {
+  label: string;
+  value: string;
+  disabled?: boolean;
+}
+
+export interface SimpleRadioGroupProps {
+  options: SimpleRadioGroupOption[];
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void;
+  name?: string;
+  label?: string;
+  row?: boolean;
+  disabled?: boolean;
+}
+
+export default function SimpleRadioGroup({
   options,
   value,
   onChange,
@@ -29,7 +45,7 @@ const SimpleRadioGroup: React.FC<SimpleRadioGroupProps> = ({
   label,
   row = false,
   disabled = false,
-}) => {
+}: SimpleRadioGroupProps) {
   return (
     <FormControl component="fieldset" disabled={disabled}>
       {label && <FormLabel component="legend">{label}</FormLabel>}
@@ -52,6 +68,5 @@ const SimpleRadioGroup: React.FC<SimpleRadioGroupProps> = ({
       </RadioGroup>
     </FormControl>
   );
-};
+}
 
-export default SimpleRadioGroup;
