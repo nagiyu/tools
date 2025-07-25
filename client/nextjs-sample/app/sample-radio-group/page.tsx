@@ -23,30 +23,6 @@ export default function SampleRadioGroupPage() {
     <div style={{ padding: 20 }}>
       <h1>SimpleRadioGroup Sample</h1>
 
-      <SimpleRadioGroup
-        options={options1}
-        value={value1}
-        onChange={(e, val) => setValue1(val)}
-        name="group1"
-        label="Group 1"
-      />
-
-      <SimpleRadioGroup
-        options={options2}
-        value={value2}
-        onChange={(e, val) => setValue2(val)}
-        name="group2"
-        label="Group 2"
-        row
-      />
-    </div>
-  );
-}
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>SimpleRadioGroup Sample</h1>
-
       <section>
         <h2>Basic Usage</h2>
         <SimpleRadioGroup
@@ -83,5 +59,3 @@ export default function SampleRadioGroupPage() {
     </div>
   );
 };
-
-export default SampleRadioGroupPage;
