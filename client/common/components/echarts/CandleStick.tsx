@@ -2,7 +2,7 @@ import React from 'react';
 
 import ReactECharts from 'echarts-for-react';
 
-export interface CandleStickData {
+interface CandleStickData {
     date: string;
     data: [number, number, number, number];
 }
@@ -16,9 +16,7 @@ function getOption(data: CandleStickData[]) {
         xAxis: {
             data: data.map(item => item.date)
         },
-        yAxis: {
-            scale: true
-        },
+        yAxis: {},
         series: [
             {
                 type: 'candlestick',
