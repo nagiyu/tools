@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+
 import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
 
 export default function Home() {
