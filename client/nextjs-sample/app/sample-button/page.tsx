@@ -1,4 +1,4 @@
-import ContainedButton from "client/common/components/inputs/Buttons/ContainedButton";
+import ContainedButton from "@client-common/components/inputs/Buttons/ContainedButton";
 
 export default function SampleButtonPage() {
   return (
