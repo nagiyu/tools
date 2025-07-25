@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mathieuc/tradingview": "^3.5.1",
     "next": "15.4.3",
     "next-auth": "^4.24.11",
     "react": "19.1.0",
@@ -16,9 +17,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/mathieuc__tradingview": "^3.5.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "bufferutil": "^4.0.9",
     "eslint": "^9",
     "eslint-config-next": "15.4.3",
     "typescript": "^5"
