@@ -1,14 +1,26 @@
 'use client';
 
-import CandleStick from '@client-common/components/echarts/CandleStick';
+import React, { useEffect, useState } from 'react';
+import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
 
 export default function Home() {
-  return (
-    <CandleStick data={[
-      { date: '2017-10-24', data: [20, 34, 10, 38] },
-      { date: '2017-10-25', data: [40, 35, 30, 50] },
-      { date: '2017-10-26', data: [31, 38, 33, 44] },
-      { date: '2017-10-27', data: [38, 15, 5, 42] }
-    ]} />
-  );
+  const [data, setData] = useState<CandleStickData[] | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch('/api/finance');
+
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const json = await response.json();
+
+      setData(json);
+    })();
+  }, []);
+
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
+  return <CandleStick data={data} />;
 }
