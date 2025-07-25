@@ -38,6 +38,7 @@ client/common/components/Layout/Stacks/BasicStack.tsx と DirectionStack.tsx の
 - 例えば、BasicStackは縦方向にボタンを並べる例。
 - DirectionStackは横方向にボタンを並べる例。
 - MUIのButtonコンポーネントを使い、見た目もわかりやすくする。
+  - Button コンポーネントは client/common/components/inputs/Buttons/ContainedButton.tsx を利用する。
 
 ## 注意事項
 - 本issueは計画のみのため、tasks/stack.md以外のファイルは変更しない。
