@@ -29,7 +29,8 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   const menuItems = [
     { title: 'Home', url: '/' },
     { title: 'Sample Button', url: '/sample-button' },
-    { title: 'Sample Date Picker', url: '/sample-date-picker' }
+    { title: 'Sample Date Picker', url: '/sample-date-picker' },
+    { title: 'Sample Stacks', url: '/sample-stacks' }
   ];
 
   if (session) {
