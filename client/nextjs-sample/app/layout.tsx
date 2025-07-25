@@ -27,16 +27,15 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   const session = await AuthUtil.getServerSession();
 
   const menuItems = [
-    { title: 'Home', url: '/' }
+    { title: 'Home', url: '/' },
+    { title: 'Sample Button', url: '/sample-button' }
   ];
 
   if (session) {
     menuItems.push({ title: 'User Data', url: '/user-data' });
   }
 
-  menuItems.push({ title: 'Sample Button', url: '/sample-button' });
   return menuItems;
-
 }
 
 export default async function RootLayout({
