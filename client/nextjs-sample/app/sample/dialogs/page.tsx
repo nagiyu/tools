@@ -24,6 +24,7 @@ export default function SampleDialogsPage() {
         }}
       />
 
+      {/* BasicDialog with onConfirm, confirmText, closeText */}
       <BasicDialog
         open={open}
         title="Sample Dialog"
@@ -33,6 +34,38 @@ export default function SampleDialogsPage() {
         closeText="Cancel"
       >
         <div>This is a sample dialog content.</div>
+      </BasicDialog>
+
+      {/* BasicDialog without onConfirm */}
+      <BasicDialog
+        open={open}
+        title="Dialog without Confirm"
+        onClose={handleClose}
+        closeText="Close"
+      >
+        <div>This dialog has no confirm button.</div>
+      </BasicDialog>
+
+      {/* BasicDialog with custom confirmText and closeText */}
+      <BasicDialog
+        open={open}
+        title="Custom Texts"
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+        confirmText="Yes"
+        closeText="No"
+      >
+        <div>Dialog with custom confirm and close texts.</div>
+      </BasicDialog>
+
+      {/* BasicDialog with only closeText */}
+      <BasicDialog
+        open={open}
+        title="Only Close Text"
+        onClose={handleClose}
+        closeText="Dismiss"
+      >
+        <div>Dialog with only close button text customized.</div>
       </BasicDialog>
     </div>
   );
