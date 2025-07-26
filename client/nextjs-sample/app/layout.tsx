@@ -27,7 +27,6 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   const session = await AuthUtil.getServerSession();
 
   const menuItems = [
-    { title: 'Table Sample', url: '/sample/table' },
     { title: 'Home', url: '/' },
     { title: 'Sample Button', url: '/sample-button' },
     { title: 'Sample Date Picker', url: '/sample-date-picker' },
@@ -36,7 +35,8 @@ async function getMenuItems(): Promise<MenuItemData[]> {
     { title: 'Sample Tab', url: '/sample-tab' },
     { title: 'Sample Text Field', url: '/sample-text-field' },
     { title: 'Sample Radio Group', url: '/sample-radio-group' },
-    { title: 'Sample Dialogs', url: '/sample/dialogs' }
+    { title: 'Sample Dialogs', url: '/sample/dialogs' },
+    { title: 'Sample Table', url: '/sample/table' }
   ];
 
   if (session) {
