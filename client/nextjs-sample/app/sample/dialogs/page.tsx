@@ -6,8 +6,8 @@ import ContainedButton from '@client-common/components/inputs/Buttons/ContainedB
 
 export default function SampleDialogsPage() {
   const [open, setOpen] = useState(false);
-  const [dialogContent, setDialogContent] = useState<React.ReactNode>(null);
-  const [dialogTitle, setDialogTitle] = useState<React.ReactNode>('Sample Dialog');
+  const dialogContent = "This is a sample dialog content.";
+  const dialogTitle = "Sample Dialog Title";
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
