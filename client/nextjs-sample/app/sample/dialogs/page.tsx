@@ -6,8 +6,6 @@ import ContainedButton from '@client-common/components/inputs/Buttons/ContainedB
 
 export default function SampleDialogsPage() {
   const [open, setOpen] = useState(false);
-  const dialogContent = "This is a sample dialog content.";
-  const dialogTitle = "Sample Dialog Title";
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -22,21 +20,19 @@ export default function SampleDialogsPage() {
       <ContainedButton
         label="Open Dialog"
         onClick={() => {
-          setDialogTitle('Sample Dialog Title');
-          setDialogContent(<p>This is a sample dialog content.</p>);
           handleOpen();
         }}
       />
 
       <BasicDialog
         open={open}
-        title={dialogTitle}
+        title="Sample Dialog Title"
         onClose={handleClose}
         onConfirm={handleConfirm}
         confirmText="Confirm"
         cancelText="Cancel"
       >
-        {dialogContent}
+        <div>This is a sample dialog content.</div>
       </BasicDialog>
     </div>
   );
