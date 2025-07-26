@@ -26,7 +26,7 @@ export default function SampleDialogsPage() {
 
       <BasicDialog
         open={open}
-        title="Sample Dialog Title"
+        title="Sample Dialog"
         onClose={handleClose}
         onConfirm={handleConfirm}
         confirmText="Confirm"

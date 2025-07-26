@@ -9,7 +9,7 @@ import Button from '@mui/material/Button';
 
 export type BasicDialogProps = {
   open: boolean;
-  title?: React.ReactNode;
+  title?: string;
   children?: React.ReactNode;
   onClose: () => void;
   onConfirm?: () => void;
