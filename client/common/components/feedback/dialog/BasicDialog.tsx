@@ -14,7 +14,7 @@ export type BasicDialogProps = {
   onClose: () => void;
   onConfirm?: () => void;
   confirmText?: string;
-  cancelText?: string;
+  closeText?: string;
 };
 
 export default function BasicDialog({
@@ -24,7 +24,7 @@ export default function BasicDialog({
   onClose,
   onConfirm,
   confirmText = 'OK',
-  cancelText = 'Cancel',
+  closeText = 'Cancel',
 }: BasicDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="basic-dialog-title">
@@ -32,7 +32,7 @@ export default function BasicDialog({
       <DialogContent dividers>{children}</DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
-          {cancelText}
+          {closeText}
         </Button>
         {onConfirm && (
           <Button onClick={onConfirm} color="primary" autoFocus>
