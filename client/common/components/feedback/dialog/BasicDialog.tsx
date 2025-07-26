@@ -28,7 +28,7 @@ export default function BasicDialog({
 }: BasicDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="basic-dialog-title">
-      {title && <DialogTitle id="basic-dialog-title">{title}</DialogTitle>}
+      <DialogTitle id="basic-dialog-title">{title}</DialogTitle>
       <DialogContent dividers>{children}</DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
