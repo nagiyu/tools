@@ -5,31 +5,61 @@ import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
 export default function SampleDialogsPage() {
-  const [open, setOpen] = useState(false);
+  // Manage open state for each dialog separately
+  const [openDialogs, setOpenDialogs] = useState({
+    sampleDialog: false,
+    noConfirmDialog: false,
+    customTextDialog: false,
+    onlyCloseTextDialog: false,
+  });
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleConfirm = () => {
-    alert('Confirmed!');
-    setOpen(false);
+  const handleOpen = (dialogName: string) => {
+    setOpenDialogs((prev) => ({ ...prev, [dialogName]: true }));
+  };
+
+  const handleClose = (dialogName: string) => {
+    setOpenDialogs((prev) => ({ ...prev, [dialogName]: false }));
+  };
+
+  const handleConfirm = (dialogName: string) => {
+    alert(`Confirmed ${dialogName}!`);
+    setOpenDialogs((prev) => ({ ...prev, [dialogName]: false }));
   };
 
   return (
     <div>
       <h1>Sample Dialogs</h1>
       <ContainedButton
-        label="Open Dialog"
+        label="Open Sample Dialog"
         onClick={() => {
-          handleOpen();
+          handleOpen('sampleDialog');
+        }}
+      />
+      <ContainedButton
+        label="Open Dialog without Confirm"
+        onClick={() => {
+          handleOpen('noConfirmDialog');
+        }}
+      />
+      <ContainedButton
+        label="Open Custom Texts Dialog"
+        onClick={() => {
+          handleOpen('customTextDialog');
+        }}
+      />
+      <ContainedButton
+        label="Open Only Close Text Dialog"
+        onClick={() => {
+          handleOpen('onlyCloseTextDialog');
         }}
       />
 
       {/* BasicDialog with onConfirm, confirmText, closeText */}
       <BasicDialog
-        open={open}
+        open={openDialogs.sampleDialog}
         title="Sample Dialog"
-        onClose={handleClose}
-        onConfirm={handleConfirm}
+        onClose={() => handleClose('sampleDialog')}
+        onConfirm={() => handleConfirm('sampleDialog')}
         confirmText="Confirm"
         closeText="Cancel"
       >
@@ -38,9 +68,9 @@ export default function SampleDialogsPage() {
 
       {/* BasicDialog without onConfirm */}
       <BasicDialog
-        open={open}
+        open={openDialogs.noConfirmDialog}
         title="Dialog without Confirm"
-        onClose={handleClose}
+        onClose={() => handleClose('noConfirmDialog')}
         closeText="Close"
       >
         <div>This dialog has no confirm button.</div>
@@ -48,10 +78,10 @@ export default function SampleDialogsPage() {
 
       {/* BasicDialog with custom confirmText and closeText */}
       <BasicDialog
-        open={open}
+        open={openDialogs.customTextDialog}
         title="Custom Texts"
-        onClose={handleClose}
-        onConfirm={handleConfirm}
+        onClose={() => handleClose('customTextDialog')}
+        onConfirm={() => handleConfirm('customTextDialog')}
         confirmText="Yes"
         closeText="No"
       >
@@ -60,9 +90,9 @@ export default function SampleDialogsPage() {
 
       {/* BasicDialog with only closeText */}
       <BasicDialog
-        open={open}
+        open={openDialogs.onlyCloseTextDialog}
         title="Only Close Text"
-        onClose={handleClose}
+        onClose={() => handleClose('onlyCloseTextDialog')}
         closeText="Dismiss"
       >
         <div>Dialog with only close button text customized.</div>
