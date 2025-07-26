@@ -30,7 +30,7 @@ export default function SampleDialogsPage() {
         onClose={handleClose}
         onConfirm={handleConfirm}
         confirmText="Confirm"
-        cancelText="Cancel"
+        closeText="Cancel"
       >
         <div>This is a sample dialog content.</div>
       </BasicDialog>
