@@ -9,6 +9,7 @@ interface Data {
   name: string;
   age: number;
   email: string;
+  action: React.ReactNode;
 }
 
 const columns: Column<Data>[] = [
