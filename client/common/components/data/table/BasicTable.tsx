@@ -21,11 +21,6 @@ export interface Column<T> {
 interface BasicTableProps<T> {
   columns: Column<T>[];
   data: T[];
-}
-
-interface BasicTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
   pageSize?: number;
   pageIndex?: number;
   pageSizeOptions?: number[];
