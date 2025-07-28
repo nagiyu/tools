@@ -5,7 +5,6 @@ import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 export interface ComboBoxAutocompleteProps {
   options: SelectOptionType[];
-  getOptionLabel: (option: SelectOptionType) => string;
   value: SelectOptionType | null;
   onChange: (event: SyntheticEvent<Element, Event>, value: SelectOptionType | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<SelectOptionType> | undefined) => void;
   label?: string;
@@ -17,7 +16,6 @@ export interface ComboBoxAutocompleteProps {
 export default function ComboBoxAutocomplete(props: ComboBoxAutocompleteProps) {
   const {
     options,
-    getOptionLabel,
     value,
     onChange,
     label,
@@ -29,7 +27,7 @@ export default function ComboBoxAutocomplete(props: ComboBoxAutocompleteProps) {
   return (
     <Autocomplete
       options={options}
-      getOptionLabel={getOptionLabel}
+      getOptionLabel={(option) => option.label}
       value={value}
       onChange={onChange}
       disabled={disabled}

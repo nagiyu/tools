@@ -42,7 +42,6 @@ export default function SampleSelectPage() {
       <h1>ComboBoxAutocomplete Sample</h1>
       <ComboBoxAutocomplete
         options={options}
-        getOptionLabel={(option) => option.label}
         value={selectedOption}
         onChange={handleAutocompleteChange}
         label="Autocomplete"
