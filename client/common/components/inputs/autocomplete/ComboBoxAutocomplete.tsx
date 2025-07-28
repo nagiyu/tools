@@ -6,7 +6,7 @@ export interface ComboBoxAutocompleteProps<T> {
   options: T[];
   getOptionLabel: (option: string | T) => string;
   value: T | null;
-  onChange: (event: React.SyntheticEvent, value: T | null) => void;
+  onChange: (event: SyntheticEvent<Element, Event>, value: string | T | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<T> | undefined) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
