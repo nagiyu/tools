@@ -10,11 +10,19 @@ interface Data {
   email: string;
 }
 
+import ContainedButton from 'client/common/components/inputs/Buttons/ContainedButton';
+
 const columns: Column<Data>[] = [
   { id: 'id', label: 'ID', minWidth: 50 },
   { id: 'name', label: 'Name', minWidth: 100 },
   { id: 'age', label: 'Age', minWidth: 50, align: 'right' },
   { id: 'email', label: 'Email', minWidth: 150 },
+  {
+    id: 'action',
+    label: 'Action',
+    minWidth: 100,
+    render: (row: Data) => <ContainedButton onClick={() => alert(`Clicked on ${row.name}`)}>Click</ContainedButton>,
+  },
 ];
 
 const data: Data[] = [
