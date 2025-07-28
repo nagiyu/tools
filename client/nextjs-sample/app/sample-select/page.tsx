@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import BasicSelect, { Option } from '@client-common/components/inputs/Selects/BasicSelect';
+import BasicSelect from '@/common/components/inputs/Selects/BasicSelect'
+import { Option } from '@/common/interfaces'
 import ComboBoxAutocomplete from '@client-common/components/inputs/autocomplete/ComboBoxAutocomplete';
 
 export default function SampleSelectPage() {
