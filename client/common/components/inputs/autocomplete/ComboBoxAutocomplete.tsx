@@ -1,19 +1,20 @@
 import React, { SyntheticEvent } from 'react';
 import Autocomplete, { AutocompleteChangeReason, AutocompleteChangeDetails } from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import { SelectOptionType } from '@/common/interfaces/SelectOptionType'
 
-export interface ComboBoxAutocompleteProps<T> {
-  options: T[];
-  getOptionLabel: (option: string | T) => string;
-  value: T | null;
-  onChange: (event: SyntheticEvent<Element, Event>, value: string | T | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<T> | undefined) => void;
+export interface ComboBoxAutocompleteProps {
+  options: SelectOptionType[];
+  getOptionLabel: (option: string | SelectOptionType) => string;
+  value: SelectOptionType | null;
+  onChange: (event: SyntheticEvent<Element, Event>, value: string | SelectOptionType | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<SelectOptionType> | undefined) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
   freeSolo?: boolean;
 }
 
-export default function ComboBoxAutocomplete<T>(props: ComboBoxAutocompleteProps<T>) {
+export default function ComboBoxAutocomplete(props: ComboBoxAutocompleteProps) {
   const {
     options,
     getOptionLabel,
