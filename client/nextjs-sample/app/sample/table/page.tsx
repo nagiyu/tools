@@ -32,7 +32,16 @@ export default function TableSamplePage() {
   return (
     <div>
       <h1>BasicTable Sample with Pagination</h1>
-      <BasicTable columns={columns} data={data} />
+      <BasicTable
+        columns={columns}
+        data={data}
+        pageSize={10}
+        pageIndex={0}
+        pageSizeOptions={[5, 10, 20, 50]}
+        onPageChange={(page) => console.log('Page changed:', page)}
+        onPageSizeChange={(size) => console.log('Page size changed:', size)}
+        totalCount={data.length}
+      />
     </div>
   );
 }
