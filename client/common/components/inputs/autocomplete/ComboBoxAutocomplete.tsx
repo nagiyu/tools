@@ -1,5 +1,5 @@
 import React, { SyntheticEvent } from 'react';
-import Autocomplete from '@mui/material/Autocomplete';
+import Autocomplete, { AutocompleteChangeReason, AutocompleteChangeDetails } from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 
 export interface ComboBoxAutocompleteProps<T> {
