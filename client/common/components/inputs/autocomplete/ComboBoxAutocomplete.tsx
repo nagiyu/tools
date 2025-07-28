@@ -1,7 +1,7 @@
 import React, { SyntheticEvent } from 'react';
 import Autocomplete, { AutocompleteChangeReason, AutocompleteChangeDetails } from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import { SelectOptionType } from '@/common/interfaces/SelectOptionType'
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 export interface ComboBoxAutocompleteProps {
   options: SelectOptionType[];
