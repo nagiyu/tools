@@ -91,7 +91,7 @@ function BasicTable<T>({
                   const value = row[column.id];
                   return (
                     <TableCell key={String(column.id)} align={column.align}>
-                      {column.format ? column.format(value) : value}
+                      {column.format ? column.format(value) : (value as React.ReactNode)}
                     </TableCell>
                   );
                 })}
