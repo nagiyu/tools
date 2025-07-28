@@ -21,7 +21,7 @@ const columns: Column<Data>[] = [
     id: 'action',
     label: 'Action',
     minWidth: 100,
-    render: (row: Data) => <ContainedButton onClick={() => alert(`Clicked on ${row.name}`)}>Click</ContainedButton>,
+    format: (row: Data) => <ContainedButton onClick={() => alert(`Clicked on ${row.name}`)}>Click</ContainedButton>,
   },
 ];
 
