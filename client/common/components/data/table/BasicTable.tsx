@@ -45,7 +45,7 @@ function BasicTable<T>({ columns, data }: BasicTableProps<T>) {
                   const value = row[column.id];
                   return (
                     <TableCell key={String(column.id)} align={column.align}>
-                      {column.format ? column.format(value) : value}
+                      {column.format ? column.format(value) : String(value)}
                     </TableCell>
                   );
                 })}
