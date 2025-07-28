@@ -4,7 +4,7 @@ import TextField from '@mui/material/TextField';
 
 export interface ComboBoxAutocompleteProps<T> {
   options: T[];
-  getOptionLabel: (option: T) => string;
+  getOptionLabel: (option: string | T) => string;
   value: T | null;
   onChange: (event: React.SyntheticEvent, value: T | null) => void;
   label?: string;
