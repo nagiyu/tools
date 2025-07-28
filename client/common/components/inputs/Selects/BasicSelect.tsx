@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 
-import { SelectOptionType } from '@/common/interfaces/SelectOptionType'
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 interface BasicSelectProps {
     label?: string;
