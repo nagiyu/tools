@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import BasicTable, { Column } from '@client-common/components/data/table/BasicTable';
 
