@@ -13,17 +13,22 @@ export interface ComboBoxAutocompleteProps {
   freeSolo?: boolean;
 }
 
-export default function ComboBoxAutocomplete(props: ComboBoxAutocompleteProps) {
-  const {
-    options,
-    value,
-    onChange,
-    label,
-    placeholder,
-    disabled,
-    freeSolo = false,
-  } = props;
+import React from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
+export interface ComboBoxAutocompleteProps {
+  options: SelectOptionType[];
+  value: SelectOptionType | null;
+  onChange: (event: React.SyntheticEvent, value: SelectOptionType | null) => void;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  freeSolo?: boolean;
+}
+
+export default function ComboBoxAutocomplete({ options, value, onChange, label, placeholder, disabled, freeSolo = false }: ComboBoxAutocompleteProps) {
   return (
     <Autocomplete
       options={options}
@@ -44,3 +49,4 @@ export default function ComboBoxAutocomplete(props: ComboBoxAutocompleteProps) {
     />
   );
 }
+

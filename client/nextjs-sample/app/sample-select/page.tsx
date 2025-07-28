@@ -24,10 +24,6 @@ export default function SampleSelectPage() {
     setSelectedOption(value);
   };
 
-  const handleFreeSoloChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFreeSoloValue(event.target.value);
-  };
-
   return (
     <div>
       <h1>BasicSelect Sample</h1>
