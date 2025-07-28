@@ -52,7 +52,6 @@ export default function SampleSelectPage() {
       <h1>ComboBoxAutocomplete Free Solo Sample</h1>
       <ComboBoxAutocomplete
         options={options}
-        getOptionLabel={(option) => option.label}
         value={freeSoloValue ? { value: freeSoloValue, label: freeSoloValue } : null}
         onChange={(event, value) => {
           if (value) {
