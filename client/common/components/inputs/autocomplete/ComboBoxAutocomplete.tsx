@@ -5,9 +5,9 @@ import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 export interface ComboBoxAutocompleteProps {
   options: SelectOptionType[];
-  getOptionLabel: (option: string | SelectOptionType) => string;
+  getOptionLabel: (option: SelectOptionType) => string;
   value: SelectOptionType | null;
-  onChange: (event: SyntheticEvent<Element, Event>, value: string | SelectOptionType | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<SelectOptionType> | undefined) => void;
+  onChange: (event: SyntheticEvent<Element, Event>, value: SelectOptionType | null, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<SelectOptionType> | undefined) => void;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
