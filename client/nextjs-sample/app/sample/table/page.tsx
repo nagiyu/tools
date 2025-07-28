@@ -2,6 +2,7 @@
 
 import React from 'react';
 import BasicTable, { Column } from '@client-common/components/data/table/BasicTable';
+import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
 interface Data {
   id: number;
@@ -9,8 +10,6 @@ interface Data {
   age: number;
   email: string;
 }
-
-import ContainedButton from 'client/common/components/inputs/Buttons/ContainedButton';
 
 const columns: Column<Data>[] = [
   { id: 'id', label: 'ID', minWidth: 50 },
