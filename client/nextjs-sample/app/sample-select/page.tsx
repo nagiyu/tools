@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import BasicSelect from '@/common/components/inputs/Selects/BasicSelect'
-import { Option } from '@/common/interfaces'
+import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect'
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType'
 import ComboBoxAutocomplete from '@client-common/components/inputs/autocomplete/ComboBoxAutocomplete';
 
 export default function SampleSelectPage() {
   const [selectedValue, setSelectedValue] = useState('');
-  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+  const [selectedOption, setSelectedOption] = useState<SelectOptionType | null>(null);
   const [freeSoloValue, setFreeSoloValue] = useState<string>('');
 
-  const options: Option[] = [
+  const options: SelectOptionType[] = [
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
     { value: 'option3', label: 'Option 3' },
@@ -20,7 +20,7 @@ export default function SampleSelectPage() {
     setSelectedValue(value);
   };
 
-  const handleAutocompleteChange = (event: React.SyntheticEvent, value: Option | null) => {
+  const handleAutocompleteChange = (event: React.SyntheticEvent, value: SelectOptionType | null) => {
     setSelectedOption(value);
   };
 
