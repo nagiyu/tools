@@ -24,7 +24,7 @@ const data: Data[] = [
 export default function TableSamplePage() {
   return (
     <div>
-      <h1>BasicTable Sample</h1>
+      <h1>BasicTable Sample with Pagination</h1>
       <BasicTable columns={columns} data={data} />
     </div>
   );
