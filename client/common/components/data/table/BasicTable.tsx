@@ -1,19 +1,4 @@
-import React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-
-export interface Column<T> {
-  id: keyof T;
-  label: string;
-  minWidth?: number;
-  align?: 'right' | 'left' | 'center';
-  format?: (value: any) => React.ReactNode;
-}
+'use client';
 
 import React, { useState } from 'react';
 import Table from '@mui/material/Table';
@@ -91,20 +76,6 @@ function BasicTable<T>({ columns, data }: BasicTableProps<T>) {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
-          <TableBody>
-            {data.map((row, rowIndex) => (
-              <TableRow hover role="checkbox" tabIndex={-1} key={rowIndex}>
-                {columns.map((column) => {
-                  const value = row[column.id];
-                  return (
-                    <TableCell key={String(column.id)} align={column.align}>
-                      {column.format ? column.format(value) : String(value)}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
         </Table>
       </TableContainer>
     </Paper>
