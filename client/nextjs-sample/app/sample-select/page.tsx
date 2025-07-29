@@ -8,7 +8,6 @@ import ComboBoxAutocomplete from '@client-common/components/inputs/autocomplete/
 export default function SampleSelectPage() {
   const [selectedValue, setSelectedValue] = useState('');
   const [selectedOption, setSelectedOption] = useState<SelectOptionType | null>(null);
-  const [freeSoloValue, setFreeSoloValue] = useState<string>('');
 
   const options: SelectOptionType[] = [
     { value: 'option1', label: 'Option 1' },
@@ -44,24 +43,6 @@ export default function SampleSelectPage() {
         placeholder="Select or type an option"
       />
       <p>Selected Option: {selectedOption ? selectedOption.label : 'None'}</p>
-
-      <h1>ComboBoxAutocomplete Free Solo Sample</h1>
-      <ComboBoxAutocomplete
-        options={options}
-        value={freeSoloValue ? { value: freeSoloValue, label: freeSoloValue } : null}
-        onChange={(event, value) => {
-          if (value) {
-            setFreeSoloValue(value.label);
-          } else {
-            setFreeSoloValue('');
-          }
-        }}
-        label="Free Solo Autocomplete"
-        placeholder="Type any value"
-        freeSolo
-      />
-      <p>Free Solo Value: {freeSoloValue}</p>
     </div>
   );
 }
-

@@ -10,10 +10,9 @@ export interface ComboBoxAutocompleteProps {
   label?: string;
   placeholder?: string;
   disabled?: boolean;
-  freeSolo?: boolean;
 }
 
-export default function ComboBoxAutocomplete({ options, value, onChange, label, placeholder, disabled, freeSolo = false }: ComboBoxAutocompleteProps) {
+export default function ComboBoxAutocomplete({ options, value, onChange, label, placeholder, disabled }: ComboBoxAutocompleteProps) {
   return (
     <Autocomplete
       options={options}
@@ -21,7 +20,6 @@ export default function ComboBoxAutocomplete({ options, value, onChange, label, 
       value={value}
       onChange={onChange}
       disabled={disabled}
-      freeSolo={freeSolo}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -34,4 +32,3 @@ export default function ComboBoxAutocomplete({ options, value, onChange, label, 
     />
   );
 }
-
