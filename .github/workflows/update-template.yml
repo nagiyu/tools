@@ -55,7 +55,7 @@ jobs:
           git fetch finance
 
       - name: Merge Finance
-        run: git merge -X theirs --no-commit finance/develop --allow-unrelated-histories || true
+        run: git merge -X theirs --no-commit --no-ff finance/develop --allow-unrelated-histories || true
 
       - name: Reset specific files
         run: |
