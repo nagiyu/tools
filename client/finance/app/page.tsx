@@ -2,15 +2,16 @@
 
 import React, { useEffect, useState } from 'react';
 
-import BasicSelect, { Option } from '@client-common/components/inputs/Selects/BasicSelect';
+import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 
 import Graph from '@/app/components/graph';
 
 export default function Home() {
-  const [exchanges, setExchanges] = useState<Option[]>([]);
-  const [tickers, setTickers] = useState<Option[]>([]);
+  const [exchanges, setExchanges] = useState<SelectOptionType[]>([]);
+  const [tickers, setTickers] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
 
