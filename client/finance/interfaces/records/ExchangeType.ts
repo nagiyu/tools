@@ -1,4 +1,4 @@
-import { FinanceTypeBase } from '@/app/interfaces/records/FinanceTypeBase';
+import { FinanceTypeBase } from '@/interfaces/records/FinanceTypeBase';
 
 export interface ExchangeType extends FinanceTypeBase {
   DataType: 'Exchange';

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { TickerRequestType } from "@/app/interfaces/requests/TickerRequestType";
+import { TickerRequestType } from "@/interfaces/requests/TickerRequestType";
 
 function getTickers(exchange: string): { value: string; label: string }[] {
   switch (exchange) {
