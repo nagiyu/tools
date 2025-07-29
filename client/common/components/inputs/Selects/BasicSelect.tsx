@@ -2,14 +2,11 @@ import React from 'react';
 
 import { Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 
-export interface Option {
-    value: string;
-    label: string;
-}
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 interface BasicSelectProps {
     label?: string;
-    options: Option[];
+    options: SelectOptionType[];
     value: string;
     defaultValue?: string;
     onChange: (value: string) => void;
