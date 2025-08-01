@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -12,8 +14,7 @@ import ResponseValidator from '@client-common/utils/ResponseValidator';
 import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
-import ExchangeUtil from '@/utils/ExchangeUtil';
-
+import DeleteDialog from '@/app/components/exchange/DeleteDialog';
 import EditDialog from '@/app/components/exchange/EditDialog';
 
 interface ExchangeType extends ExchangeDataType {
@@ -78,6 +79,7 @@ export default function ExchangesPage() {
     const [exchange, setExchange] = useState<ExchangeDataType | null>(null);
     const [isNew, setIsNew] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
     const convertExchange = (data: ExchangeDataType): ExchangeType => {
         return {
@@ -85,7 +87,7 @@ export default function ExchangesPage() {
             action: (
                 <DirectionStack>
                     <ContainsButton label='Edit' onClick={() => onEditClick(data)} />
-                    <ContainsButton label='Delete' onClick={() => alert(`Delete ${data.name}`)} />
+                    <ContainsButton label='Delete' onClick={() => onDeleteClick(data)} />
                 </DirectionStack>
             )
         };
@@ -103,12 +105,25 @@ export default function ExchangesPage() {
         handleEditDialogOpen();
     };
 
+    const onDeleteClick = (exchange: ExchangeDataType) => {
+        setExchange(exchange);
+        handleDeleteDialogOpen();
+    };
+
     const handleEditDialogOpen = () => {
         setEditDialogOpen(true);
     };
 
     const handleEditDialogClose = () => {
         setEditDialogOpen(false);
+    };
+
+    const handleDeleteDialogOpen = () => {
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteDialogClose = () => {
+        setDeleteDialogOpen(false);
     };
 
     useEffect(() => {
@@ -131,6 +146,12 @@ export default function ExchangesPage() {
                 setExchange={setExchange}
                 create={createExchange}
                 update={updateExchange}
+            />
+            <DeleteDialog
+                open={deleteDialogOpen}
+                onClose={handleDeleteDialogClose}
+                exchange={exchange}
+                deleteExchange={deleteExchange}
             />
         </>
     );

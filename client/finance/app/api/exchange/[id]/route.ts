@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   return APIUtil.ReturnSuccessWithObject(exchange);
 }
 
-export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id;
 
   await ExchangeUtil.Delete(id);
