@@ -2,22 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { TimeType } from '@common/interfaces/TimeType';
 import TimeUtil from '@common/utils/TimeUtil';
 
 import BasicTable, { Column } from '@client-common/components/data/table/BasicTable';
 import ContainsButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import ResponseValidator from '@client-common/utils/ResponseValidator';
 
-import { ExchangeType as ExchangeRecordType } from '@/interfaces/records/ExchangeType';
+import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
+import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
-interface ExchangeType {
-    id: string;
-    name: string;
-    start: TimeType;
-    end: TimeType;
-    create: number;
-    update: number;
+import ExchangeUtil from '@/utils/ExchangeUtil';
+
+import EditDialog from '@/app/components/exchange/EditDialog';
+
+interface ExchangeType extends ExchangeDataType {
     action: React.ReactNode;
 }
 
@@ -28,70 +27,111 @@ const columns: Column<ExchangeType>[] = [
     { id: 'action', label: 'Actions' }
 ];
 
-function ConvertExchange(record: ExchangeRecordType): ExchangeType {
-    return {
-        id: record.ID,
-        name: record.Name,
-        start: TimeUtil.parseTime(record.Start),
-        end: TimeUtil.parseTime(record.End),
-        create: record.Create,
-        update: record.Update,
-        action: (
-            <DirectionStack>
-                <ContainsButton label='Edit' onClick={() => alert(`Edit ${record.Name}`)} />
-                <ContainsButton label='Delete' onClick={() => alert(`Delete ${record.Name}`)} />
-            </DirectionStack>
-        )
-    };
+const getExchanges = async (): Promise<ExchangeDataType[]> => {
+    const response = await fetch('/api/exchange', {
+        method: 'GET'
+    });
+
+    ResponseValidator.ValidateResponse(response);
+
+    return await response.json();
 }
 
-function ConvertExchangeRecord(exchange: ExchangeType): ExchangeRecordType {
-    return {
-        ID: exchange.id,
-        DataType: 'Exchange',
-        Name: exchange.name,
-        Start: TimeUtil.formatTime(exchange.start),
-        End: TimeUtil.formatTime(exchange.end),
-        Create: exchange.create,
-        Update: exchange.update
-    };
-}
-
-function getExchangeRecords(): ExchangeRecordType[] {
-    const exchangeRecords: ExchangeRecordType[] = [
-        {
-            ID: '1',
-            DataType: 'Exchange',
-            Name: 'Exchange 1',
-            Start: TimeUtil.formatTime({ hour: 9, minute: 0 }),
-            End: TimeUtil.formatTime({ hour: 17, minute: 0 }),
-            Create: Date.now(),
-            Update: Date.now()
+const createExchange = async (request: CreateExchangeRequestType): Promise<ExchangeDataType> => {
+    const response = await fetch('/api/exchange', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
         },
-        {
-            ID: '2',
-            DataType: 'Exchange',
-            Name: 'Exchange 2',
-            Start: TimeUtil.formatTime({ hour: 10, minute: 0 }),
-            End: TimeUtil.formatTime({ hour: 18, minute: 0 }),
-            Create: Date.now(),
-            Update: Date.now()
-        }
-    ]
+        body: JSON.stringify(request)
+    });
 
-    return exchangeRecords;
+    ResponseValidator.ValidateResponse(response);
+
+    return await response.json();
+}
+
+const updateExchange = async (id: string, request: UpdateExchangeRequestType): Promise<ExchangeDataType> => {
+    const response = await fetch(`/api/exchange/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+    });
+
+    ResponseValidator.ValidateResponse(response);
+
+    return await response.json();
+}
+
+const deleteExchange = async (id: string): Promise<void> => {
+    const response = await fetch(`/api/exchange/${id}`, {
+        method: 'DELETE'
+    });
+
+    ResponseValidator.ValidateResponse(response);
 }
 
 export default function ExchangesPage() {
     const [exchanges, setExchanges] = useState<ExchangeType[]>([]);
+    const [exchange, setExchange] = useState<ExchangeDataType | null>(null);
+    const [isNew, setIsNew] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+    const convertExchange = (data: ExchangeDataType): ExchangeType => {
+        return {
+            ...data,
+            action: (
+                <DirectionStack>
+                    <ContainsButton label='Edit' onClick={() => onEditClick(data)} />
+                    <ContainsButton label='Delete' onClick={() => alert(`Delete ${data.name}`)} />
+                </DirectionStack>
+            )
+        };
+    }
+
+    const onCreateClick = () => {
+        setExchange(null);
+        setIsNew(true);
+        handleEditDialogOpen();
+    };
+
+    const onEditClick = (exchange: ExchangeDataType) => {
+        setExchange(exchange);
+        setIsNew(false);
+        handleEditDialogOpen();
+    };
+
+    const handleEditDialogOpen = () => {
+        setEditDialogOpen(true);
+    };
+
+    const handleEditDialogClose = () => {
+        setEditDialogOpen(false);
+    };
 
     useEffect(() => {
-        const exchangeRecords = getExchangeRecords();
-        const exchanges = exchangeRecords.map(ConvertExchange);
-        setExchanges(exchanges);
+        (async () => {
+            const exchangeData = await getExchanges();
+            const exchanges = exchangeData.map(convertExchange);
+            setExchanges(exchanges);
+        })();
     }, []);
 
     return (
-        <BasicTable columns={columns} data={exchanges} />
+        <>
+            <ContainsButton label='Create' onClick={onCreateClick} />
+            <BasicTable columns={columns} data={exchanges} />
+            <EditDialog
+                open={editDialogOpen}
+                onClose={handleEditDialogClose}
+                isNew={isNew}
+                exchange={exchange}
+                setExchange={setExchange}
+                create={createExchange}
+                update={updateExchange}
+            />
+        </>
     );
 }

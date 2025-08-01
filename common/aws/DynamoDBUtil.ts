@@ -111,23 +111,26 @@ export default class DynamoDBUtil {
    * @template T The type of the record to update.
    * @param tableName The name of the DynamoDB table.
    * @param key The primary key of the record to update.
+   * @param dataType The DataType of the record to update.
    * @param updates The attributes to update.
    */
   public static async update<T extends RecordTypeBase>(
     tableName: string,
     id: string,
+    dataType: string,
     updates: Partial<T>
   ): Promise<void> {
     const dynamoClient = await this.getDynamoClient();
 
-    const updateEntries = Object.entries(updates).filter(([_, v]) => v !== undefined && v !== null);
+    const updateEntries = Object.entries(updates)
+      .filter(([k, v]) => !["ID", "DataType"].includes(k) && v !== undefined && v !== null);
     const updateExpr = updateEntries.map(([k]) => `#${k} = :${k}`).join(', ');
     const exprAttrNames = Object.fromEntries(updateEntries.map(([k]) => [`#${k}`, k]));
     const exprAttrValues = Object.fromEntries(updateEntries.map(([k, v]) => [`:${k}`, marshall({ [k]: v })[k]]));
 
     const command = new UpdateItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id }),
+      Key: marshall({ ID: id, DataType: dataType }),
       UpdateExpression: `SET ${updateExpr}`,
       ExpressionAttributeNames: exprAttrNames,
       ExpressionAttributeValues: exprAttrValues
@@ -144,13 +147,14 @@ export default class DynamoDBUtil {
    * Deletes a record from a DynamoDB table.
    * @param tableName The name of the DynamoDB table.
    * @param key The primary key of the record to delete.
+   * @param dataType The DataType of the record to delete.
    */
-  public static async delete(tableName: string, id: string): Promise<void> {
+  public static async delete(tableName: string, id: string, dataType: string): Promise<void> {
     const dynamoClient = await this.getDynamoClient();
 
     const command = new DeleteItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id })
+      Key: marshall({ ID: id, DataType: dataType })
     });
 
     try {
