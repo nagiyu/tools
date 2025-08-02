@@ -49,7 +49,7 @@ export default class DynamoDBUtil {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(JSON.stringify(error));
     }
   }
 
@@ -78,7 +78,7 @@ export default class DynamoDBUtil {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(JSON.stringify(error));
     }
   }
 
@@ -102,7 +102,7 @@ export default class DynamoDBUtil {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(JSON.stringify(error));
     }
   }
 
@@ -139,7 +139,7 @@ export default class DynamoDBUtil {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(JSON.stringify(error));
     }
   }
 
@@ -160,7 +160,7 @@ export default class DynamoDBUtil {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(JSON.stringify(error));
     }
   }
 }
