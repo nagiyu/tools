@@ -23,6 +23,7 @@ interface ExchangeType extends ExchangeDataType {
 
 const columns: Column<ExchangeType>[] = [
     { id: 'name', label: 'Name' },
+    { id: 'key', label: 'Key' },
     { id: 'start', label: 'Start Time', format: TimeUtil.formatTime },
     { id: 'end', label: 'End Time', format: TimeUtil.formatTime },
     { id: 'action', label: 'Actions' }
@@ -126,6 +127,24 @@ export default function ExchangesPage() {
         setDeleteDialogOpen(false);
     };
 
+    const handleCreateExchange = async (request: CreateExchangeRequestType): Promise<void> => {
+        const exchange = await createExchange(request);
+        setExchanges(prev => [...prev, convertExchange(exchange)]);
+        handleEditDialogClose();
+    };
+
+    const handleUpdateExchange = async (id: string, request: UpdateExchangeRequestType): Promise<void> => {
+        const exchange = await updateExchange(id, request);
+        setExchanges(prev => prev.map(item => item.id === exchange.id ? convertExchange(exchange) : item));
+        handleEditDialogClose();
+    };
+
+    const handleDeleteExchange = async (id: string): Promise<void> => {
+        await deleteExchange(id);
+        setExchanges(prev => prev.filter(item => item.id !== id));
+        handleDeleteDialogClose();
+    };
+
     useEffect(() => {
         (async () => {
             const exchangeData = await getExchanges();
@@ -144,14 +163,14 @@ export default function ExchangesPage() {
                 isNew={isNew}
                 exchange={exchange}
                 setExchange={setExchange}
-                create={createExchange}
-                update={updateExchange}
+                createExchange={handleCreateExchange}
+                updateExchange={handleUpdateExchange}
             />
             <DeleteDialog
                 open={deleteDialogOpen}
                 onClose={handleDeleteDialogClose}
                 exchange={exchange}
-                deleteExchange={deleteExchange}
+                deleteExchange={handleDeleteExchange}
             />
         </>
     );

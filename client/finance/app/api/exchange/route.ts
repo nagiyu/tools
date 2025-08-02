@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
   const exchange: ExchangeDataType = {
     id: CommonUtil.generateUUID(),
     name: body.name,
+    key: body.key,
     start: body.start,
     end: body.end,
     create: now,

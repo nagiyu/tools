@@ -15,6 +15,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   const exchange: ExchangeDataType = {
     id: id,
     name: body.name,
+    key: body.key,
     start: body.start,
     end: body.end,
     create: body.create,

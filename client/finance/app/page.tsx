@@ -6,8 +6,18 @@ import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import ResponseValidator from '@client-common/utils/ResponseValidator';
+
+import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
 import Graph from '@/app/components/graph';
+
+function convertSelectOptions(data: ExchangeDataType[]): SelectOptionType[] {
+  return data.map(item => ({
+    label: item.name,
+    value: item.key
+  }));
+}
 
 export default function Home() {
   const [exchanges, setExchanges] = useState<SelectOptionType[]>([]);
@@ -17,11 +27,15 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const exchangeResponse = await fetch('/api/exchange');
+      const response = await fetch('/api/exchange', {
+        method: 'GET'
+      });
 
-      const exchangeData = await exchangeResponse.json();
+      ResponseValidator.ValidateResponse(response);
 
-      setExchanges(exchangeData);
+      const exchange: ExchangeDataType[] = await response.json();
+
+      setExchanges(convertSelectOptions(exchange));
     })();
   }, []);
 

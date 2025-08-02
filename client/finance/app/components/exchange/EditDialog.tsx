@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -21,8 +23,8 @@ type EditDialogProps = {
     isNew: boolean;
     exchange: ExchangeDataType | null;
     setExchange: React.Dispatch<React.SetStateAction<ExchangeDataType | null>>;
-    create: (request: CreateExchangeRequestType) => Promise<ExchangeDataType>;
-    update: (id: string, request: UpdateExchangeRequestType) => Promise<ExchangeDataType>;
+    createExchange: (request: CreateExchangeRequestType) => Promise<void>;
+    updateExchange: (id: string, request: UpdateExchangeRequestType) => Promise<void>;
 };
 
 function getDefaultTime(): TimeType {
@@ -35,15 +37,17 @@ export default function EditDialog({
     isNew,
     exchange,
     setExchange,
-    create,
-    update
+    createExchange,
+    updateExchange
 }: EditDialogProps) {
     const [name, setName] = useState(exchange?.name || '');
+    const [key, setKey] = useState(exchange?.key || '');
     const [start, setStart] = useState(exchange?.start || getDefaultTime());
     const [end, setEnd] = useState(exchange?.end || getDefaultTime());
 
     useEffect(() => {
         setName(exchange?.name || '');
+        setKey(exchange?.key || '');
         setStart(exchange?.start || getDefaultTime());
         setEnd(exchange?.end || getDefaultTime());
     }, [open])
@@ -52,12 +56,13 @@ export default function EditDialog({
         setExchange({
             id: exchange?.id || '',
             name: name,
+            key: key,
             start: start,
             end: end,
             create: exchange?.create || Date.now(),
             update: Date.now(),
         })
-    }, [name, start, end])
+    }, [name, key, start, end])
 
     const onConfirm = async () => {
         if (!exchange) {
@@ -65,14 +70,16 @@ export default function EditDialog({
         }
 
         if (isNew) {
-            await create({
+            await createExchange({
                 name: exchange.name,
+                key: exchange.key,
                 start: exchange.start,
                 end: exchange.end
             });
         } else {
-            await update(exchange.id, {
+            await updateExchange(exchange.id, {
                 name: exchange.name,
+                key: exchange.key,
                 start: exchange.start,
                 end: exchange.end,
                 create: exchange.create
@@ -91,12 +98,16 @@ export default function EditDialog({
             confirmText={isNew ? "Create" : "Update"}
             closeText="Cancel"
         >
-            <div>{JSON.stringify(exchange)}</div>
             <BasicStack>
                 <BasicTextField
                     label="Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                />
+                <BasicTextField
+                    label="Key"
+                    value={key}
+                    onChange={(e) => setKey(e.target.value)}
                 />
                 <DirectionStack>
                     <BasicNumberField

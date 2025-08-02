@@ -3,6 +3,7 @@ import { FinanceRecordTypeBase } from '@/interfaces/records/FinanceRecordTypeBas
 export interface ExchangeRecordType extends FinanceRecordTypeBase {
   DataType: 'Exchange';
   Name: string;
+  Key: string;
   Start: string;
   End: string;
 }

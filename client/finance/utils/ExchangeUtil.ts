@@ -10,6 +10,7 @@ export default class ExchangeUtil {
         return {
             id: record.ID,
             name: record.Name,
+            key: record.Key,
             start: TimeUtil.parseTime(record.Start),
             end: TimeUtil.parseTime(record.End),
             create: record.Create,
@@ -22,6 +23,7 @@ export default class ExchangeUtil {
             ID: exchange.id,
             DataType: 'Exchange',
             Name: exchange.name,
+            Key: exchange.key,
             Start: TimeUtil.formatTime(exchange.start),
             End: TimeUtil.formatTime(exchange.end),
             Create: exchange.create,
