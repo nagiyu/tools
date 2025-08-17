@@ -1,7 +1,7 @@
 import DynamoDBUtil from '@common/aws/DynamoDBUtil';
 import TimeUtil from '@common/utils/TimeUtil';
-import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 
+import FinanceUtil from '@/utils/FinanceUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { ExchangeRecordType } from '@/interfaces/records/ExchangeRecordType';
 
@@ -32,33 +32,21 @@ export default class ExchangeUtil {
     }
 
     public static async GetAll(): Promise<ExchangeDataType[]> {
-        const exchangeRecords = await DynamoDBUtil.getAllByDataType<ExchangeRecordType>(this.GetExchangeTableName(), 'Exchange');
+        const exchangeRecords = await DynamoDBUtil.getAllByDataType<ExchangeRecordType>(FinanceUtil.getFinanceTableName(), 'Exchange');
         return exchangeRecords.map(this.ConvertExchange);
     }
 
     public static async Create(exchange: ExchangeDataType): Promise<void> {
         const record = this.ConvertExchangeRecord(exchange);
-        await DynamoDBUtil.create(this.GetExchangeTableName(), record);
+        await DynamoDBUtil.create(FinanceUtil.getFinanceTableName(), record);
     }
 
     public static async Update(exchange: ExchangeDataType): Promise<void> {
         const record = this.ConvertExchangeRecord(exchange);
-        await DynamoDBUtil.update(this.GetExchangeTableName(), record.ID, 'Exchange', record);
+        await DynamoDBUtil.update(FinanceUtil.getFinanceTableName(), record.ID, 'Exchange', record);
     }
 
     public static async Delete(id: string): Promise<void> {
-        await DynamoDBUtil.delete(this.GetExchangeTableName(), id, 'Exchange');
-    }
-
-    private static GetExchangeTableName(): string {
-        switch (EnvironmentalUtil.GetProcessEnv()) {
-            case 'local':
-            case 'development':
-                return 'DevFinance';
-            case 'production':
-                return 'Finance';
-            default:
-                return 'DevFinance';
-        }
+        await DynamoDBUtil.delete(FinanceUtil.getFinanceTableName(), id, 'Exchange');
     }
 }

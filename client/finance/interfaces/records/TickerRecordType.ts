@@ -2,4 +2,7 @@ import { FinanceRecordTypeBase } from '@/interfaces/records/FinanceRecordTypeBas
 
 export interface TickerRecordType extends FinanceRecordTypeBase {
   DataType: 'Ticker';
+  Name: string;
+  Key: string;
+  Exchange: string;
 }
