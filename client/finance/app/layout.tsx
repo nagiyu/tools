@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import AuthUtil from '@client-common/auth/AuthUtil';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
 import BasicAppBar from '@client-common/components/surfaces/AppBars/BasicAppBar';
 import LinkMenu, { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
+
+import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,16 +25,19 @@ export const metadata: Metadata = {
 };
 
 async function getMenuItems(): Promise<MenuItemData[]> {
-  const session = await AuthUtil.getServerSession();
+  const menuItems: MenuItemData[] = [];
 
-  const menuItems = [
-    { title: 'Home', url: '/' },
-    { title: 'Exchange', url: '/exchanges' },
-    { title: 'Tickers', url: '/tickers' },
-  ];
+  if (await FinanceAuthorizer.isUser()) {
+    menuItems.push(
+      { title: 'Home', url: '/' },
+    );
+  }
 
-  if (session) {
-    menuItems.push({ title: 'User Data', url: '/user-data' });
+  if (await FinanceAuthorizer.isAdmin()) {
+    menuItems.push(
+      { title: 'Exchange', url: '/exchanges' },
+      { title: 'Tickers', url: '/tickers' },
+    );
   }
 
   return menuItems;
@@ -44,8 +48,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await AuthUtil.getServerSession();
-
   return (
     <html lang="ja">
       <head>
@@ -54,16 +56,18 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <BasicAppBar
           center={
-            <div>Next.js Sample</div>
+            <div>Finance</div>
           }
           right={
             <>
-              {session ? (
-                <SignoutButton />
+              {await FinanceAuthorizer.isUser() ? (
+                <>
+                  <SignoutButton />
+                  <LinkMenu menuItems={await getMenuItems()} />
+                </>
               ) : (
                 <SignInButton />
               )}
-              <LinkMenu menuItems={await getMenuItems()} />
             </>
           }
         />

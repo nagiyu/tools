@@ -12,4 +12,8 @@ export default class APIUtil {
   public static ReturnBadRequest(message: string) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
+
+  public static ReturnUnauthorized(): NextResponse {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 }

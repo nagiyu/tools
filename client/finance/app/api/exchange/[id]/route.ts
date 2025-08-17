@@ -2,12 +2,17 @@ import { NextRequest } from "next/server";
 
 import APIUtil from '@client-common/utils/APIUtil';
 
+import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 import { UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!await FinanceAuthorizer.isAdmin()) {
+    return APIUtil.ReturnUnauthorized();
+  }
+
   const id = (await params).id;
   const body: UpdateExchangeRequestType = await request.json();
   const now = Date.now();
@@ -33,6 +38,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!await FinanceAuthorizer.isAdmin()) {
+    return APIUtil.ReturnUnauthorized();
+  }
+
   const id = (await params).id;
 
   await ExchangeUtil.Delete(id);

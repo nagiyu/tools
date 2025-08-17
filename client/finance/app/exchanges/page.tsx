@@ -14,6 +14,7 @@ import ResponseValidator from '@client-common/utils/ResponseValidator';
 import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
+import Auth from '@/app/components/Auth';
 import DeleteDialog from '@/app/components/exchange/DeleteDialog';
 import EditDialog from '@/app/components/exchange/EditDialog';
 import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
@@ -145,24 +146,31 @@ export default function ExchangesPage() {
     }, []);
 
     return (
-        <>
-            <ContainsButton label='Create' onClick={onCreateClick} />
-            <BasicTable columns={columns} data={exchanges} />
-            <EditDialog
-                open={editDialogOpen}
-                onClose={handleEditDialogClose}
-                isNew={isNew}
-                exchange={exchange}
-                setExchange={setExchange}
-                createExchange={handleCreateExchange}
-                updateExchange={handleUpdateExchange}
-            />
-            <DeleteDialog
-                open={deleteDialogOpen}
-                onClose={handleDeleteDialogClose}
-                exchange={exchange}
-                deleteExchange={handleDeleteExchange}
-            />
-        </>
+        <Auth
+            adminContent={
+                <>
+                    <ContainsButton label='Create' onClick={onCreateClick} />
+                    <BasicTable columns={columns} data={exchanges} />
+                    <EditDialog
+                        open={editDialogOpen}
+                        onClose={handleEditDialogClose}
+                        isNew={isNew}
+                        exchange={exchange}
+                        setExchange={setExchange}
+                        createExchange={handleCreateExchange}
+                        updateExchange={handleUpdateExchange}
+                    />
+                    <DeleteDialog
+                        open={deleteDialogOpen}
+                        onClose={handleDeleteDialogClose}
+                        exchange={exchange}
+                        deleteExchange={handleDeleteExchange}
+                    />
+                </>
+            }
+            userContent={
+                <div>権限がありません。</div>
+            }
+        />
     );
 }
