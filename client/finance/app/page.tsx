@@ -12,6 +12,7 @@ import TickerUtil from '@/utils/TickerUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
+import Auth from '@/app/components/Auth';
 import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
 import Graph from '@/app/components/graph';
 import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
@@ -58,15 +59,19 @@ export default function Home() {
     if (tickerOptions.length > 0) {
       setTicker(tickerOptions[0].value);
     }
-  }, [tickerOptions]);;
+  }, [tickerOptions]);
 
   return (
-    <BasicStack>
-      <DirectionStack>
-        <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
-        <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
-      </DirectionStack>
-      <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} />
-    </BasicStack>
+    <Auth
+      userContent={
+        <BasicStack>
+          <DirectionStack>
+            <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
+            <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
+          </DirectionStack>
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} />
+        </BasicStack>
+      }
+    />
   );
 }

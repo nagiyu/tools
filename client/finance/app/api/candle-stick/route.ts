@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 
 import TradingView, { PricePeriod } from '@mathieuc/tradingview';
 
+import APIUtil from '@client-common/utils/APIUtil';
+
+import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
+
 export async function POST(req: NextRequest) {
+  if (!await FinanceAuthorizer.isUser()) {
+    return APIUtil.ReturnUnauthorized();
+  }
+
   try {
     const { exchange, ticker } = await req.json();
     const market = `${exchange}:${ticker}`;
