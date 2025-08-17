@@ -7,7 +7,7 @@ export default class AuthorizeUtil {
 
   public static async isAuthorizedByGoogleUserID<T extends AuthRecordType>(
     googleUserID: string,
-    feature: string,
+    feature: keyof T,
     roles?: string[]
   ): Promise<boolean> {
     const authRecord = await this.getAuthRecord<T>();
@@ -17,7 +17,7 @@ export default class AuthorizeUtil {
       (
         roles === undefined ||
         roles.length === 0 ||
-        roles.includes(record[feature])
+        roles.includes(record[feature] as string)
       )
     );
   }
