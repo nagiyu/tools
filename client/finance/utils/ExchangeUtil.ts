@@ -1,6 +1,8 @@
 import DynamoDBUtil from '@common/aws/DynamoDBUtil';
 import TimeUtil from '@common/utils/TimeUtil';
 
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
+
 import FinanceUtil from '@/utils/FinanceUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { ExchangeRecordType } from '@/interfaces/records/ExchangeRecordType';
@@ -29,6 +31,13 @@ export default class ExchangeUtil {
             Create: exchange.create,
             Update: exchange.update
         };
+    }
+
+    public static dataToSelectOptions(exchanges: ExchangeDataType[]): SelectOptionType[] {
+        return exchanges.map(exchange => ({
+            label: exchange.name,
+            value: exchange.id
+        }));
     }
 
     public static async GetAll(): Promise<ExchangeDataType[]> {

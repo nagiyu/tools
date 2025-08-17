@@ -1,3 +1,5 @@
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
+
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 import { TickerRecordType } from "@/interfaces/records/TickerRecordType";
 
@@ -23,5 +25,12 @@ export default class TickerUtil {
       create: record.Create,
       update: record.Update,
     };
+  }
+
+  public static dataToSelectOptions(tickers: TickerDataType[]): SelectOptionType[] {
+    return tickers.map(ticker => ({
+      label: ticker.name,
+      value: ticker.id
+    }));
   }
 }

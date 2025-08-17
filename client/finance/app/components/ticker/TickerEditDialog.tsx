@@ -5,12 +5,16 @@
 import React, { useEffect } from 'react';
 
 import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
+import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 
 import ErrorUtil from '@common/utils/ErrorUtil';
-import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
+import ExchangeUtil from '@/utils/ExchangeUtil';
+import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
+
+import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
 
 interface TargetTicker {
     name: string,
@@ -23,6 +27,7 @@ type TickerEditDialogProps = {
     onClose: () => void;
     isNew: boolean;
     ticker: TickerDataType | null;
+    exchanges: ExchangeDataType[];
     createTicker: (ticker: TickerDataType) => void;
     updateTicker: (ticker: TickerDataType) => void;
 }
@@ -32,6 +37,7 @@ export default function TickerEditDialog({
     onClose,
     isNew,
     ticker,
+    exchanges,
     createTicker,
     updateTicker
 }: TickerEditDialogProps) {
@@ -42,13 +48,11 @@ export default function TickerEditDialog({
     });
 
     useEffect(() => {
-        if (ticker) {
-            setTargetTicker({
-                name: ticker.name,
-                key: ticker.key,
-                exchange: ticker.exchange
-            });
-        }
+        setTargetTicker({
+            name: ticker?.name || '',
+            key: ticker?.key || '',
+            exchange: ticker?.exchange || ''
+        });
     }, [open]);
 
     const onConfirm = async () => {
@@ -110,10 +114,12 @@ export default function TickerEditDialog({
                     value={targetTicker.key}
                     onChange={(e) => setTargetTicker({ ...targetTicker, key: e.target.value })}
                 />
-                <BasicTextField
+                <BasicSelect
                     label='Exchange'
+                    options={ExchangeUtil.dataToSelectOptions(exchanges)}
                     value={targetTicker.exchange}
-                    onChange={(e) => setTargetTicker({ ...targetTicker, exchange: e.target.value })}
+                    defaultValue={targetTicker.exchange}
+                    onChange={(value) => setTargetTicker({ ...targetTicker, exchange: value })}
                 />
             </BasicStack>
         </BasicDialog >

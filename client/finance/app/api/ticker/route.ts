@@ -8,23 +8,6 @@ import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
 import { CreateTickerRequestType } from "@/interfaces/requests/TickerRequestType";
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 
-function getTickers(exchange: string): { value: string; label: string }[] {
-  switch (exchange) {
-    case 'NASDAQ':
-      return [
-        { value: 'NVDA', label: 'NVIDIA' }
-      ];
-
-    case 'TSE':
-      return [
-        { value: '9697', label: 'CAPCOM CO LTD' }
-      ];
-
-    default:
-      return [];
-  }
-}
-
 export async function GET() {
   const tickers = await TickerDataAccessor.get();
 

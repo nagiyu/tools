@@ -16,6 +16,7 @@ import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
 import DeleteDialog from '@/app/components/exchange/DeleteDialog';
 import EditDialog from '@/app/components/exchange/EditDialog';
+import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
 
 interface ExchangeType extends ExchangeDataType {
     action: React.ReactNode;
@@ -28,16 +29,6 @@ const columns: Column<ExchangeType>[] = [
     { id: 'end', label: 'End Time', format: TimeUtil.formatTime },
     { id: 'action', label: 'Actions' }
 ];
-
-const getExchanges = async (): Promise<ExchangeDataType[]> => {
-    const response = await fetch('/api/exchange', {
-        method: 'GET'
-    });
-
-    ResponseValidator.ValidateResponse(response);
-
-    return await response.json();
-}
 
 const createExchange = async (request: CreateExchangeRequestType): Promise<ExchangeDataType> => {
     const response = await fetch('/api/exchange', {
@@ -147,7 +138,7 @@ export default function ExchangesPage() {
 
     useEffect(() => {
         (async () => {
-            const exchangeData = await getExchanges();
+            const exchangeData = await ExchangeAPIUtil.get();
             const exchanges = exchangeData.map(convertExchange);
             setExchanges(exchanges);
         })();
