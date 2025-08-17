@@ -27,7 +27,9 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   const session = await AuthUtil.getServerSession();
 
   const menuItems = [
-    { title: 'Home', url: '/' }
+    { title: 'Home', url: '/' },
+    { title: 'Exchange', url: '/exchanges' },
+    { title: 'Tickers', url: '/tickers' },
   ];
 
   if (session) {
