@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import BasicAppBar from '@client-common/components/surfaces/AppBars/BasicAppBar';
+import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import LinkMenu, { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
+import NotificationSettingButton from '@client-common/components/inputs/buttons/NotificationSettingButton';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
-import BasicAppBar from '@client-common/components/surfaces/AppBars/BasicAppBar';
-import LinkMenu, { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 
@@ -61,10 +63,11 @@ export default async function RootLayout({
           right={
             <>
               {await FinanceAuthorizer.isUser() ? (
-                <>
+                <DirectionStack>
                   <SignoutButton />
+                  <NotificationSettingButton />
                   <LinkMenu menuItems={await getMenuItems()} />
-                </>
+                </DirectionStack>
               ) : (
                 <SignInButton />
               )}
