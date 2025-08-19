@@ -13,6 +13,7 @@ import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 import Auth from '@/app/components/Auth';
+import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
 import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
 import Graph from '@/app/components/graph';
 import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
@@ -35,8 +36,10 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      setExchanges(await ExchangeAPIUtil.get());
-      setTickers(await TickerAPIUtil.get());
+      if (await AuthAPIUtil.isAuthorized('user')) {
+        setExchanges(await ExchangeAPIUtil.get());
+        setTickers(await TickerAPIUtil.get());
+      }
     })();
   }, []);
 
