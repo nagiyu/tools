@@ -1,8 +1,24 @@
 # @host = http://localhost:8080/2015-03-31/functions/function/invocations
 @host = 
 
-###
-POST {{host}}
+### Health Check
+GET {{host}}
 Content-Type: application/json
 
 {}
+
+### Send Notification Test
+POST {{host}}
+Content-Type: application/json
+
+{
+  "message": "Test notification from server finance",
+  "subscription": {
+    "endpoint": "https://example.com/test",
+    "keys": {
+      "p256dh": "test-key",
+      "auth": "test-auth"
+    }
+  },
+  "clientBaseUrl": "http://localhost:3000"
+}
