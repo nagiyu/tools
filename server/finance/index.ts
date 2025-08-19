@@ -6,7 +6,6 @@ import TimeUtil from '@common/utils/TimeUtil';
 interface NotificationRequest {
   message: string;
   subscription: any;
-  clientBaseUrl?: string;
 }
 
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
@@ -28,10 +27,10 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
 
     // If notification request is provided, send the notification
     if (requestBody && requestBody.message && requestBody.subscription) {
-      const { message, subscription, clientBaseUrl } = requestBody;
+      const { message, subscription } = requestBody;
       
-      // Use provided client base URL or default to environment variable
-      const baseUrl = clientBaseUrl || process.env.CLIENT_BASE_URL || 'http://localhost:3000';
+      // Use environment variable or default to localhost for development
+      const baseUrl = process.env.CLIENT_BASE_URL || 'http://localhost:3000';
       const notificationEndpoint = `${baseUrl}/api/send-notification`;
 
       try {
@@ -84,7 +83,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
         message: 'Finance server is running',
         time: TimeUtil.formatTime({ hour: 12, minute: 30 }),
         endpoints: {
-          notification: 'POST with { message, subscription, clientBaseUrl? } to send push notifications'
+          notification: 'POST with { message, subscription } to send push notifications'
         }
       })
     };

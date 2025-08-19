@@ -19,6 +19,5 @@ Content-Type: application/json
       "p256dh": "test-key",
       "auth": "test-auth"
     }
-  },
-  "clientBaseUrl": "http://localhost:3000"
+  }
 }

@@ -17,8 +17,7 @@ The Lambda function now accepts POST requests with the following payload:
       "p256dh": "...",
       "auth": "..."
     }
-  },
-  "clientBaseUrl": "https://your-client-domain.com" // optional, defaults to CLIENT_BASE_URL env var or localhost:3000
+  }
 }
 ```
 
