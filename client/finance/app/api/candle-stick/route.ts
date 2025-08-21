@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
-import FinanceUtil from '@utils/FinanceUtil';
+import FinanceUtil from '@finance/utils/FinanceUtil';
 
 export async function POST(req: NextRequest) {
   if (!await FinanceAuthorizer.isUser()) {

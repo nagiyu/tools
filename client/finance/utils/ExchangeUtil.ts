@@ -3,7 +3,7 @@ import TimeUtil from '@common/utils/TimeUtil';
 
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
-import FinanceUtil from '@utils/FinanceUtil';
+import FinanceUtil from '@finance/utils/FinanceUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { ExchangeRecordType } from '@/interfaces/records/ExchangeRecordType';
 

@@ -32,8 +32,8 @@
       "@client-common/*": [
         "../common/*"
       ],
-      "@utils/*": [
-        "../../utils/*"
+      "@finance/*": [
+        "../../finance/*"
       ]
     }
   },
