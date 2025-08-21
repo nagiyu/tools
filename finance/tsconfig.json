@@ -3,6 +3,9 @@
     "paths": {
       "@finance/*": [
         "./*"
+      ],
+      "@common/*": [
+        "../common/*"
       ]
     }
   }
