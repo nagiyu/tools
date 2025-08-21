@@ -57,7 +57,18 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
           };
         }
 
-        const result = await response.json();
+        // Handle empty response bodies gracefully
+        let result = null;
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          try {
+            result = JSON.parse(responseText);
+          } catch (parseError) {
+            // If response is not valid JSON, treat it as text
+            result = { response: responseText };
+          }
+        }
+
         return {
           statusCode: 200,
           body: JSON.stringify({
