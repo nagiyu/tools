@@ -12,11 +12,15 @@ ARG NEXTAUTH_URL
 WORKDIR /app
 
 COPY common ./common
+COPY finance ./finance
 COPY client/common ./client/common
 COPY client/finance ./client/finance
 
 WORKDIR /app/common
 
+RUN npm install
+
+WORKDIR /app/finance
 RUN npm install
 
 WORKDIR /app/client/common
@@ -51,6 +55,9 @@ ENV AWS_LWA_PORT=3000
 WORKDIR /app/common
 
 COPY --from=builder /app/common .
+
+WORKDIR /app/finance
+COPY --from=builder /app/finance .
 
 WORKDIR /app/client/common
 
