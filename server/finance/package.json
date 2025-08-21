@@ -6,6 +6,7 @@
     "build": "esbuild index.ts --bundle --minify --sourcemap --platform=node --target=es2020 --outfile=dist/index.js"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.872.0",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {

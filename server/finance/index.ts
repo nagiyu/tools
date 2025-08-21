@@ -2,6 +2,7 @@ import { Context, APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
 import fetch from 'node-fetch';
 
 import TimeUtil from '@common/utils/TimeUtil';
+import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 
 interface NotificationRequest {
   message: string;
@@ -29,8 +30,8 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     if (requestBody && requestBody.message && requestBody.subscription) {
       const { message, subscription } = requestBody;
       
-      // Use environment variable or default to localhost for development
-      const baseUrl = process.env.CLIENT_BASE_URL || 'http://localhost:3000';
+      // Get client base URL from AWS Secrets Manager
+      const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
       const notificationEndpoint = `${baseUrl}/api/send-notification`;
 
       try {
