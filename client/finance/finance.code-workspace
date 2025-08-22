@@ -10,6 +10,10 @@
     {
       "path": "../../common",
       "name": "common"
+    },
+    {
+      "path": "../../finance",
+      "name": "finance"
     }
   ],
   "settings": {

@@ -1,6 +1,6 @@
 import DynamoDBUtil from '@common/aws/DynamoDBUtil';
 
-import FinanceUtil from '@/utils/FinanceUtil';
+import FinanceUtil from '@finance/utils/FinanceUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 import { TickerRecordType } from "@/interfaces/records/TickerRecordType";
