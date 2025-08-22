@@ -2,7 +2,7 @@
   "name": "finance",
   "version": "1.0.0",
   "dependencies": {
-    "@mathieuc/tradingview": "^3.5.1",
+    "@mathieuc/tradingview": "^3.5.1"
   },
   "devDependencies": {
     "@types/mathieuc__tradingview": "^3.5.0",
