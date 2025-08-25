@@ -32,13 +32,14 @@ async function getMenuItems(): Promise<MenuItemData[]> {
   if (await FinanceAuthorizer.isUser()) {
     menuItems.push(
       { title: 'Home', url: '/' },
+      { title: 'My Ticker', url: '/myticker' },
     );
   }
 
   if (await FinanceAuthorizer.isAdmin()) {
     menuItems.push(
       { title: 'Exchange', url: '/exchanges' },
-      { title: 'Tickers', url: '/tickers' },
+      { title: 'Ticker', url: '/tickers' },
     );
   }
 

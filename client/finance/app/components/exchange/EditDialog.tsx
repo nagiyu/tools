@@ -13,6 +13,7 @@ import BasicNumberField from '@client-common/components/inputs/TextFields/BasicN
 import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
+import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
 import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
@@ -44,6 +45,7 @@ export default function EditDialog({
     const [key, setKey] = useState(exchange?.key || '');
     const [start, setStart] = useState(exchange?.start || getDefaultTime());
     const [end, setEnd] = useState(exchange?.end || getDefaultTime());
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setName(exchange?.name || '');
@@ -65,28 +67,37 @@ export default function EditDialog({
     }, [name, key, start, end])
 
     const onConfirm = async () => {
-        if (!exchange) {
-            ErrorUtil.throwError("Exchange data is missing");
-        }
+        setError(null);
+        try {
+            if (!exchange) {
+                ErrorUtil.throwError("Exchange data is missing");
+            }
 
-        if (isNew) {
-            await createExchange({
-                name: exchange.name,
-                key: exchange.key,
-                start: exchange.start,
-                end: exchange.end
-            });
-        } else {
-            await updateExchange(exchange.id, {
-                name: exchange.name,
-                key: exchange.key,
-                start: exchange.start,
-                end: exchange.end,
-                create: exchange.create
-            });
-        }
+            if (isNew) {
+                await createExchange({
+                    name: exchange.name,
+                    key: exchange.key,
+                    start: exchange.start,
+                    end: exchange.end
+                });
+            } else {
+                await updateExchange(exchange.id, {
+                    name: exchange.name,
+                    key: exchange.key,
+                    start: exchange.start,
+                    end: exchange.end,
+                    create: exchange.create
+                });
+            }
 
-        onClose();
+            onClose();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError("不明なエラーが発生しました");
+            }
+        }
     }
 
     return (
@@ -98,6 +109,7 @@ export default function EditDialog({
             confirmText={isNew ? "Create" : "Update"}
             closeText="Cancel"
         >
+            {error && <ErrorAlert message={error} />}
             <BasicStack>
                 <BasicTextField
                     label="Name"
