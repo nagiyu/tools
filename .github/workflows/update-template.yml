@@ -69,6 +69,8 @@ jobs:
           git clean -f client/finance
           git reset -- server/finance
           git clean -f server/finance
+          git reset -- finance
+          git clean -f finance
           git reset -- README.md
           git restore README.md
 
