@@ -8,12 +8,13 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
   private readonly dataAccessor: DataAccessorBase<RecordType>;
   private readonly dataToRecord: (data: DataType) => RecordType;
   private readonly recordToData: (record: RecordType) => DataType;
-  private readonly cacheKey = CommonUtil.generateUUID();
+  private readonly cacheKey: string;
 
   protected constructor(dataAccessor: DataAccessorBase<RecordType>, dataToRecord: (data: DataType) => RecordType, recordToData: (record: RecordType) => DataType) {
     this.dataAccessor = dataAccessor;
     this.dataToRecord = dataToRecord;
     this.recordToData = recordToData;
+    this.cacheKey = dataAccessor.constructor.name;
   }
 
   public async get(useCache: boolean = false): Promise<DataType[]> {
