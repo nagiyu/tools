@@ -1,5 +1,4 @@
 import CacheUtil from '@common/utils/CacheUtil';
-import CommonUtil from '@common/utils/CommonUtil';
 import DataAccessorBase from '@common/services/DataAccessorBase';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
 import { RecordTypeBase } from '@common/aws/interfaces/DynamoDB/RecordTypeBase';
