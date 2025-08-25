@@ -13,11 +13,11 @@ class SimpleAuthService extends AuthService<AuthDataType, AuthRecordType> {
   }
 
   private static dataToRecord(data: AuthDataType): AuthRecordType {
-    return super.dataToRecordBase(data);
+    return AuthService.dataToRecordBase(data);
   }
 
   private static recordToData(record: AuthRecordType): AuthDataType {
-    return super.recordToDataBase(record);
+    return AuthService.recordToDataBase(record);
   }
 }
 

@@ -12,14 +12,14 @@ class FinanceAuthService extends AuthService<FinanceAuthDataType, FinanceAuthRec
 
   private static dataToRecord(data: FinanceAuthDataType): FinanceAuthRecordType {
     return {
-      ...super.dataToRecordBase(data),
+      ...AuthService.dataToRecordBase(data),
       Finance: data.finance
     };
   }
 
   private static recordToData(record: FinanceAuthRecordType): FinanceAuthDataType {
     return {
-      ...super.recordToDataBase(record),
+      ...AuthService.recordToDataBase(record),
       finance: record.Finance
     };
   }
