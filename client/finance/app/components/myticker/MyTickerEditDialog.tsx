@@ -38,22 +38,22 @@ type MyTickerEditDialogProps = {
     open: boolean;
     onClose: () => void;
     isNew: boolean;
-    myTicker: MyTickerDataType | null;
+    item: MyTickerDataType | null;
+    onCreate: (data: MyTickerDataType) => void;
+    onUpdate: (data: MyTickerDataType) => void;
     exchanges: ExchangeDataType[];
     allTickers: TickerDataType[];
-    createMyTicker: (data: MyTickerDataType) => void;
-    updateMyTicker: (data: MyTickerDataType) => void;
 }
 
 export default function MyTickerEditDialog({
     open,
     onClose,
     isNew,
-    myTicker,
+    item: myTicker,
+    onCreate: createMyTicker,
+    onUpdate: updateMyTicker,
     exchanges,
-    allTickers,
-    createMyTicker,
-    updateMyTicker
+    allTickers
 }: MyTickerEditDialogProps) {
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
     const [targetMyTicker, setTargetMyTicker] = useState<TargetMyTicker>({
