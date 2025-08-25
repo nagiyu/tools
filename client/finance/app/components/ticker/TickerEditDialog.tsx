@@ -8,6 +8,7 @@ import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
+import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
 import ErrorUtil from '@common/utils/ErrorUtil';
 import ExchangeUtil from '@/utils/ExchangeUtil';
@@ -46,6 +47,7 @@ export default function TickerEditDialog({
         key: '',
         exchange: ''
     });
+    const [error, setError] = React.useState<string | null>(null);
 
     useEffect(() => {
         setTargetTicker({
@@ -56,42 +58,51 @@ export default function TickerEditDialog({
     }, [open]);
 
     const onConfirm = async () => {
-        if (targetTicker.name.trim() === '') {
-            ErrorUtil.throwError('Name is required');
-        }
-
-        if (targetTicker.key.trim() === '') {
-            ErrorUtil.throwError('Key is required');
-        }
-
-        if (targetTicker.exchange.trim() === '') {
-            ErrorUtil.throwError('Exchange is required');
-        }
-
-        if (isNew) {
-            const returnTicker = await TickerAPIUtil.create({
-                name: targetTicker.name,
-                key: targetTicker.key,
-                exchange: targetTicker.exchange
-            });
-
-            createTicker(returnTicker);
-        } else {
-            if (!ticker) {
-                ErrorUtil.throwError('Ticker not found');
+        setError(null);
+        try {
+            if (targetTicker.name.trim() === '') {
+                ErrorUtil.throwError('Name is required');
             }
 
-            const returnTicker = await TickerAPIUtil.update(ticker.id, {
-                name: targetTicker.name,
-                key: targetTicker.key,
-                exchange: targetTicker.exchange,
-                create: ticker.create || Date.now(),
-            });
+            if (targetTicker.key.trim() === '') {
+                ErrorUtil.throwError('Key is required');
+            }
 
-            updateTicker(returnTicker);
+            if (targetTicker.exchange.trim() === '') {
+                ErrorUtil.throwError('Exchange is required');
+            }
+
+            if (isNew) {
+                const returnTicker = await TickerAPIUtil.create({
+                    name: targetTicker.name,
+                    key: targetTicker.key,
+                    exchange: targetTicker.exchange
+                });
+
+                createTicker(returnTicker);
+            } else {
+                if (!ticker) {
+                    ErrorUtil.throwError('Ticker not found');
+                }
+
+                const returnTicker = await TickerAPIUtil.update(ticker.id, {
+                    name: targetTicker.name,
+                    key: targetTicker.key,
+                    exchange: targetTicker.exchange,
+                    create: ticker.create || Date.now(),
+                });
+
+                updateTicker(returnTicker);
+            }
+
+            onClose();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError("不明なエラーが発生しました");
+            }
         }
-
-        onClose();
     }
 
     return (
@@ -103,6 +114,7 @@ export default function TickerEditDialog({
             confirmText={isNew ? 'Create' : 'Update'}
             closeText="Cancel"
         >
+            {error && <ErrorAlert message={error} />}
             <BasicStack>
                 <BasicTextField
                     label='Name'

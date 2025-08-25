@@ -16,6 +16,7 @@ import BasicNumberField from '@client-common/components/inputs/TextFields/BasicN
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
+import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
@@ -65,6 +66,7 @@ export default function MyTickerEditDialog({
         sellPrice: null
     });
     const [isSell, setIsSell] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         setTargetMyTicker({
@@ -99,66 +101,75 @@ export default function MyTickerEditDialog({
     }, [targetMyTicker.exchangeId]);
 
     const onConfirm = async () => {
-        if (!targetMyTicker.exchangeId) {
-            ErrorUtil.throwError('Exchange is required');
-        }
-
-        if (!targetMyTicker.tickerId) {
-            ErrorUtil.throwError('Ticker is required');
-        }
-
-        if (targetMyTicker.purchasePrice < 0) {
-            ErrorUtil.throwError('Purchase price must be non-negative');
-        }
-
-        if (targetMyTicker.quantity <= 0) {
-            ErrorUtil.throwError('Quantity must be greater than zero');
-        }
-
-        // isSellがオフの場合は売却情報をクリア
-        const fixedTargetMyTicker = !isSell
-            ? { ...targetMyTicker, sellDate: null, sellPrice: null }
-            : targetMyTicker;
-
-        const fetchService = new MyTickerFetchService();
-
-        const authFetchService = new AuthFetchService();
-        const user = await authFetchService.getUserByGoogle();
-        const userId = user.id;
-
-        const now = Date.now();
-
-        if (isNew) {
-            const fetchRequest: MyTickerDataType = {
-                ...fixedTargetMyTicker,
-                id: '',
-                userId,
-                create: now,
-                update: now
-            };
-
-            const returnMyTicker = await fetchService.create(fetchRequest);
-
-            createMyTicker(returnMyTicker);
-        } else {
-            if (!myTicker) {
-                ErrorUtil.throwError('MyTicker not found');
+        setError(null);
+        try {
+            if (!targetMyTicker.exchangeId) {
+                ErrorUtil.throwError('Exchange is required');
             }
 
-            const fetchRequest: MyTickerDataType = {
-                ...fixedTargetMyTicker,
-                id: myTicker.id,
-                userId,
-                create: myTicker.create,
-                update: now
-            };
+            if (!targetMyTicker.tickerId) {
+                ErrorUtil.throwError('Ticker is required');
+            }
 
-            const returnMyTicker = await fetchService.update(fetchRequest);
+            if (targetMyTicker.purchasePrice < 0) {
+                ErrorUtil.throwError('Purchase price must be non-negative');
+            }
 
-            updateMyTicker(returnMyTicker);
+            if (targetMyTicker.quantity <= 0) {
+                ErrorUtil.throwError('Quantity must be greater than zero');
+            }
+
+            // isSellがオフの場合は売却情報をクリア
+            const fixedTargetMyTicker = !isSell
+                ? { ...targetMyTicker, sellDate: null, sellPrice: null }
+                : targetMyTicker;
+
+            const fetchService = new MyTickerFetchService();
+
+            const authFetchService = new AuthFetchService();
+            const user = await authFetchService.getUserByGoogle();
+            const userId = user.id;
+
+            const now = Date.now();
+
+            if (isNew) {
+                const fetchRequest: MyTickerDataType = {
+                    ...fixedTargetMyTicker,
+                    id: '',
+                    userId,
+                    create: now,
+                    update: now
+                };
+
+                const returnMyTicker = await fetchService.create(fetchRequest);
+
+                createMyTicker(returnMyTicker);
+            } else {
+                if (!myTicker) {
+                    ErrorUtil.throwError('MyTicker not found');
+                }
+
+                const fetchRequest: MyTickerDataType = {
+                    ...fixedTargetMyTicker,
+                    id: myTicker.id,
+                    userId,
+                    create: myTicker.create,
+                    update: now
+                };
+
+                const returnMyTicker = await fetchService.update(fetchRequest);
+
+                updateMyTicker(returnMyTicker);
+            }
+
+            onClose();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setError(e.message);
+            } else {
+                setError("不明なエラーが発生しました");
+            }
         }
-
-        onClose();
     };
 
     return (
@@ -170,6 +181,7 @@ export default function MyTickerEditDialog({
             confirmText={isNew ? 'Create' : 'Update'}
             closeText='Cancel'
         >
+            {error && <ErrorAlert message={error} />}
             <BasicStack>
                 <BasicSelect
                     label='Exchange'
