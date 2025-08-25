@@ -26,7 +26,7 @@ export default class AuthService<DataType extends AuthDataType, RecordType exten
       roles === undefined ||
       roles.length === 0 ||
       roles.includes(user[feature] as string)
-    )
+    );
   }
 
   protected static dataToRecordBase(data: AuthDataType): AuthRecordType {
