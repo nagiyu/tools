@@ -4,9 +4,9 @@ export interface MyTickerDataType extends DataTypeBase {
   userId: string;
   exchangeId: string;
   tickerId: string;
-  purchaseDate: Date;
+  purchaseDate: number;
   purchasePrice: number;
   quantity: number;
-  sellDate: Date | null;
+  sellDate: number | null;
   sellPrice: number | null;
 }

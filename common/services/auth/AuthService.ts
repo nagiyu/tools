@@ -34,8 +34,8 @@ export default class AuthService<DataType extends AuthDataType, RecordType exten
       ID: data.id,
       DataType: 'Auth',
       GoogleUserID: data.googleUserId,
-      Create: new Date(data.create).getTime(),
-      Update: new Date(data.update).getTime(),
+      Create: data.create,
+      Update: data.update,
     };
   }
 
@@ -43,8 +43,8 @@ export default class AuthService<DataType extends AuthDataType, RecordType exten
     return {
       id: record.ID,
       googleUserId: record.GoogleUserID,
-      create: new Date(record.Create),
-      update: new Date(record.Update),
+      create: record.Create,
+      update: record.Update,
     };
   }
 }

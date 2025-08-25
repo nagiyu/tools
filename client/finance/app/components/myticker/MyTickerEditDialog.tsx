@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 
+import DateUtil from '@common/utils/DateUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
 
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
@@ -25,10 +26,10 @@ import { TickerDataType } from '@/interfaces/data/TickerDataType';
 interface TargetMyTicker {
     exchangeId: string;
     tickerId: string;
-    purchaseDate: Date;
+    purchaseDate: number;
     purchasePrice: number;
     quantity: number;
-    sellDate: Date | null;
+    sellDate: number | null;
     sellPrice: number | null;
 }
 
@@ -57,7 +58,7 @@ export default function MyTickerEditDialog({
     const [targetMyTicker, setTargetMyTicker] = useState<TargetMyTicker>({
         exchangeId: '',
         tickerId: '',
-        purchaseDate: new Date(),
+        purchaseDate: DateUtil.getTodayStartTimestamp(),
         purchasePrice: 0,
         quantity: 0,
         sellDate: null,
@@ -69,12 +70,19 @@ export default function MyTickerEditDialog({
         setTargetMyTicker({
             exchangeId: myTicker?.exchangeId || exchanges[0]?.id || '',
             tickerId: myTicker?.tickerId || '',
-            purchaseDate: myTicker?.purchaseDate || new Date(),
+            purchaseDate: myTicker?.purchaseDate || DateUtil.getTodayStartTimestamp(),
             purchasePrice: myTicker?.purchasePrice || 0,
             quantity: myTicker?.quantity || 0,
             sellDate: myTicker?.sellDate || null,
             sellPrice: myTicker?.sellPrice || null
         });
+
+        // sellDateまたはsellPriceが設定されていればisSellをtrueにする
+        if (myTicker && (myTicker.sellDate || myTicker.sellPrice)) {
+            setIsSell(true);
+        } else {
+            setIsSell(false);
+        }
     }, [open]);
 
     useEffect(() => {
@@ -107,17 +115,22 @@ export default function MyTickerEditDialog({
             ErrorUtil.throwError('Quantity must be greater than zero');
         }
 
+        // isSellがオフの場合は売却情報をクリア
+        const fixedTargetMyTicker = !isSell
+            ? { ...targetMyTicker, sellDate: null, sellPrice: null }
+            : targetMyTicker;
+
         const fetchService = new MyTickerFetchService();
 
         const authFetchService = new AuthFetchService();
         const user = await authFetchService.getUserByGoogle();
         const userId = user.id;
 
-        const now = new Date();
+        const now = Date.now();
 
         if (isNew) {
             const fetchRequest: MyTickerDataType = {
-                ...targetMyTicker,
+                ...fixedTargetMyTicker,
                 id: '',
                 userId,
                 create: now,
@@ -133,10 +146,10 @@ export default function MyTickerEditDialog({
             }
 
             const fetchRequest: MyTickerDataType = {
-                ...targetMyTicker,
+                ...fixedTargetMyTicker,
                 id: myTicker.id,
                 userId,
-                create: now,
+                create: myTicker.create,
                 update: now
             };
 
@@ -174,8 +187,8 @@ export default function MyTickerEditDialog({
                 />
                 <BasicDatePicker
                     label='Purchase Date'
-                    value={targetMyTicker.purchaseDate}
-                    onChange={(date) => setTargetMyTicker({ ...targetMyTicker, purchaseDate: date ?? new Date() })}
+                    value={new Date(targetMyTicker.purchaseDate)}
+                    onChange={(date) => setTargetMyTicker({ ...targetMyTicker, purchaseDate: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
                 />
                 <BasicNumberField
                     label='Purchase Price'
@@ -201,8 +214,8 @@ export default function MyTickerEditDialog({
                     <>
                         <BasicDatePicker
                             label='Sell Date'
-                            value={targetMyTicker.sellDate || new Date()}
-                            onChange={(date) => setTargetMyTicker({ ...targetMyTicker, sellDate: date ?? new Date() })}
+                            value={targetMyTicker.sellDate ? new Date(targetMyTicker.sellDate) : null}
+                            onChange={(date) => setTargetMyTicker({ ...targetMyTicker, sellDate: date ? DateUtil.toStartOfDay(date) : null })}
                         />
                         <BasicNumberField
                             label='Sell Price'

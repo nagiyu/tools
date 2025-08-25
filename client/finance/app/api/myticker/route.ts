@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body: MyTickerDataType = await request.json();
-  const now = new Date();
+  const now = Date.now();
 
   const requestData: MyTickerDataType = {
     ...body,

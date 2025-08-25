@@ -16,13 +16,13 @@ export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, M
       UserID: data.userId,
       ExchangeID: data.exchangeId,
       TickerID: data.tickerId,
-      PurchaseDate: new Date(data.purchaseDate).getTime(),
+      PurchaseDate: data.purchaseDate,
       PurchasePrice: data.purchasePrice,
       Quantity: data.quantity,
-      SellDate: data.sellDate ? new Date(data.sellDate).getTime() : null,
+      SellDate: data.sellDate,
       SellPrice: data.sellPrice,
-      Create: new Date(data.create).getTime(),
-      Update: new Date(data.update).getTime(),
+      Create: data.create,
+      Update: data.update,
     };
   }
 
@@ -32,13 +32,13 @@ export default class MyTickerService extends CRUDServiceBase<MyTickerDataType, M
       userId: record.UserID,
       exchangeId: record.ExchangeID,
       tickerId: record.TickerID,
-      purchaseDate: new Date(record.PurchaseDate),
+      purchaseDate: record.PurchaseDate,
       purchasePrice: record.PurchasePrice,
       quantity: record.Quantity,
-      sellDate: record.SellDate ? new Date(record.SellDate) : null,
+      sellDate: record.SellDate,
       sellPrice: record.SellPrice,
-      create: new Date(record.Create),
-      update: new Date(record.Update),
+      create: record.Create,
+      update: record.Update,
     };
   }
 }

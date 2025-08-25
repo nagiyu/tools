@@ -19,21 +19,8 @@ import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 interface MyTickerTableType extends MyTickerDataType {
-    exchangeName: string;
-    tickerName: string;
     action: React.ReactNode;
 }
-
-const columns: Column<MyTickerTableType>[] = [
-    { id: 'exchangeName', label: 'Exchange Name' },
-    { id: 'tickerName', label: 'Ticker Name' },
-    { id: 'purchaseDate', label: 'Purchase Date' },
-    { id: 'purchasePrice', label: 'Purchase Price' },
-    { id: 'quantity', label: 'Quantity' },
-    { id: 'sellDate', label: 'Sell Date' },
-    { id: 'sellPrice', label: 'Sell Price' },
-    { id: 'action', label: 'Action' }
-];
 
 export default function MyTickerTable() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
@@ -44,11 +31,36 @@ export default function MyTickerTable() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+    const columns: Column<MyTickerTableType>[] = [
+        {
+            id: 'exchangeId',
+            label: 'Exchange',
+            format: (cell) => cell ? exchanges.find(exchange => exchange.id === cell)?.name : ''
+        },
+        {
+            id: 'tickerId',
+            label: 'Ticker',
+            format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
+        },
+        {
+            id: 'purchaseDate',
+            label: 'Purchase Date',
+            format: (cell) => cell ? new Date(cell).toLocaleString() : ''
+        },
+        { id: 'purchasePrice', label: 'Purchase Price' },
+        { id: 'quantity', label: 'Quantity' },
+        {
+            id: 'sellDate',
+            label: 'Sell Date',
+            format: (cell) => cell ? new Date(cell).toLocaleString() : ''
+        },
+        { id: 'sellPrice', label: 'Sell Price' },
+        { id: 'action', label: 'Action' }
+    ];
+
     const dataToTable = (data: MyTickerDataType): MyTickerTableType => {
         return {
             ...data,
-            exchangeName: exchanges.find(exchange => exchange.id === data.exchangeId)?.name || '',
-            tickerName: tickers.find(ticker => ticker.id === data.tickerId)?.name || '',
             action: (
                 <DirectionStack>
                     <ContainsButton label='Edit' onClick={() => onEditClick(data)} />
