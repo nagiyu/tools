@@ -17,15 +17,15 @@ import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
 import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
+import ResponseValidator from '@client-common/utils/ResponseValidator';
 
 type EditDialogProps = {
     open: boolean;
     onClose: () => void;
     isNew: boolean;
-    exchange: ExchangeDataType | null;
-    setExchange: React.Dispatch<React.SetStateAction<ExchangeDataType | null>>;
-    createExchange: (request: CreateExchangeRequestType) => Promise<void>;
-    updateExchange: (id: string, request: UpdateExchangeRequestType) => Promise<void>;
+    item: ExchangeDataType | null;
+    onCreate: (exchange: ExchangeDataType) => void;
+    onUpdate: (exchange: ExchangeDataType) => void;
 };
 
 function getDefaultTime(): TimeType {
@@ -36,10 +36,9 @@ export default function EditDialog({
     open,
     onClose,
     isNew,
-    exchange,
-    setExchange,
-    createExchange,
-    updateExchange
+    item: exchange,
+    onCreate,
+    onUpdate
 }: EditDialogProps) {
     const [name, setName] = useState(exchange?.name || '');
     const [key, setKey] = useState(exchange?.key || '');
@@ -54,40 +53,54 @@ export default function EditDialog({
         setEnd(exchange?.end || getDefaultTime());
     }, [open])
 
-    useEffect(() => {
-        setExchange({
-            id: exchange?.id || '',
-            name: name,
-            key: key,
-            start: start,
-            end: end,
-            create: exchange?.create || Date.now(),
-            update: Date.now(),
-        })
-    }, [name, key, start, end])
-
     const onConfirm = async () => {
         setError(null);
         try {
-            if (!exchange) {
-                ErrorUtil.throwError("Exchange data is missing");
-            }
-
             if (isNew) {
-                await createExchange({
-                    name: exchange.name,
-                    key: exchange.key,
-                    start: exchange.start,
-                    end: exchange.end
+                const request: CreateExchangeRequestType = {
+                    name,
+                    key,
+                    start,
+                    end
+                };
+                
+                const response = await fetch('/api/exchange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(request)
                 });
+
+                ResponseValidator.ValidateResponse(response);
+                const newExchange = await response.json();
+                
+                onCreate(newExchange);
             } else {
-                await updateExchange(exchange.id, {
-                    name: exchange.name,
-                    key: exchange.key,
-                    start: exchange.start,
-                    end: exchange.end,
+                if (!exchange) {
+                    ErrorUtil.throwError("Exchange data is missing");
+                }
+                
+                const request: UpdateExchangeRequestType = {
+                    name,
+                    key,
+                    start,
+                    end,
                     create: exchange.create
+                };
+                
+                const response = await fetch(`/api/exchange/${exchange.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(request)
                 });
+
+                ResponseValidator.ValidateResponse(response);
+                const updatedExchange = await response.json();
+                
+                onUpdate(updatedExchange);
             }
 
             onClose();

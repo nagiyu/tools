@@ -27,20 +27,20 @@ type TickerEditDialogProps = {
     open: boolean;
     onClose: () => void;
     isNew: boolean;
-    ticker: TickerDataType | null;
+    item: TickerDataType | null;
+    onCreate: (ticker: TickerDataType) => void;
+    onUpdate: (ticker: TickerDataType) => void;
     exchanges: ExchangeDataType[];
-    createTicker: (ticker: TickerDataType) => void;
-    updateTicker: (ticker: TickerDataType) => void;
 }
 
 export default function TickerEditDialog({
     open,
     onClose,
     isNew,
-    ticker,
-    exchanges,
-    createTicker,
-    updateTicker
+    item: ticker,
+    onCreate: createTicker,
+    onUpdate: updateTicker,
+    exchanges
 }: TickerEditDialogProps) {
     const [targetTicker, setTargetTicker] = React.useState<TargetTicker>({
         name: '',
