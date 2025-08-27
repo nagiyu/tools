@@ -86,7 +86,7 @@ export default function ExchangeTable() {
             onUpdate={onUpdate}
             onDelete={onDelete}
         >
-            {(item, onItemChange) => {
+            {(item, _state, onItemChange) => {
                 return (
                     <>
                         <BasicTextField

@@ -97,7 +97,7 @@ export default function TickerTable() {
             onUpdate={onUpdate}
             onDelete={onDelete}
         >
-            {(item, onItemChange) => {
+            {(item, _state, onItemChange) => {
                 return (
                     <>
                         <BasicTextField
