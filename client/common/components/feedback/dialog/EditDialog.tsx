@@ -11,18 +11,23 @@ import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
-interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> {
+// Base props without state management  
+interface BaseEditDialogProps<ItemType extends DataTypeBase> {
     open: boolean;
     title: string;
     onClose: () => void;
     isNew: boolean;
     initItem: ItemType;
-    initState?: StateType;
     defaultItem: ItemType;
-    defaultState?: StateType;
     validateItem: (data: ItemType) => string | null;
     onCreate: (data: ItemType) => Promise<void>;
     onUpdate: (data: ItemType) => Promise<void>;
+}
+
+// Props with state management
+interface StatefulEditDialogProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown>> extends BaseEditDialogProps<ItemType> {
+    initState: StateType;
+    defaultState: StateType;
     children: (
         item: ItemType,
         state: StateType,
@@ -31,29 +36,56 @@ interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Recor
     ) => React.ReactNode;
 }
 
-export default function EditDialog<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
+// Props without state management (simplified)
+interface StatelessEditDialogProps<ItemType extends DataTypeBase> extends BaseEditDialogProps<ItemType> {
+    initState?: never;
+    defaultState?: never;
+    children: (
+        item: ItemType,
+        onItemChange: (updates: ItemType) => void
+    ) => React.ReactNode;
+}
+
+type EditDialogProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> =
+    | StatefulEditDialogProps<ItemType, StateType>
+    | StatelessEditDialogProps<ItemType>;
+
+// Function overloads for type safety
+function EditDialog<ItemType extends DataTypeBase, StateType extends Record<string, unknown>>(
+    props: StatefulEditDialogProps<ItemType, StateType>
+): React.ReactElement;
+function EditDialog<ItemType extends DataTypeBase>(
+    props: StatelessEditDialogProps<ItemType>
+): React.ReactElement;
+function EditDialog<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
     open,
     title,
     onClose,
     isNew,
     initItem,
-    initState = {} as StateType,
+    initState,
     defaultItem,
-    defaultState = {} as StateType,
+    defaultState,
     validateItem,
     onCreate,
     onUpdate,
     children
 }: EditDialogProps<ItemType, StateType>) {
     const [item, setItem] = useState<ItemType>(defaultItem);
-    const [state, setState] = useState<StateType>(defaultState);
     const [error, setError] = useState<string | null>(null);
+
+    // Check if this is a stateful component
+    const isStateful = initState !== undefined && defaultState !== undefined;
+    const actualInitState = initState || ({} as StateType);
+    const actualDefaultState = defaultState || ({} as StateType);
+    
+    const [state, setState] = useState<StateType>(actualDefaultState);
 
     useEffect(() => {
         if (!open) return;
 
         const itemData = isNew ? { ...defaultItem } : { ...initItem };
-        const stateData = isNew ? { ...defaultState } : { ...initState };
+        const stateData = isNew ? { ...actualDefaultState } : { ...actualInitState };
 
         setItem(itemData);
         setState(stateData);
@@ -105,8 +137,13 @@ export default function EditDialog<ItemType extends DataTypeBase, StateType exte
         >
             {error && <ErrorAlert message={error} />}
             <BasicStack>
-                {children(item, state, onItemChange, onStateChange)}
+                {isStateful 
+                    ? (children as any)(item, state, onItemChange, onStateChange)
+                    : (children as any)(item, onItemChange)
+                }
             </BasicStack>
         </BasicDialog>
     );
 }
+
+export default EditDialog;

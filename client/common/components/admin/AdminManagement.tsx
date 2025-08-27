@@ -16,32 +16,58 @@ interface AdminManagementTableType {
     action: React.ReactNode;
 }
 
-interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> {
+// Base props without state management
+interface BaseAdminManagementProps<ItemType extends DataTypeBase> {
     columns: Column<ItemType & AdminManagementTableType>[];
     fetchData: () => Promise<ItemType[]>;
     itemName: string;
     defaultItem: ItemType;
-    defaultState?: StateType;
-    generateState?: (item: ItemType) => StateType;
     validateItem: (data: ItemType) => string | null;
     onCreate: (item: ItemType) => Promise<ItemType>;
     onUpdate: (item: ItemType) => Promise<ItemType>;
     onDelete: (id: string) => Promise<void>;
+}
+
+// Props with state management
+interface StatefulAdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown>> extends BaseAdminManagementProps<ItemType> {
+    defaultState: StateType;
+    generateState: (item: ItemType) => StateType;
     children: (
         item: ItemType,
         state: StateType,
         onItemChange: (updates: ItemType) => void,
         onStateChange: (updates: StateType) => void
     ) => React.ReactNode;
-};
+}
 
-export default function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
+// Props without state management (simplified)
+interface StatelessAdminManagementProps<ItemType extends DataTypeBase> extends BaseAdminManagementProps<ItemType> {
+    defaultState?: never;
+    generateState?: never;
+    children: (
+        item: ItemType,
+        onItemChange: (updates: ItemType) => void
+    ) => React.ReactNode;
+}
+
+type AdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> =
+    | StatefulAdminManagementProps<ItemType, StateType>
+    | StatelessAdminManagementProps<ItemType>;
+
+// Function overloads for type safety
+function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown>>(
+    props: StatefulAdminManagementProps<ItemType, StateType>
+): React.ReactElement;
+function AdminManagement<ItemType extends DataTypeBase>(
+    props: StatelessAdminManagementProps<ItemType>
+): React.ReactElement;
+function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
     columns,
     fetchData,
     itemName,
     defaultItem,
-    defaultState = {} as StateType,
-    generateState = () => ({} as StateType),
+    defaultState,
+    generateState,
     validateItem,
     onCreate,
     onUpdate,
@@ -53,6 +79,11 @@ export default function AdminManagement<ItemType extends DataTypeBase, StateType
     const [isNew, setIsNew] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+    // Check if this is a stateful component
+    const isStateful = defaultState !== undefined && generateState !== undefined;
+    const actualDefaultState = defaultState || ({} as StateType);
+    const actualGenerateState = generateState || (() => ({} as StateType));
 
     const itemToTable = (item: ItemType): ItemType & AdminManagementTableType => {
         return {
@@ -118,13 +149,13 @@ export default function AdminManagement<ItemType extends DataTypeBase, StateType
                 onClose={() => setEditDialogOpen(false)}
                 isNew={isNew}
                 initItem={item}
-                initState={generateState(item)}
+                initState={isStateful ? actualGenerateState(item) : undefined}
                 defaultItem={defaultItem}
-                defaultState={defaultState}
+                defaultState={isStateful ? actualDefaultState : undefined}
                 validateItem={validateItem}
                 onCreate={handleCreate}
                 onUpdate={handleUpdate}
-                children={children}
+                children={children as any} // Type assertion needed for union type
             />
             <DeleteDialog
                 open={deleteDialogOpen}
@@ -137,3 +168,5 @@ export default function AdminManagement<ItemType extends DataTypeBase, StateType
         </>
     );
 }
+
+export default AdminManagement;
