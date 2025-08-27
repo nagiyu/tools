@@ -17,9 +17,7 @@ interface TickerTableType extends TickerDataType {
     action: React.ReactNode;
 }
 
-interface StateType extends Record<string, unknown> {
-    // No additional state needed for Ticker
-}
+
 
 export default function TickerTable() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
@@ -44,9 +42,9 @@ export default function TickerTable() {
         update: 0
     };
 
-    const defaultState: StateType = {};
+    const defaultState: Record<string, unknown> = {};
 
-    const generateState = (item: TickerDataType): StateType => {
+    const generateState = (): Record<string, unknown> => {
         return {};
     };
 
@@ -95,7 +93,7 @@ export default function TickerTable() {
     }, []);
 
     return (
-        <AdminManagement<TickerDataType, StateType>
+        <AdminManagement<TickerDataType, Record<string, unknown>>
             columns={columns}
             fetchData={fetchData}
             itemName='Ticker'
@@ -107,7 +105,7 @@ export default function TickerTable() {
             onUpdate={onUpdate}
             onDelete={onDelete}
         >
-            {(item, state, onItemChange, onStateChange) => {
+            {(item, _state, onItemChange) => {
                 return (
                     <>
                         <BasicTextField

@@ -17,9 +17,7 @@ interface ExchangeTableType extends ExchangeDataType {
     action: React.ReactNode;
 }
 
-interface StateType extends Record<string, unknown> {
-    // No additional state needed for Exchange
-}
+
 
 export default function ExchangeTable() {
     const columns: Column<ExchangeTableType>[] = [
@@ -40,9 +38,9 @@ export default function ExchangeTable() {
         update: 0
     };
 
-    const defaultState: StateType = {};
+    const defaultState: Record<string, unknown> = {};
 
-    const generateState = (item: ExchangeDataType): StateType => {
+    const generateState = (): Record<string, unknown> => {
         return {};
     };
 
@@ -51,7 +49,6 @@ export default function ExchangeTable() {
     };
 
     const onCreate = async (item: ExchangeDataType): Promise<ExchangeDataType> => {
-        const now = Date.now();
         return await ExchangeAPIUtil.create({
             name: item.name,
             key: item.key,
@@ -85,7 +82,7 @@ export default function ExchangeTable() {
     };
 
     return (
-        <AdminManagement<ExchangeDataType, StateType>
+        <AdminManagement<ExchangeDataType, Record<string, unknown>>
             columns={columns}
             fetchData={fetchData}
             itemName='Exchange'
@@ -97,7 +94,7 @@ export default function ExchangeTable() {
             onUpdate={onUpdate}
             onDelete={onDelete}
         >
-            {(item, state, onItemChange, onStateChange) => {
+            {(item, _state, onItemChange) => {
                 return (
                     <>
                         <BasicTextField
