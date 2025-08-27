@@ -16,13 +16,13 @@ interface AdminManagementTableType {
     action: React.ReactNode;
 }
 
-interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown>> {
+interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> {
     columns: Column<ItemType & AdminManagementTableType>[];
     fetchData: () => Promise<ItemType[]>;
     itemName: string;
     defaultItem: ItemType;
-    defaultState: StateType;
-    generateState: (item: ItemType) => StateType;
+    defaultState?: StateType;
+    generateState?: (item: ItemType) => StateType;
     validateItem: (data: ItemType) => string | null;
     onCreate: (item: ItemType) => Promise<ItemType>;
     onUpdate: (item: ItemType) => Promise<ItemType>;
@@ -35,13 +35,13 @@ interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends 
     ) => React.ReactNode;
 };
 
-export default function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown>>({
+export default function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
     columns,
     fetchData,
     itemName,
     defaultItem,
-    defaultState,
-    generateState,
+    defaultState = {} as StateType,
+    generateState = () => ({} as StateType),
     validateItem,
     onCreate,
     onUpdate,

@@ -42,12 +42,6 @@ export default function TickerTable() {
         update: 0
     };
 
-    const defaultState: Record<string, unknown> = {};
-
-    const generateState = (): Record<string, unknown> => {
-        return {};
-    };
-
     const fetchData = async (): Promise<TickerDataType[]> => {
         const [exchangeData, tickerData] = await Promise.all([
             ExchangeAPIUtil.get(),
@@ -93,13 +87,11 @@ export default function TickerTable() {
     }, []);
 
     return (
-        <AdminManagement<TickerDataType, Record<string, unknown>>
+        <AdminManagement<TickerDataType>
             columns={columns}
             fetchData={fetchData}
             itemName='Ticker'
             defaultItem={defaultItem}
-            defaultState={defaultState}
-            generateState={generateState}
             validateItem={validateItem}
             onCreate={onCreate}
             onUpdate={onUpdate}

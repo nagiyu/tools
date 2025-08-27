@@ -38,12 +38,6 @@ export default function ExchangeTable() {
         update: 0
     };
 
-    const defaultState: Record<string, unknown> = {};
-
-    const generateState = (): Record<string, unknown> => {
-        return {};
-    };
-
     const fetchData = async (): Promise<ExchangeDataType[]> => {
         return await ExchangeAPIUtil.get();
     };
@@ -82,13 +76,11 @@ export default function ExchangeTable() {
     };
 
     return (
-        <AdminManagement<ExchangeDataType, Record<string, unknown>>
+        <AdminManagement<ExchangeDataType>
             columns={columns}
             fetchData={fetchData}
             itemName='Exchange'
             defaultItem={defaultItem}
-            defaultState={defaultState}
-            generateState={generateState}
             validateItem={validateItem}
             onCreate={onCreate}
             onUpdate={onUpdate}

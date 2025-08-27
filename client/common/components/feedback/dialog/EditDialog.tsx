@@ -11,15 +11,15 @@ import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import ErrorAlert from '@client-common/components/feedback/alert/ErrorAlert';
 
-interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown>> {
+interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> {
     open: boolean;
     title: string;
     onClose: () => void;
     isNew: boolean;
     initItem: ItemType;
-    initState: StateType;
+    initState?: StateType;
     defaultItem: ItemType;
-    defaultState: StateType;
+    defaultState?: StateType;
     validateItem: (data: ItemType) => string | null;
     onCreate: (data: ItemType) => Promise<void>;
     onUpdate: (data: ItemType) => Promise<void>;
@@ -31,15 +31,15 @@ interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Recor
     ) => React.ReactNode;
 }
 
-export default function EditDialog<ItemType extends DataTypeBase, StateType extends Record<string, unknown>>({
+export default function EditDialog<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
     open,
     title,
     onClose,
     isNew,
     initItem,
-    initState,
+    initState = {} as StateType,
     defaultItem,
-    defaultState,
+    defaultState = {} as StateType,
     validateItem,
     onCreate,
     onUpdate,
