@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,26 +8,21 @@ import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
-import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
-import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
-import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
 import Auth from '@/app/components/Auth';
 import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
-import ExchangeUtil from '@/utils/ExchangeUtil';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
 import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
-import TickerUtil from '@/utils/TickerUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
+import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 
 interface MyTickerTableType extends MyTickerDataType {
     action: React.ReactNode;
 }
 
-interface StateType extends Record<string, unknown> {
+export interface StateType extends Record<string, unknown> {
     filteredTickers: TickerDataType[];
     isSell: boolean;
 }
@@ -167,64 +160,15 @@ export default function MyTickerPage() {
                 >
                     {(item, state, onItemChange, onStateChange) => {
                         return (
-                            <>
-                                <BasicSelect
-                                    label='Exchange'
-                                    options={ExchangeUtil.dataToSelectOptions(exchanges)}
-                                    value={item.exchangeId}
-                                    onChange={(value) => {
-                                        const filteredTickers = tickers.filter(t => t.exchange === value);
-                                        onItemChange({ ...item, exchangeId: value, tickerId: filteredTickers.length > 0 ? filteredTickers[0].id : '' });
-                                        onStateChange({ ...state, filteredTickers });
-                                    }}
-                                />
-                                <BasicSelect
-                                    label='Ticker'
-                                    options={TickerUtil.dataToSelectOptions(state.filteredTickers)}
-                                    value={item.tickerId}
-                                    onChange={(value) => onItemChange({ ...item, tickerId: value })}
-                                />
-                                <BasicDatePicker
-                                    label='Purchase Date'
-                                    value={new Date(item.purchaseDate)}
-                                    onChange={(date) => onItemChange({ ...item, purchaseDate: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
-                                />
-                                <BasicNumberField
-                                    label='Purchase Price'
-                                    value={item.purchasePrice}
-                                    onChange={(e) => onItemChange({ ...item, purchasePrice: Number(e.target.value) })}
-                                />
-                                <BasicNumberField
-                                    label='Quantity'
-                                    value={item.quantity}
-                                    onChange={(e) => onItemChange({ ...item, quantity: Number(e.target.value) })}
-                                />
-                                <ControlledCheckbox
-                                    label='Sell'
-                                    checked={state.isSell}
-                                    onChange={(e) => {
-                                        onStateChange({ ...state, isSell: e.target.checked });
-                                        if (!e.target.checked) {
-                                            onItemChange({ ...item, sellDate: null, sellPrice: null });
-                                        }
-                                    }}
-                                />
-                                {state.isSell && (
-                                    <>
-                                        <BasicDatePicker
-                                            label='Sell Date'
-                                            value={item.sellDate ? new Date(item.sellDate) : null}
-                                            onChange={(date) => onItemChange({ ...item, sellDate: date ? DateUtil.toStartOfDay(date) : null })}
-                                        />
-                                        <BasicNumberField
-                                            label='Sell Price'
-                                            value={item.sellPrice || 0}
-                                            onChange={(e) => onItemChange({ ...item, sellPrice: Number(e.target.value) })}
-                                        />
-                                    </>
-                                )}
-                            </>
-                        )
+                            <MyTickerEditDialogContent
+                                item={item}
+                                state={state}
+                                onItemChange={onItemChange}
+                                onStateChange={onStateChange}
+                                exchanges={exchanges}
+                                tickers={tickers}
+                            />
+                        );
                     }}
                 </AdminManagement>
             }
