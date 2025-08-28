@@ -5,7 +5,6 @@ import CommonUtil from "@common/utils/CommonUtil";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
-import { CreateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
@@ -25,15 +24,12 @@ export async function POST(request: NextRequest) {
     return APIUtil.ReturnUnauthorized();
   }
 
-  const body: CreateExchangeRequestType = await request.json();
+  const body: ExchangeDataType = await request.json();
   const now = Date.now();
 
   const exchange: ExchangeDataType = {
+    ...body,
     id: CommonUtil.generateUUID(),
-    name: body.name,
-    key: body.key,
-    start: body.start,
-    end: body.end,
     create: now,
     update: now,
   };

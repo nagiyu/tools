@@ -1,172 +1,99 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import TimeUtil from '@common/utils/TimeUtil';
 
-import BasicTable, { Column } from '@client-common/components/data/table/BasicTable';
-import ContainsButton from '@client-common/components/inputs/Buttons/ContainedButton';
-import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
-import ResponseValidator from '@client-common/utils/ResponseValidator';
-
-import { CreateExchangeRequestType, UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
-import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
+import AdminManagement from '@client-common/components/admin/AdminManagement';
+import { Column } from '@client-common/components/data/table/BasicTable';
 
 import Auth from '@/app/components/Auth';
-import DeleteDialog from '@/app/components/exchange/DeleteDialog';
-import EditDialog from '@/app/components/exchange/EditDialog';
-import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
+import ExchangeEditDialogContent from '@/app/components/exchange/ExchangeEditDialogContent';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
+import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
-interface ExchangeType extends ExchangeDataType {
+interface ExchangeTableType extends ExchangeDataType {
     action: React.ReactNode;
 }
 
-const columns: Column<ExchangeType>[] = [
-    { id: 'name', label: 'Name' },
-    { id: 'key', label: 'Key' },
-    { id: 'start', label: 'Start Time', format: TimeUtil.formatTime },
-    { id: 'end', label: 'End Time', format: TimeUtil.formatTime },
-    { id: 'action', label: 'Actions' }
-];
-
-const createExchange = async (request: CreateExchangeRequestType): Promise<ExchangeDataType> => {
-    const response = await fetch('/api/exchange', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(request)
-    });
-
-    ResponseValidator.ValidateResponse(response);
-
-    return await response.json();
-}
-
-const updateExchange = async (id: string, request: UpdateExchangeRequestType): Promise<ExchangeDataType> => {
-    const response = await fetch(`/api/exchange/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(request)
-    });
-
-    ResponseValidator.ValidateResponse(response);
-
-    return await response.json();
-}
-
-const deleteExchange = async (id: string): Promise<void> => {
-    const response = await fetch(`/api/exchange/${id}`, {
-        method: 'DELETE'
-    });
-
-    ResponseValidator.ValidateResponse(response);
-}
-
 export default function ExchangesPage() {
-    const [exchanges, setExchanges] = useState<ExchangeType[]>([]);
-    const [exchange, setExchange] = useState<ExchangeDataType | null>(null);
-    const [isNew, setIsNew] = useState(false);
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const exchangeFetchService = new ExchangeFetchService();
 
-    const convertExchange = (data: ExchangeDataType): ExchangeType => {
-        return {
-            ...data,
-            action: (
-                <DirectionStack>
-                    <ContainsButton label='Edit' onClick={() => onEditClick(data)} />
-                    <ContainsButton label='Delete' onClick={() => onDeleteClick(data)} />
-                </DirectionStack>
-            )
-        };
-    }
+    const columns: Column<ExchangeTableType>[] = [
+        { id: 'name', label: 'Name' },
+        { id: 'key', label: 'Key' },
+        { id: 'start', label: 'Start Time', format: TimeUtil.formatTime },
+        { id: 'end', label: 'End Time', format: TimeUtil.formatTime },
+        { id: 'action', label: 'Actions' }
+    ];
 
-    const onCreateClick = () => {
-        setExchange(null);
-        setIsNew(true);
-        handleEditDialogOpen();
+    const defaultItem: ExchangeDataType = {
+        id: '',
+        name: '',
+        key: '',
+        start: { hour: 0, minute: 0 },
+        end: { hour: 0, minute: 0 },
+        create: Date.now(),
+        update: Date.now()
     };
 
-    const onEditClick = (exchange: ExchangeDataType) => {
-        setExchange(exchange);
-        setIsNew(false);
-        handleEditDialogOpen();
+    const fetchData = async (): Promise<ExchangeDataType[]> => {
+        return await exchangeFetchService.get();
     };
 
-    const onDeleteClick = (exchange: ExchangeDataType) => {
-        setExchange(exchange);
-        handleDeleteDialogOpen();
+    const fixItem = (item: ExchangeDataType, isNew: boolean): ExchangeDataType => {
+        const now = Date.now();
+
+        if (isNew) {
+            item.create = now;
+        }
+
+        item.update = now;
+
+        return item;
     };
 
-    const handleEditDialogOpen = () => {
-        setEditDialogOpen(true);
+    const onCreate = async (item: ExchangeDataType): Promise<ExchangeDataType> => {
+        const fixedItem = fixItem(item, true);
+        return await exchangeFetchService.create(fixedItem);
     };
 
-    const handleEditDialogClose = () => {
-        setEditDialogOpen(false);
+    const onUpdate = async (item: ExchangeDataType): Promise<ExchangeDataType> => {
+        const fixedItem = fixItem(item, false);
+        return await exchangeFetchService.update(fixedItem);
     };
 
-    const handleDeleteDialogOpen = () => {
-        setDeleteDialogOpen(true);
+    const onDelete = async (id: string): Promise<void> => {
+        await exchangeFetchService.delete(id);
     };
 
-    const handleDeleteDialogClose = () => {
-        setDeleteDialogOpen(false);
+    const validateItem = (item: ExchangeDataType): string | null => {
+        if (!item.name.trim()) return 'Name is required.';
+        if (!item.key.trim()) return 'Key is required.';
+        if (item.start.hour < 0 || item.start.hour > 23) return 'Start hour must be between 0 and 23.';
+        if (item.start.minute < 0 || item.start.minute > 59) return 'Start minute must be between 0 and 59.';
+        if (item.end.hour < 0 || item.end.hour > 23) return 'End hour must be between 0 and 23.';
+        if (item.end.minute < 0 || item.end.minute > 59) return 'End minute must be between 0 and 59.';
+        return null;
     };
-
-    const handleCreateExchange = async (request: CreateExchangeRequestType): Promise<void> => {
-        const exchange = await createExchange(request);
-        setExchanges(prev => [...prev, convertExchange(exchange)]);
-        handleEditDialogClose();
-    };
-
-    const handleUpdateExchange = async (id: string, request: UpdateExchangeRequestType): Promise<void> => {
-        const exchange = await updateExchange(id, request);
-        setExchanges(prev => prev.map(item => item.id === exchange.id ? convertExchange(exchange) : item));
-        handleEditDialogClose();
-    };
-
-    const handleDeleteExchange = async (id: string): Promise<void> => {
-        await deleteExchange(id);
-        setExchanges(prev => prev.filter(item => item.id !== id));
-        handleDeleteDialogClose();
-    };
-
-    useEffect(() => {
-        (async () => {
-            const exchangeData = await ExchangeAPIUtil.get();
-            const exchanges = exchangeData.map(convertExchange);
-            setExchanges(exchanges);
-        })();
-    }, []);
 
     return (
         <Auth
             adminContent={
-                <>
-                    <ContainsButton label='Create' onClick={onCreateClick} />
-                    <BasicTable columns={columns} data={exchanges} />
-                    <EditDialog
-                        open={editDialogOpen}
-                        onClose={handleEditDialogClose}
-                        isNew={isNew}
-                        exchange={exchange}
-                        setExchange={setExchange}
-                        createExchange={handleCreateExchange}
-                        updateExchange={handleUpdateExchange}
-                    />
-                    <DeleteDialog
-                        open={deleteDialogOpen}
-                        onClose={handleDeleteDialogClose}
-                        exchange={exchange}
-                        deleteExchange={handleDeleteExchange}
-                    />
-                </>
+                <AdminManagement<ExchangeDataType>
+                    columns={columns}
+                    fetchData={fetchData}
+                    itemName='Exchange'
+                    defaultItem={defaultItem}
+                    validateItem={validateItem}
+                    onCreate={onCreate}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                >
+                    {(item, _, onItemChange) => (
+                        <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />
+                    )}
+                </AdminManagement>
             }
             userContent={
                 <div>権限がありません。</div>

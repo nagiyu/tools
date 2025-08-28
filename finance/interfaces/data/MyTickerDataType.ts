@@ -1,12 +1,12 @@
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
+import { MyTickerDealType } from '@finance/types/MyTickerType';
 
 export interface MyTickerDataType extends DataTypeBase {
   userId: string;
   exchangeId: string;
   tickerId: string;
-  purchaseDate: number;
-  purchasePrice: number;
+  deal: MyTickerDealType;
+  date: number;
+  price: number;
   quantity: number;
-  sellDate: number | null;
-  sellPrice: number | null;
 }
