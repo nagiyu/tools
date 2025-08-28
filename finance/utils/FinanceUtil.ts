@@ -1,5 +1,6 @@
 import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
-import TradingView, { PricePeriod } from '@mathieuc/tradingview';
+import * as TradingView from '@mathieuc/tradingview';
+import { PricePeriod } from '@mathieuc/tradingview';
 
 export default class FinanceUtil {
   public static getFinanceTableName(): string {

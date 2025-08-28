@@ -33,6 +33,7 @@ async function getMenuItems(): Promise<MenuItemData[]> {
     menuItems.push(
       { title: 'Home', url: '/' },
       { title: 'My Ticker', url: '/myticker' },
+      { title: 'Finance Notification', url: '/finance-notification' },
     );
   }
 

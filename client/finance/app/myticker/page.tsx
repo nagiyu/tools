@@ -89,7 +89,9 @@ export default function MyTickerPage() {
     };
 
     const fetchData = async (): Promise<MyTickerDataType[]> => {
-        return await myTickerFetchService.get();
+        const user = await authFetchService.getUserByGoogle();
+        const result = await myTickerFetchService.get();
+        return result.filter(item => item.userId === user.id);
     };
 
     const fixItem = async (item: MyTickerDataType, isNew: boolean): Promise<MyTickerDataType> => {
