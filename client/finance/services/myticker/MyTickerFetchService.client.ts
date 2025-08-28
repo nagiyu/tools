@@ -1,4 +1,4 @@
-import FetchServiceBase from '@client-common/services/FetchServiceBase';
+import FetchServiceBase from '@client-common/services/FetchServiceBase.client';
 
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 

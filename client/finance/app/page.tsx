@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -14,9 +16,9 @@ import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 import Auth from '@/app/components/Auth';
 import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
-import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import Graph from '@/app/components/graph';
-import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
+import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 
 export default function Home() {
   const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
@@ -25,6 +27,9 @@ export default function Home() {
   const [tickerOptions, setTickerOptions] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
+
+  const exchangeFetchService = new ExchangeFetchService();
+  const tickerFetchService = new TickerFetchService();
 
   const getExchangeKey = (id: string): string => {
     return exchanges.find(exchange => exchange.id === id)?.key || '';
@@ -37,8 +42,8 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       if (await AuthAPIUtil.isAuthorized('user')) {
-        setExchanges(await ExchangeAPIUtil.get());
-        setTickers(await TickerAPIUtil.get());
+        setExchanges(await exchangeFetchService.get());
+        setTickers(await tickerFetchService.get());
       }
     })();
   }, []);

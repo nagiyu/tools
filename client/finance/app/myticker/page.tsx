@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -11,12 +13,12 @@ import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
 import Auth from '@/app/components/Auth';
-import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
+import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
-import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
+import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
-import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 
 interface MyTickerTableType extends MyTickerDataType {
     action: React.ReactNode;
@@ -31,8 +33,10 @@ export default function MyTickerPage() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
 
-    const fetchService = new MyTickerFetchService();
+    const myTickerFetchService = new MyTickerFetchService();
     const authFetchService = new AuthFetchService();
+    const exchangeFetchService = new ExchangeFetchService();
+    const tickerFetchService = new TickerFetchService();
 
     const columns: Column<MyTickerTableType>[] = [
         {
@@ -71,8 +75,8 @@ export default function MyTickerPage() {
         quantity: 0,
         sellDate: null,
         sellPrice: null,
-        create: 0,
-        update: 0
+        create: Date.now(),
+        update: Date.now()
     }
 
     const defaultState: StateType = {
@@ -90,37 +94,41 @@ export default function MyTickerPage() {
     };
 
     const fetchData = async (): Promise<MyTickerDataType[]> => {
-        return await fetchService.get();
+        return await myTickerFetchService.get();
     };
 
-    const onCreate = async (item: MyTickerDataType) => {
+    const fixItem = async (item: MyTickerDataType, isNew: boolean): Promise<MyTickerDataType> => {
         const user = await authFetchService.getUserByGoogle();
         item.userId = user.id;
 
         const now = Date.now();
 
-        item.create = now;
+        if (isNew) {
+            item.create = now;
+        }
+
         item.update = now;
 
-        return await fetchService.create(item);
+        return item;
     };
 
-    const onUpdate = async (item: MyTickerDataType) => {
-        const user = await authFetchService.getUserByGoogle();
-        item.userId = user.id;
-
-        item.update = Date.now();
-
-        return await fetchService.update(item);
+    const onCreate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
+        const fixedItem = await fixItem(item, true);
+        return await myTickerFetchService.create(fixedItem);
     };
 
-    const onDelete = async (id: string) => {
-        await fetchService.delete(id);
+    const onUpdate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
+        const fixedItem = await fixItem(item, false);
+        return await myTickerFetchService.update(fixedItem);
+    };
+
+    const onDelete = async (id: string): Promise<void> => {
+        await myTickerFetchService.delete(id);
     };
 
     const validateItem = (item: MyTickerDataType): string | null => {
-        if (!item.exchangeId) return 'Exchange is required.';
-        if (!item.tickerId) return 'Ticker is required.';
+        if (!item.exchangeId.trim()) return 'Exchange is required.';
+        if (!item.tickerId.trim()) return 'Ticker is required.';
         if (item.purchasePrice <= 0) return 'Purchase Price must be greater than 0.';
         if (item.quantity <= 0) return 'Quantity must be greater than 0.';
         if ((item.sellDate && !item.sellPrice) || (!item.sellDate && item.sellPrice)) {
@@ -135,8 +143,8 @@ export default function MyTickerPage() {
     useEffect(() => {
         (async () => {
             const [exchangeData, tickerData] = await Promise.all([
-                ExchangeAPIUtil.get(),
-                TickerAPIUtil.get()
+                exchangeFetchService.get(),
+                tickerFetchService.get()
             ]);
             setExchanges(exchangeData);
             setTickers(tickerData);

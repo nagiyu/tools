@@ -4,12 +4,12 @@ import React from 'react';
 
 import TimeUtil from '@common/utils/TimeUtil';
 
-import { Column } from '@client-common/components/data/table/BasicTable';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import { Column } from '@client-common/components/data/table/BasicTable';
 
 import Auth from '@/app/components/Auth';
-import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
 import ExchangeEditDialogContent from '@/app/components/exchange/ExchangeEditDialogContent';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 
 interface ExchangeTableType extends ExchangeDataType {
@@ -17,6 +17,8 @@ interface ExchangeTableType extends ExchangeDataType {
 }
 
 export default function ExchangesPage() {
+    const exchangeFetchService = new ExchangeFetchService();
+
     const columns: Column<ExchangeTableType>[] = [
         { id: 'name', label: 'Name' },
         { id: 'key', label: 'Key' },
@@ -31,35 +33,38 @@ export default function ExchangesPage() {
         key: '',
         start: { hour: 0, minute: 0 },
         end: { hour: 0, minute: 0 },
-        create: 0,
-        update: 0
+        create: Date.now(),
+        update: Date.now()
     };
 
     const fetchData = async (): Promise<ExchangeDataType[]> => {
-        return await ExchangeAPIUtil.get();
+        return await exchangeFetchService.get();
+    };
+
+    const fixItem = (item: ExchangeDataType, isNew: boolean): ExchangeDataType => {
+        const now = Date.now();
+
+        if (isNew) {
+            item.create = now;
+        }
+
+        item.update = now;
+
+        return item;
     };
 
     const onCreate = async (item: ExchangeDataType): Promise<ExchangeDataType> => {
-        return await ExchangeAPIUtil.create({
-            name: item.name,
-            key: item.key,
-            start: item.start,
-            end: item.end
-        });
+        const fixedItem = fixItem(item, true);
+        return await exchangeFetchService.create(fixedItem);
     };
 
     const onUpdate = async (item: ExchangeDataType): Promise<ExchangeDataType> => {
-        return await ExchangeAPIUtil.update(item.id, {
-            name: item.name,
-            key: item.key,
-            start: item.start,
-            end: item.end,
-            create: item.create
-        });
+        const fixedItem = fixItem(item, false);
+        return await exchangeFetchService.update(fixedItem);
     };
 
     const onDelete = async (id: string): Promise<void> => {
-        await ExchangeAPIUtil.delete(id);
+        await exchangeFetchService.delete(id);
     };
 
     const validateItem = (item: ExchangeDataType): string | null => {
@@ -85,7 +90,7 @@ export default function ExchangesPage() {
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 >
-                    {(item, _state, onItemChange) => (
+                    {(item, _, onItemChange) => (
                         <ExchangeEditDialogContent item={item} onItemChange={onItemChange} />
                     )}
                 </AdminManagement>

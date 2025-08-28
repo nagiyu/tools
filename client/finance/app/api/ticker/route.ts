@@ -6,7 +6,6 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
-import { CreateTickerRequestType } from "@/interfaces/requests/TickerRequestType";
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 
 export async function GET() {
@@ -24,14 +23,12 @@ export async function POST(request: NextRequest) {
     return APIUtil.ReturnUnauthorized();
   }
 
-  const body: CreateTickerRequestType = await request.json();
+  const body: TickerDataType = await request.json();
   const now = Date.now();
 
   const ticker: TickerDataType = {
+    ...body,
     id: CommonUtil.generateUUID(),
-    name: body.name,
-    key: body.key,
-    exchange: body.exchange,
     create: now,
     update: now,
   }

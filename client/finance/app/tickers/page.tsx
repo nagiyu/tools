@@ -1,14 +1,17 @@
+
+/* eslint-disable react-hooks/exhaustive-deps */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
 
-import { Column } from '@client-common/components/data/table/BasicTable';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import { Column } from '@client-common/components/data/table/BasicTable';
 
 import Auth from '@/app/components/Auth';
-import ExchangeAPIUtil from '@/app/exchanges/ExchangeAPIUtil';
-import TickerAPIUtil from '@/app/tickers/TickerAPIUtil';
+import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import TickerEditDialogContent from '@/app/components/ticker/TickerEditDialogContent';
+import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
@@ -18,6 +21,9 @@ interface TickerTableType extends TickerDataType {
 
 export default function TickersPage() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
+
+    const tickerFetchService = new TickerFetchService();
+    const exchangeFetchService = new ExchangeFetchService();
 
     const columns: Column<TickerTableType>[] = [
         { id: 'name', label: 'Name' },
@@ -35,38 +41,24 @@ export default function TickersPage() {
         name: '',
         key: '',
         exchange: '',
-        create: 0,
-        update: 0
+        create: Date.now(),
+        update: Date.now()
     };
 
     const fetchData = async (): Promise<TickerDataType[]> => {
-        const [exchangeData, tickerData] = await Promise.all([
-            ExchangeAPIUtil.get(),
-            TickerAPIUtil.get()
-        ]);
-        setExchanges(exchangeData);
-        return tickerData;
+        return await tickerFetchService.get();
     };
 
     const onCreate = async (item: TickerDataType): Promise<TickerDataType> => {
-        return await TickerAPIUtil.create({
-            name: item.name,
-            key: item.key,
-            exchange: item.exchange
-        });
+        return await tickerFetchService.create(item);
     };
 
     const onUpdate = async (item: TickerDataType): Promise<TickerDataType> => {
-        return await TickerAPIUtil.update(item.id, {
-            name: item.name,
-            key: item.key,
-            exchange: item.exchange,
-            create: item.create
-        });
+        return await tickerFetchService.update(item);
     };
 
     const onDelete = async (id: string): Promise<void> => {
-        await TickerAPIUtil.delete(id);
+        await tickerFetchService.delete(id);
     };
 
     const validateItem = (item: TickerDataType): string | null => {
@@ -78,7 +70,7 @@ export default function TickersPage() {
 
     useEffect(() => {
         (async () => {
-            const exchangeData = await ExchangeAPIUtil.get();
+            const exchangeData = await exchangeFetchService.get();
             setExchanges(exchangeData);
         })();
     }, []);
@@ -96,7 +88,7 @@ export default function TickersPage() {
                     onUpdate={onUpdate}
                     onDelete={onDelete}
                 >
-                    {(item, _state, onItemChange) => (
+                    {(item, _, onItemChange) => (
                         <TickerEditDialogContent
                             item={item}
                             onItemChange={onItemChange}

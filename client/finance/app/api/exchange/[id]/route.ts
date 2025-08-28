@@ -3,7 +3,6 @@ import { NextRequest } from "next/server";
 import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
-import { UpdateExchangeRequestType } from "@/interfaces/requests/ExchangeRequestType";
 import { ExchangeDataType } from "@/interfaces/data/ExchangeDataType";
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
@@ -14,16 +13,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const id = (await params).id;
-  const body: UpdateExchangeRequestType = await request.json();
+  const body: ExchangeDataType = await request.json();
   const now = Date.now();
 
   const exchange: ExchangeDataType = {
-    id: id,
-    name: body.name,
-    key: body.key,
-    start: body.start,
-    end: body.end,
-    create: body.create,
+    ...body,
+    id,
     update: now,
   };
 

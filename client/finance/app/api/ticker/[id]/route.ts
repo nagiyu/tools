@@ -4,7 +4,6 @@ import APIUtil from '@client-common/utils/APIUtil';
 
 import FinanceAuthorizer from '@/services/finance/FinanceAuthorizer';
 import TickerDataAccessor from "@/services/ticker/TickerDataAcceesor";
-import { UpdateTickerRequestType } from "@/interfaces/requests/TickerRequestType";
 import { TickerDataType } from "@/interfaces/data/TickerDataType";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -13,15 +12,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   const id = (await params).id;
-  const body: UpdateTickerRequestType = await request.json();
+  const body: TickerDataType = await request.json();
   const now = Date.now();
 
   const ticker: TickerDataType = {
-    id: id,
-    name: body.name,
-    key: body.key,
-    exchange: body.exchange,
-    create: body.create,
+    ...body,
+    id,
     update: now
   };
 
