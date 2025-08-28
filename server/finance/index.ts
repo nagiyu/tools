@@ -4,6 +4,8 @@ import fetch from 'node-fetch';
 import TimeUtil from '@common/utils/TimeUtil';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import FinanceNotificationService from '@finance/services/FinanceNotificationService';
+import ExchangeService from '@finance/services/ExchangeService';
+import TickerService from '@finance/services/TickerService';
 import FinanceUtil from '@finance/utils/FinanceUtil';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FINANCE_NOTIFICATION_CONDITION_TYPE } from '@finance/types/FinanceNotificationType';
@@ -77,15 +79,38 @@ async function processNotification(
   notificationEndpoint: string
 ): Promise<void> {
   try {
-    // We need to get the exchange key for the stock price API
-    // For now, we'll assume the exchangeId is the exchange key
-    // This might need to be enhanced to lookup exchange data
-    const exchangeKey = notification.exchangeId;
-    const tickerKey = notification.tickerId;
+    // Get the exchange and ticker services to lookup the actual keys
+    const exchangeService = new ExchangeService();
+    const tickerService = new TickerService();
 
-    console.log(`Checking stock price for ${exchangeKey}:${tickerKey}`);
+    console.log(`Looking up exchange and ticker data for notification ${notification.id}`);
 
-    // Get current stock price using the new helper method
+    // Get the exchange and ticker data using the IDs
+    const [exchanges, tickers] = await Promise.all([
+      exchangeService.get(),
+      tickerService.get()
+    ]);
+
+    const exchange = exchanges.find(e => e.id === notification.exchangeId);
+    const ticker = tickers.find(t => t.id === notification.tickerId);
+
+    if (!exchange) {
+      console.error(`Exchange not found for ID: ${notification.exchangeId}`);
+      return;
+    }
+
+    if (!ticker) {
+      console.error(`Ticker not found for ID: ${notification.tickerId}`);
+      return;
+    }
+
+    // Use the actual exchange and ticker keys for the API call
+    const exchangeKey = exchange.key;
+    const tickerKey = ticker.key;
+
+    console.log(`Checking stock price for ${exchangeKey}:${tickerKey} (Exchange: ${exchange.name}, Ticker: ${ticker.name})`);
+
+    // Get current stock price using the actual keys
     const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey);
     
     if (currentPrice === null) {
@@ -102,12 +127,12 @@ async function processNotification(
     if (notification.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) {
       if (currentPrice > notification.conditionValue) {
         conditionMet = true;
-        message = `${exchangeKey}:${tickerKey} price ${currentPrice} is above your target of ${notification.conditionValue}`;
+        message = `${ticker.name} (${exchangeKey}:${tickerKey}) price ${currentPrice} is above your target of ${notification.conditionValue}`;
       }
     } else if (notification.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) {
       if (currentPrice < notification.conditionValue) {
         conditionMet = true;
-        message = `${exchangeKey}:${tickerKey} price ${currentPrice} is below your target of ${notification.conditionValue}`;
+        message = `${ticker.name} (${exchangeKey}:${tickerKey}) price ${currentPrice} is below your target of ${notification.conditionValue}`;
       }
     }
 
