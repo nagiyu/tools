@@ -68,4 +68,25 @@ export default class FinanceUtil {
 
     return result;
   }
+
+  /**
+   * Get the current stock price for a given exchange and ticker
+   * Returns the latest close price
+   */
+  public static async getCurrentStockPrice(exchange: string, ticker: string): Promise<number | null> {
+    try {
+      const stockData = await this.getStockPriceData(exchange, ticker);
+      
+      if (!stockData || !Array.isArray(stockData) || stockData.length === 0) {
+        return null;
+      }
+
+      // Get the latest price (close price from the most recent data)
+      const latestData = stockData[stockData.length - 1];
+      return latestData.data[1]; // Close price
+    } catch (error) {
+      console.error('Error getting current stock price:', error);
+      return null;
+    }
+  }
 }

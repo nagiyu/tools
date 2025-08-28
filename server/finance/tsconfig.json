@@ -10,6 +10,9 @@
       ],
       "@server-common/*": [
         "../common/*"
+      ],
+      "@finance/*": [
+        "../../finance/*"
       ]
     }
   }
