@@ -3,11 +3,12 @@ import React from 'react';
 import DateUtil from '@common/utils/DateUtil';
 
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
+import { MyTickerDealType, MY_TICKER_DEAL_TYPE } from '@finance/types/MyTickerType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
-import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
@@ -23,6 +24,11 @@ interface MyTickerEditDialogContentProps {
     exchanges: ExchangeDataType[];
     tickers: TickerDataType[];
 }
+
+const dealOptions: SelectOptionType[] = [
+    { value: MY_TICKER_DEAL_TYPE.PURCHASE, label: 'Purchase' },
+    { value: MY_TICKER_DEAL_TYPE.SELL, label: 'Sell' },
+];
 
 export default function MyTickerEditDialogContent({
     item,
@@ -50,45 +56,27 @@ export default function MyTickerEditDialogContent({
                 value={item.tickerId}
                 onChange={(value) => onItemChange({ ...item, tickerId: value })}
             />
+            <BasicSelect
+                label='Deal'
+                options={dealOptions}
+                value={item.deal}
+                onChange={(value) => onItemChange({ ...item, deal: value as MyTickerDealType })}
+            />
             <BasicDatePicker
-                label='Purchase Date'
-                value={new Date(item.purchaseDate)}
-                onChange={(date) => onItemChange({ ...item, purchaseDate: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
+                label='Date'
+                value={new Date(item.date)}
+                onChange={(date) => onItemChange({ ...item, date: date ? DateUtil.toStartOfDay(date) : DateUtil.getTodayStartTimestamp() })}
             />
             <BasicNumberField
-                label='Purchase Price'
-                value={item.purchasePrice}
-                onChange={(e) => onItemChange({ ...item, purchasePrice: Number(e.target.value) })}
+                label='Price'
+                value={item.price}
+                onChange={(e) => onItemChange({ ...item, price: Number(e.target.value) })}
             />
             <BasicNumberField
                 label='Quantity'
                 value={item.quantity}
                 onChange={(e) => onItemChange({ ...item, quantity: Number(e.target.value) })}
             />
-            <ControlledCheckbox
-                label='Sell'
-                checked={state.isSell}
-                onChange={(e) => {
-                    onStateChange({ ...state, isSell: e.target.checked });
-                    if (!e.target.checked) {
-                        onItemChange({ ...item, sellDate: null, sellPrice: null });
-                    }
-                }}
-            />
-            {state.isSell && (
-                <>
-                    <BasicDatePicker
-                        label='Sell Date'
-                        value={item.sellDate ? new Date(item.sellDate) : null}
-                        onChange={(date) => onItemChange({ ...item, sellDate: date ? DateUtil.toStartOfDay(date) : null })}
-                    />
-                    <BasicNumberField
-                        label='Sell Price'
-                        value={item.sellPrice || 0}
-                        onChange={(e) => onItemChange({ ...item, sellPrice: Number(e.target.value) })}
-                    />
-                </>
-            )}
         </>
     );
 }

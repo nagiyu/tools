@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import DateUtil from '@common/utils/DateUtil';
 
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
+import { MY_TICKER_DEAL_TYPE } from '@finance/types/MyTickerType';
 
 import AuthFetchService from '@client-common/services/auth/AuthFetchService.client';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
@@ -26,7 +27,6 @@ interface MyTickerTableType extends MyTickerDataType {
 
 export interface StateType extends Record<string, unknown> {
     filteredTickers: TickerDataType[];
-    isSell: boolean;
 }
 
 export default function MyTickerPage() {
@@ -50,18 +50,16 @@ export default function MyTickerPage() {
             format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
         },
         {
-            id: 'purchaseDate',
-            label: 'Purchase Date',
-            format: (cell) => cell ? new Date(cell).toLocaleString() : ''
+            id: 'deal',
+            label: 'Deal'
         },
-        { id: 'purchasePrice', label: 'Purchase Price' },
-        { id: 'quantity', label: 'Quantity' },
         {
-            id: 'sellDate',
-            label: 'Sell Date',
+            id: 'date',
+            label: 'Date',
             format: (cell) => cell ? new Date(cell).toLocaleString() : ''
         },
-        { id: 'sellPrice', label: 'Sell Price' },
+        { id: 'price', label: 'Price' },
+        { id: 'quantity', label: 'Quantity' },
         { id: 'action', label: 'Action' }
     ];
 
@@ -70,26 +68,23 @@ export default function MyTickerPage() {
         userId: '',
         exchangeId: '',
         tickerId: '',
-        purchaseDate: DateUtil.getTodayStartTimestamp(),
-        purchasePrice: 0,
+        deal: MY_TICKER_DEAL_TYPE.PURCHASE,
+        date: DateUtil.getTodayStartTimestamp(),
+        price: 0,
         quantity: 0,
-        sellDate: null,
-        sellPrice: null,
         create: Date.now(),
         update: Date.now()
     }
 
     const defaultState: StateType = {
-        filteredTickers: [],
-        isSell: false
+        filteredTickers: []
     }
 
     const generateState = (item: MyTickerDataType): StateType => {
         const filteredTickers = tickers.filter(t => t.exchange === item.exchangeId);
-        const isSell = item.sellDate !== null || item.sellPrice !== null;
+
         return {
-            filteredTickers,
-            isSell
+            filteredTickers
         };
     };
 
@@ -129,14 +124,8 @@ export default function MyTickerPage() {
     const validateItem = (item: MyTickerDataType): string | null => {
         if (!item.exchangeId.trim()) return 'Exchange is required.';
         if (!item.tickerId.trim()) return 'Ticker is required.';
-        if (item.purchasePrice <= 0) return 'Purchase Price must be greater than 0.';
+        if (item.price <= 0) return 'Price must be greater than 0.';
         if (item.quantity <= 0) return 'Quantity must be greater than 0.';
-        if ((item.sellDate && !item.sellPrice) || (!item.sellDate && item.sellPrice)) {
-            return 'Both Sell Date and Sell Price must be set together.';
-        }
-        if (item.sellPrice && item.sellPrice <= 0) {
-            return 'Sell Price must be greater than 0.';
-        }
         return null;
     };
 
