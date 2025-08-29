@@ -166,7 +166,7 @@ export default function FinanceNotificationPage() {
     return (
         <Auth
             userContent={
-                terminalId ? (
+                terminalId && exchanges.length > 0 && tickers.length > 0 ? (
                     <AdminManagement<FinanceNotificationDataType, StateType>
                         columns={columns}
                         fetchData={fetchData}
