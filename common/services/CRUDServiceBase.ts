@@ -75,6 +75,17 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     }
   }
 
+  public async syncCache(): Promise<void> {
+    if (!this.useCache) {
+      return;
+    }
+
+    const data = await this.dataAccessor.get();
+    const mappedData = data.map(this.recordToData);
+
+    CacheUtil.set(this.cacheKey, mappedData);
+  }
+
   private getCache(): DataType[] | null {
     if (this.useCache) {
       return CacheUtil.get<DataType[]>(this.cacheKey);

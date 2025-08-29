@@ -1,180 +1,58 @@
-import { Context, EventBridgeEvent } from 'aws-lambda';
-import fetch from 'node-fetch';
-
-import TimeUtil from '@common/utils/TimeUtil';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+import ErrorUtil from '@common/utils/ErrorUtil';
+
 import FinanceNotificationService from '@finance/services/FinanceNotificationService';
-import ExchangeService from '@finance/services/ExchangeService';
-import TickerService from '@finance/services/TickerService';
-import FinanceUtil from '@finance/utils/FinanceUtil';
-import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
-import { FINANCE_NOTIFICATION_CONDITION_TYPE } from '@finance/types/FinanceNotificationType';
 
-interface EventBridgeDetail {
-  scheduled?: boolean;
-}
+import LambdaUtil from '@server-common/utils/LambdaUtil';
 
-export const handler = async (
-  event: EventBridgeEvent<'Scheduled Event', EventBridgeDetail>, 
-  context: Context
-): Promise<void> => {
-  console.log('Finance notification service started', { event, context });
+export const handler = LambdaUtil.generateHandler(
+  async () => {
+    const errors: string[] = [];
 
-  try {
-    const financeNotificationService = new FinanceNotificationService();
-    
-    // Get client base URL from AWS Secrets Manager
-    const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
-    const notificationEndpoint = `${baseUrl}/api/send-notification`;
+    try {
+      const financeNotificationService = new FinanceNotificationService();
 
-    // Run for 10 minutes (600 seconds), checking every minute (60 seconds)
-    const endTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
-    const checkInterval = 60 * 1000; // 1 minute
+      // Get client base URL from AWS Secrets Manager
+      const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
+      const notificationEndpoint = `${baseUrl}/api/send-notification`;
 
-    while (Date.now() < endTime) {
-      try {
-        console.log('Starting stock price check cycle');
+      // Run for 10 minutes (600 seconds), checking every minute (60 seconds)
+      const endTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+      const checkInterval = 60 * 1000; // 1 minute
 
-        // Get all finance notifications
-        const notifications = await financeNotificationService.get();
-        console.log(`Found ${notifications.length} notification settings`);
+      while (Date.now() < endTime) {
+        try {
+          console.log('Starting stock price check cycle');
 
-        // Process each notification
-        for (const notification of notifications) {
-          try {
-            await processNotification(notification, notificationEndpoint);
-          } catch (error) {
-            console.error('Error processing notification:', {
-              notificationId: notification.id,
-              error: error instanceof Error ? error.message : 'Unknown error'
-            });
+          await financeNotificationService.notification(notificationEndpoint);
+
+          console.log('Stock price check cycle completed');
+
+          // Wait for next cycle (unless we're near the end time)
+          const remainingTime = endTime - Date.now();
+          if (remainingTime > checkInterval) {
+            await new Promise(resolve => setTimeout(resolve, checkInterval));
+          } else {
+            break;
           }
-        }
-
-        console.log('Stock price check cycle completed');
-
-        // Wait for next cycle (unless we're near the end time)
-        const remainingTime = endTime - Date.now();
-        if (remainingTime > checkInterval) {
+        } catch (error) {
+          errors.push(`Error in check cycle: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          // Continue with next cycle even if this one failed
           await new Promise(resolve => setTimeout(resolve, checkInterval));
-        } else {
-          break;
         }
-      } catch (error) {
-        console.error('Error in check cycle:', error instanceof Error ? error.message : 'Unknown error');
-        // Continue with next cycle even if this one failed
-        await new Promise(resolve => setTimeout(resolve, checkInterval));
+      }
+
+      console.log('Finance notification service completed');
+    } catch (error) {
+      if (error instanceof Error) {
+        errors.push(`Fatal error: ${error.message}`);
+      } else {
+        errors.push('Fatal unknown error');
       }
     }
 
-    console.log('Finance notification service completed');
-  } catch (error) {
-    console.error('Fatal error in finance notification service:', error instanceof Error ? error.message : 'Unknown error');
-    throw error;
+    if (errors.length > 0) {
+      ErrorUtil.throwError(errors.join('; '));
+    }
   }
-};
-
-async function processNotification(
-  notification: FinanceNotificationDataType,
-  notificationEndpoint: string
-): Promise<void> {
-  try {
-    // Get the exchange and ticker services to lookup the actual keys
-    const exchangeService = new ExchangeService();
-    const tickerService = new TickerService();
-
-    console.log(`Looking up exchange and ticker data for notification ${notification.id}`);
-
-    // Get the exchange and ticker data using the IDs
-    const [exchanges, tickers] = await Promise.all([
-      exchangeService.get(),
-      tickerService.get()
-    ]);
-
-    const exchange = exchanges.find(e => e.id === notification.exchangeId);
-    const ticker = tickers.find(t => t.id === notification.tickerId);
-
-    if (!exchange) {
-      console.error(`Exchange not found for ID: ${notification.exchangeId}`);
-      return;
-    }
-
-    if (!ticker) {
-      console.error(`Ticker not found for ID: ${notification.tickerId}`);
-      return;
-    }
-
-    // Use the actual exchange and ticker keys for the API call
-    const exchangeKey = exchange.key;
-    const tickerKey = ticker.key;
-
-    console.log(`Checking stock price for ${exchangeKey}:${tickerKey} (Exchange: ${exchange.name}, Ticker: ${ticker.name})`);
-
-    // Get current stock price using the actual keys
-    const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey);
-    
-    if (currentPrice === null) {
-      console.log(`No stock data available for ${exchangeKey}:${tickerKey}`);
-      return;
-    }
-
-    console.log(`Current price for ${exchangeKey}:${tickerKey}: ${currentPrice}, condition: ${notification.conditionType} ${notification.conditionValue}`);
-
-    // Check if condition is met
-    let conditionMet = false;
-    let message = '';
-
-    if (notification.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) {
-      if (currentPrice > notification.conditionValue) {
-        conditionMet = true;
-        message = `${ticker.name} (${exchangeKey}:${tickerKey}) price ${currentPrice} is above your target of ${notification.conditionValue}`;
-      }
-    } else if (notification.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) {
-      if (currentPrice < notification.conditionValue) {
-        conditionMet = true;
-        message = `${ticker.name} (${exchangeKey}:${tickerKey}) price ${currentPrice} is below your target of ${notification.conditionValue}`;
-      }
-    }
-
-    if (conditionMet) {
-      console.log(`Condition met for notification ${notification.id}, sending push notification`);
-
-      // Prepare subscription object
-      const subscription = {
-        endpoint: notification.subscriptionEndpoint,
-        keys: {
-          p256dh: notification.subscriptionKeysP256dh,
-          auth: notification.subscriptionKeysAuth
-        }
-      };
-
-      // Send push notification
-      try {
-        const response = await fetch(notificationEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message,
-            subscription,
-          }),
-        });
-
-        if (response.ok) {
-          console.log(`Push notification sent successfully for ${exchangeKey}:${tickerKey}`);
-        } else {
-          const errorText = await response.text();
-          console.error(`Failed to send push notification: ${response.status} ${response.statusText}`, errorText);
-        }
-      } catch (fetchError) {
-        console.error('Error sending push notification:', fetchError instanceof Error ? fetchError.message : 'Unknown error');
-      }
-    } else {
-      console.log(`Condition not met for ${exchangeKey}:${tickerKey}`);
-    }
-  } catch (error) {
-    console.error('Error processing notification:', error instanceof Error ? error.message : 'Unknown error');
-    throw error;
-  }
-}
+);
