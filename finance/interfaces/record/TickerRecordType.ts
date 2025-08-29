@@ -1,7 +1,8 @@
-import { RecordTypeBase } from '@common/aws/interfaces/DynamoDB/RecordTypeBase';
+import { FinanceRecordTypeBase } from '@finance/interfaces/record/FinanceRecordTypeBase';
+import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
-export interface TickerRecordType extends RecordTypeBase {
-  DataType: 'Ticker';
+export interface TickerRecordType extends FinanceRecordTypeBase {
+  DataType: typeof FINANCE_RECORD_DATA_TYPE.TICKER;
   Name: string;
   Key: string;
   Exchange: string;
