@@ -5,7 +5,7 @@ import FinanceNotificationService from '@finance/services/FinanceNotificationSer
 
 import LambdaUtil from '@server-common/utils/LambdaUtil';
 
-export const handler = LambdaUtil.generateHandler(
+const handler = LambdaUtil.generateHandler(
   async () => {
     const errors: string[] = [];
 
@@ -56,3 +56,5 @@ export const handler = LambdaUtil.generateHandler(
     }
   }
 );
+
+module.exports = { handler };
