@@ -1,7 +1,4 @@
 {
   "name": "server-common",
-  "version": "1.0.0",
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.152"
-  }
+  "version": "1.0.0"
 }
