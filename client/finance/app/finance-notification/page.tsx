@@ -63,7 +63,7 @@ export default function FinanceNotificationPage() {
         }
     ];
 
-    const defaultItem: FinanceNotificationDataType = {
+    const getDefaultItem = (): FinanceNotificationDataType => ({
         id: '',
         terminalId: terminalId,
         subscriptionEndpoint: '',
@@ -76,7 +76,7 @@ export default function FinanceNotificationPage() {
         timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
         create: Date.now(),
         update: Date.now(),
-    };
+    });
 
     const defaultState: StateType = {
         filteredTickers: []
@@ -166,31 +166,35 @@ export default function FinanceNotificationPage() {
     return (
         <Auth
             userContent={
-                <AdminManagement<FinanceNotificationDataType, StateType>
-                    columns={columns}
-                    fetchData={fetchData}
-                    itemName='Finance Notification'
-                    defaultItem={defaultItem}
-                    defaultState={defaultState}
-                    generateState={generateState}
-                    validateItem={validateItem}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                >
-                    {(item, state, onItemChange, onStateChange) => {
-                        return (
-                            <FinanceNotificationEditDialogContent
-                                item={item}
-                                state={state}
-                                onItemChange={onItemChange}
-                                onStateChange={onStateChange}
-                                exchanges={exchanges}
-                                tickers={tickers}
-                            />
-                        );
-                    }}
-                </AdminManagement>
+                terminalId ? (
+                    <AdminManagement<FinanceNotificationDataType, StateType>
+                        columns={columns}
+                        fetchData={fetchData}
+                        itemName='Finance Notification'
+                        defaultItem={getDefaultItem()}
+                        defaultState={defaultState}
+                        generateState={generateState}
+                        validateItem={validateItem}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                    >
+                        {(item, state, onItemChange, onStateChange) => {
+                            return (
+                                <FinanceNotificationEditDialogContent
+                                    item={item}
+                                    state={state}
+                                    onItemChange={onItemChange}
+                                    onStateChange={onStateChange}
+                                    exchanges={exchanges}
+                                    tickers={tickers}
+                                />
+                            );
+                        }}
+                    </AdminManagement>
+                ) : (
+                    <div>Loading...</div>
+                )
             }
         />
     );
