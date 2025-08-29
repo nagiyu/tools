@@ -11,19 +11,20 @@ ARG PROJECT_AWS_REGION
 WORKDIR /app
 
 COPY common ./common
+COPY finance ./finance
 COPY server/common ./server/common
 COPY server/finance ./server/finance
 
 WORKDIR /app/common
+RUN npm install
 
+WORKDIR /app/finance
 RUN npm install
 
 WORKDIR /app/server/common
-
 RUN npm install
 
 WORKDIR /app/server/finance
-
 RUN npm install && \
     npm run build
 
