@@ -1,111 +1,54 @@
-import { Context, APIGatewayProxyResult, APIGatewayEvent } from 'aws-lambda';
-import fetch from 'node-fetch';
-
-import TimeUtil from '@common/utils/TimeUtil';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+import ErrorUtil from '@common/utils/ErrorUtil';
 
-interface NotificationRequest {
-  message: string;
-  subscription: any;
-}
+import FinanceNotificationService from '@finance/services/FinanceNotificationService';
 
-export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async () => {
+  const errors: string[] = [];
+
   try {
-    // Parse the request body if it exists
-    let requestBody: NotificationRequest | null = null;
-    if (event.body) {
+    const financeNotificationService = new FinanceNotificationService();
+
+    // Get client base URL from AWS Secrets Manager
+    const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
+    const notificationEndpoint = `${baseUrl}/api/send-notification`;
+
+    // Run for 10 minutes (600 seconds), checking every minute (60 seconds)
+    const endTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+    const checkInterval = 60 * 1000; // 1 minute
+
+    while (Date.now() < endTime) {
       try {
-        requestBody = JSON.parse(event.body);
+        console.log('Starting stock price check cycle');
+
+        await financeNotificationService.notification(notificationEndpoint);
+
+        console.log('Stock price check cycle completed');
+
+        // Wait for next cycle (unless we're near the end time)
+        const remainingTime = endTime - Date.now();
+        if (remainingTime > checkInterval) {
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+        } else {
+          break;
+        }
       } catch (error) {
-        return {
-          statusCode: 400,
-          body: JSON.stringify({
-            error: 'Invalid JSON in request body'
-          })
-        };
+        errors.push(`Error in check cycle: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // Continue with next cycle even if this one failed
+        await new Promise(resolve => setTimeout(resolve, checkInterval));
       }
     }
 
-    // If notification request is provided, send the notification
-    if (requestBody && requestBody.message && requestBody.subscription) {
-      const { message, subscription } = requestBody;
-      
-      // Get client base URL from AWS Secrets Manager
-      const baseUrl = await SecretsManagerUtil.getSecretValue(process.env.PROJECT_SECRET!, 'CLIENT_BASE_URL');
-      const notificationEndpoint = `${baseUrl}/api/send-notification`;
-
-      try {
-        const response = await fetch(notificationEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message,
-            subscription,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          return {
-            statusCode: 500,
-            body: JSON.stringify({
-              error: `Failed to send notification: ${response.status} ${response.statusText}`,
-              details: errorText
-            })
-          };
-        }
-
-        // Handle empty response bodies gracefully
-        let result = null;
-        const responseText = await response.text();
-        if (responseText.trim()) {
-          try {
-            result = JSON.parse(responseText);
-          } catch (parseError) {
-            // If response is not valid JSON, treat it as text
-            result = { response: responseText };
-          }
-        }
-
-        return {
-          statusCode: 200,
-          body: JSON.stringify({
-            message: 'Notification sent successfully',
-            result,
-            time: TimeUtil.formatTime({ hour: 12, minute: 30 })
-          })
-        };
-      } catch (error) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({
-            error: 'Failed to send notification request',
-            details: error instanceof Error ? error.message : 'Unknown error'
-          })
-        };
-      }
-    }
-
-    // Default response for basic health check
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'Finance server is running',
-        time: TimeUtil.formatTime({ hour: 12, minute: 30 }),
-        endpoints: {
-          notification: 'POST with { message, subscription } to send push notifications'
-        }
-      })
-    };
+    console.log('Finance notification service completed');
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      })
-    };
+    if (error instanceof Error) {
+      errors.push(`Fatal error: ${error.message}`);
+    } else {
+      errors.push('Fatal unknown error');
+    }
+  }
+
+  if (errors.length > 0) {
+    ErrorUtil.throwError(errors.join('; '));
   }
 };
