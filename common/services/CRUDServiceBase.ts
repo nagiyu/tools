@@ -14,7 +14,7 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     dataAccessor: DataAccessorBase<RecordType>,
     dataToRecord: (data: DataType) => RecordType,
     recordToData: (record: RecordType) => DataType,
-    useCache: boolean = true
+    useCache: boolean = false
   ) {
     this.dataAccessor = dataAccessor;
     this.dataToRecord = dataToRecord;
