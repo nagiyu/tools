@@ -53,8 +53,12 @@ export default function DeleteDialog({
             confirmText='Delete'
             closeText='Cancel'
         >
-            {error && <ErrorAlert message={error} />}
-            <div>{itemName}を削除しますか？</div>
+            {() => (
+                <>
+                    {error && <ErrorAlert message={error} />}
+                    <div>{itemName}を削除しますか？</div>
+                </>
+            )}
         </BasicDialog>
     );
 }

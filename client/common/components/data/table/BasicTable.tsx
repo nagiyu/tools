@@ -10,6 +10,8 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import TablePagination from '@mui/material/TablePagination';
 
+import TextSkeleton from '@client-common/components/feedback/skeleton/TextSkeleton';
+
 export interface Column<T> {
   id: keyof T;
   label: string;
@@ -21,6 +23,7 @@ export interface Column<T> {
 interface BasicTableProps<T> {
   columns: Column<T>[];
   data: T[];
+  loading?: boolean;
   pageSize?: number;
   pageIndex?: number;
   pageSizeOptions?: number[];
@@ -32,6 +35,7 @@ interface BasicTableProps<T> {
 function BasicTable<T>({
   columns,
   data,
+  loading = false,
   pageSize = 10,
   pageIndex = 0,
   pageSizeOptions = [10, 25, 100],
@@ -80,18 +84,28 @@ function BasicTable<T>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, rowIndex) => (
-              <TableRow hover role="checkbox" tabIndex={-1} key={rowIndex}>
-                {columns.map((column) => {
-                  const value = row[column.id];
-                  return (
+            {loading
+              ? Array.from({ length: rowsPerPage }).map((_, rowIndex) => (
+                <TableRow hover role="checkbox" tabIndex={-1} key={rowIndex}>
+                  {columns.map((column) => (
                     <TableCell key={String(column.id)} align={column.align}>
-                      {column.format ? column.format(value) : (value as React.ReactNode)}
+                      <TextSkeleton />
                     </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
+                  ))}
+                </TableRow>
+              ))
+              : data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, rowIndex) => (
+                <TableRow hover role="checkbox" tabIndex={-1} key={rowIndex}>
+                  {columns.map((column) => {
+                    const value = row[column.id];
+                    return (
+                      <TableCell key={String(column.id)} align={column.align}>
+                        {column.format ? column.format(value) : (value as React.ReactNode)}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
