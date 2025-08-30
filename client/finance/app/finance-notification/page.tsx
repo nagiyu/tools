@@ -8,6 +8,7 @@ import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME } 
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
+import LoadingPage from '@client-common/components/page/LoadingPage';
 import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
@@ -30,7 +31,6 @@ export interface StateType extends Record<string, unknown> {
 }
 
 export default function FinanceNotificationPage() {
-    const [terminalId, setTerminalId] = useState<string>('');
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
 
@@ -63,9 +63,9 @@ export default function FinanceNotificationPage() {
         }
     ];
 
-    const getDefaultItem = (): FinanceNotificationDataType => ({
+    const defaultItem: FinanceNotificationDataType = {
         id: '',
-        terminalId: terminalId,
+        terminalId: '',
         subscriptionEndpoint: '',
         subscriptionKeysP256dh: '',
         subscriptionKeysAuth: '',
@@ -76,7 +76,7 @@ export default function FinanceNotificationPage() {
         timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
         create: Date.now(),
         update: Date.now(),
-    });
+    };
 
     const defaultState: StateType = {
         filteredTickers: []
@@ -89,12 +89,13 @@ export default function FinanceNotificationPage() {
     };
 
     const fetchData = async () => {
+        const terminalId = await TerminalUtil.getTerminalId();
         const result = await financeNotificationFetchService.get();
         return result.filter(item => item.terminalId === terminalId);
     };
 
     const fixItem = async (item: FinanceNotificationDataType, isNew: boolean): Promise<FinanceNotificationDataType> => {
-        item.terminalId = terminalId;
+        item.terminalId = await TerminalUtil.getTerminalId();
 
         const subscription = NotificationUtil.getSubscription();
 
@@ -152,50 +153,48 @@ export default function FinanceNotificationPage() {
 
     useEffect(() => {
         (async () => {
-            const [exchangesData, tickersData, terminalId] = await Promise.all([
+            const [exchangesData, tickersData] = await Promise.all([
                 exchangeFetchService.get(),
-                tickerFetchService.get(),
-                TerminalUtil.getTerminalId()
+                tickerFetchService.get()
             ]);
             setExchanges(exchangesData);
             setTickers(tickersData);
-            setTerminalId(terminalId);
         })();
     }, []);
 
     return (
-        <Auth
-            userContent={
-                terminalId && exchanges.length > 0 && tickers.length > 0 ? (
-                    <AdminManagement<FinanceNotificationDataType, StateType>
-                        columns={columns}
-                        fetchData={fetchData}
-                        itemName='Finance Notification'
-                        defaultItem={getDefaultItem()}
-                        defaultState={defaultState}
-                        generateState={generateState}
-                        validateItem={validateItem}
-                        onCreate={onCreate}
-                        onUpdate={onUpdate}
-                        onDelete={onDelete}
-                    >
-                        {(item, state, onItemChange, onStateChange) => {
-                            return (
-                                <FinanceNotificationEditDialogContent
-                                    item={item}
-                                    state={state}
-                                    onItemChange={onItemChange}
-                                    onStateChange={onStateChange}
-                                    exchanges={exchanges}
-                                    tickers={tickers}
-                                />
-                            );
-                        }}
-                    </AdminManagement>
-                ) : (
-                    <div>Loading...</div>
-                )
-            }
-        />
-    );
+        <LoadingPage>
+            {(loading, runWithLoading) => (
+                <Auth
+                    userContent={
+                        <AdminManagement<FinanceNotificationDataType, StateType>
+                            columns={columns}
+                            loading={loading}
+                            fetchData={() => runWithLoading(fetchData)}
+                            itemName='Finance Notification'
+                            defaultItem={defaultItem}
+                            defaultState={defaultState}
+                            generateState={generateState}
+                            validateItem={validateItem}
+                            onCreate={(item) => runWithLoading(() => onCreate(item))}
+                            onUpdate={(item) => runWithLoading(() => onUpdate(item))}
+                            onDelete={(id) => runWithLoading(() => onDelete(id))}
+                        >
+                            {(item, state, onItemChange, onStateChange) => {
+                                return (
+                                    <FinanceNotificationEditDialogContent
+                                        item={item}
+                                        state={state}
+                                        onItemChange={onItemChange}
+                                        onStateChange={onStateChange}
+                                        exchanges={exchanges}
+                                        tickers={tickers}
+                                    />
+                                );
+                            }}
+                        </AdminManagement>
+                    }
+                />)}
+        </LoadingPage>
+    )
 }

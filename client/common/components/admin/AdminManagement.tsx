@@ -18,6 +18,7 @@ interface AdminManagementTableType {
 
 interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>> {
     columns: Column<ItemType & AdminManagementTableType>[];
+    loading?: boolean;
     fetchData: () => Promise<ItemType[]>;
     itemName: string;
     defaultItem: ItemType;
@@ -37,6 +38,7 @@ interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends 
 
 export default function AdminManagement<ItemType extends DataTypeBase, StateType extends Record<string, unknown> = Record<string, unknown>>({
     columns,
+    loading = false,
     fetchData,
     itemName,
     defaultItem,
@@ -111,7 +113,7 @@ export default function AdminManagement<ItemType extends DataTypeBase, StateType
     return (
         <>
             <ContainsButton label='Create' onClick={onCreateClick} />
-            <BasicTable columns={columns} data={items} />
+            <BasicTable columns={columns} data={items} loading={loading} />
             <EditDialog
                 open={editDialogOpen}
                 title={isNew ? `Create ${itemName}` : `Edit ${itemName}`}
