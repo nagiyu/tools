@@ -8,16 +8,15 @@ import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME } 
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
-import LoadingPage from '@client-common/components/page/LoadingPage';
 import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import Auth from '@/app/components/Auth';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
+import LoadingAuthPage from '@/app/components/pages/LoadingAuthPage';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
@@ -163,38 +162,35 @@ export default function FinanceNotificationPage() {
     }, []);
 
     return (
-        <LoadingPage>
-            {(loading, runWithLoading) => (
-                <Auth
-                    userContent={
-                        <AdminManagement<FinanceNotificationDataType, StateType>
-                            columns={columns}
-                            loading={loading}
-                            fetchData={() => runWithLoading(fetchData)}
-                            itemName='Finance Notification'
-                            defaultItem={defaultItem}
-                            defaultState={defaultState}
-                            generateState={generateState}
-                            validateItem={validateItem}
-                            onCreate={(item) => runWithLoading(() => onCreate(item))}
-                            onUpdate={(item) => runWithLoading(() => onUpdate(item))}
-                            onDelete={(id) => runWithLoading(() => onDelete(id))}
-                        >
-                            {(item, state, onItemChange, onStateChange) => {
-                                return (
-                                    <FinanceNotificationEditDialogContent
-                                        item={item}
-                                        state={state}
-                                        onItemChange={onItemChange}
-                                        onStateChange={onStateChange}
-                                        exchanges={exchanges}
-                                        tickers={tickers}
-                                    />
-                                );
-                            }}
-                        </AdminManagement>
-                    }
-                />)}
-        </LoadingPage>
+        <LoadingAuthPage
+            userContent={(loading, runWithLoading) => (
+                <AdminManagement<FinanceNotificationDataType, StateType>
+                    columns={columns}
+                    loading={loading}
+                    fetchData={() => runWithLoading(fetchData)}
+                    itemName='Finance Notification'
+                    defaultItem={defaultItem}
+                    defaultState={defaultState}
+                    generateState={generateState}
+                    validateItem={validateItem}
+                    onCreate={(item) => runWithLoading(() => onCreate(item))}
+                    onUpdate={(item) => runWithLoading(() => onUpdate(item))}
+                    onDelete={(id) => runWithLoading(() => onDelete(id))}
+                >
+                    {(item, state, onItemChange, onStateChange) => {
+                        return (
+                            <FinanceNotificationEditDialogContent
+                                item={item}
+                                state={state}
+                                onItemChange={onItemChange}
+                                onStateChange={onStateChange}
+                                exchanges={exchanges}
+                                tickers={tickers}
+                            />
+                        );
+                    }}
+                </AdminManagement>
+            )}
+        />
     )
 }

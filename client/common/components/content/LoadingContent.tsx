@@ -2,16 +2,16 @@
 
 import React, { useState } from 'react';
 
-interface LoadingPageProps {
+interface LoadingContentProps {
     children: (
         loading: boolean,
         runWithLoading: <T>(func: () => Promise<T>) => Promise<T>
     ) => React.ReactNode;
 }
 
-export default function LoadingPage({
+export default function LoadingContent({
     children
-}: LoadingPageProps) {
+}: LoadingContentProps) {
     const [loading, setLoading] = useState(false);
 
     async function runWithLoading<T>(func: () => Promise<T>): Promise<T> {
@@ -21,9 +21,5 @@ export default function LoadingPage({
         return result;
     }
 
-    // return children(loading, runWithLoading);
-
-    return (
-        <>{children(loading, runWithLoading)}</>
-    )
+    return children(loading, runWithLoading);
 }
