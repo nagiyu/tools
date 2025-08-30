@@ -21,7 +21,7 @@ export default function SampleDialogsPage() {
     setOpenDialogs((prev) => ({ ...prev, [dialogName]: false }));
   };
 
-  const handleConfirm = (dialogName: string) => {
+  const handleConfirm = async (dialogName: string) => {
     alert(`Confirmed ${dialogName}!`);
     setOpenDialogs((prev) => ({ ...prev, [dialogName]: false }));
   };
@@ -63,7 +63,7 @@ export default function SampleDialogsPage() {
         confirmText="Confirm"
         closeText="Cancel"
       >
-        <div>This is a sample dialog content.</div>
+        {() => <div>This is a sample dialog content.</div>}
       </BasicDialog>
 
       {/* BasicDialog without onConfirm */}
@@ -73,7 +73,7 @@ export default function SampleDialogsPage() {
         onClose={() => handleClose('noConfirmDialog')}
         closeText="Close"
       >
-        <div>This dialog has no confirm button.</div>
+        {() => <div>This dialog has no confirm button.</div>}
       </BasicDialog>
 
       {/* BasicDialog with custom confirmText and closeText */}
@@ -85,7 +85,7 @@ export default function SampleDialogsPage() {
         confirmText="Yes"
         closeText="No"
       >
-        <div>Dialog with custom confirm and close texts.</div>
+        {() => <div>Dialog with custom confirm and close texts.</div>}
       </BasicDialog>
 
       {/* BasicDialog with only closeText */}
@@ -95,7 +95,7 @@ export default function SampleDialogsPage() {
         onClose={() => handleClose('onlyCloseTextDialog')}
         closeText="Dismiss"
       >
-        <div>Dialog with only close button text customized.</div>
+        {() => <div>Dialog with only close button text customized.</div>}
       </BasicDialog>
     </div>
   );

@@ -36,7 +36,7 @@ export default function BasicDialog({
       {(loading, runWithLoading) => (
         <Dialog open={open} onClose={onClose} aria-labelledby="basic-dialog-title">
           <DialogTitle id="basic-dialog-title">{title}</DialogTitle>
-          <DialogContent dividers>{children(loading, runWithLoading)}</DialogContent>
+          <DialogContent dividers>{children?.(loading, runWithLoading)}</DialogContent>
           <DialogActions>
             <Button onClick={onClose} color="primary" disabled={loading}>
               {closeText}
