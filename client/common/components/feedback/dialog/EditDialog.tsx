@@ -27,7 +27,9 @@ interface EditDialogProps<ItemType extends DataTypeBase, StateType extends Recor
         item: ItemType,
         state: StateType,
         onItemChange: (updates: ItemType) => void,
-        onStateChange: (updates: StateType) => void
+        onStateChange: (updates: StateType) => void,
+        loading?: boolean,
+        runWithLoading?: <T>(func: () => Promise<T>) => Promise<T>
     ) => React.ReactNode;
 }
 
@@ -103,10 +105,14 @@ export default function EditDialog<ItemType extends DataTypeBase, StateType exte
             confirmText={isNew ? 'Create' : 'Update'}
             closeText='Cancel'
         >
-            {error && <ErrorAlert message={error} />}
-            <BasicStack>
-                {children(item, state, onItemChange, onStateChange)}
-            </BasicStack>
+            {(loading, runWithLoading) => (
+                <>
+                    {error && <ErrorAlert message={error} />}
+                    <BasicStack>
+                        {children(item, state, onItemChange, onStateChange, loading, runWithLoading)}
+                    </BasicStack>
+                </>
+            )}
         </BasicDialog>
     );
 }

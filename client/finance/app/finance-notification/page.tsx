@@ -12,11 +12,11 @@ import NotificationUtil from '@client-common/utils/NotificationUtil.client';
 import TerminalUtil from '@client-common/utils/TerminalUtil.client';
 import { Column } from '@client-common/components/data/table/BasicTable';
 
-import Auth from '@/app/components/Auth';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import FinanceNotificationEditDialogContent from '@/app/components/financeNotification/FinanceNotificationEditDialogContent';
 import FinanceNotificationFetchService from '@/services/financeNotification/FinanceNotificationFetchService.client';
+import LoadingAuthPage from '@/app/components/pages/LoadingAuthPage';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
@@ -30,7 +30,6 @@ export interface StateType extends Record<string, unknown> {
 }
 
 export default function FinanceNotificationPage() {
-    const [terminalId, setTerminalId] = useState<string>('');
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
 
@@ -65,7 +64,7 @@ export default function FinanceNotificationPage() {
 
     const defaultItem: FinanceNotificationDataType = {
         id: '',
-        terminalId: terminalId,
+        terminalId: '',
         subscriptionEndpoint: '',
         subscriptionKeysP256dh: '',
         subscriptionKeysAuth: '',
@@ -89,12 +88,13 @@ export default function FinanceNotificationPage() {
     };
 
     const fetchData = async () => {
+        const terminalId = await TerminalUtil.getTerminalId();
         const result = await financeNotificationFetchService.get();
         return result.filter(item => item.terminalId === terminalId);
     };
 
     const fixItem = async (item: FinanceNotificationDataType, isNew: boolean): Promise<FinanceNotificationDataType> => {
-        item.terminalId = terminalId;
+        item.terminalId = await TerminalUtil.getTerminalId();
 
         const subscription = NotificationUtil.getSubscription();
 
@@ -152,46 +152,46 @@ export default function FinanceNotificationPage() {
 
     useEffect(() => {
         (async () => {
-            const [exchangesData, tickersData, terminalId] = await Promise.all([
+            const [exchangesData, tickersData] = await Promise.all([
                 exchangeFetchService.get(),
-                tickerFetchService.get(),
-                TerminalUtil.getTerminalId()
+                tickerFetchService.get()
             ]);
             setExchanges(exchangesData);
             setTickers(tickersData);
-            setTerminalId(terminalId);
         })();
     }, []);
 
     return (
-        <Auth
-            userContent={
+        <LoadingAuthPage
+            userContent={(loading, runWithLoading) => (
                 <AdminManagement<FinanceNotificationDataType, StateType>
                     columns={columns}
-                    fetchData={fetchData}
+                    loading={loading}
+                    fetchData={() => runWithLoading(fetchData)}
                     itemName='Finance Notification'
                     defaultItem={defaultItem}
                     defaultState={defaultState}
                     generateState={generateState}
                     validateItem={validateItem}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
+                    onCreate={(item) => runWithLoading(() => onCreate(item))}
+                    onUpdate={(item) => runWithLoading(() => onUpdate(item))}
+                    onDelete={(id) => runWithLoading(() => onDelete(id))}
                 >
-                    {(item, state, onItemChange, onStateChange) => {
+                    {(item, state, onItemChange, onStateChange, loading) => {
                         return (
                             <FinanceNotificationEditDialogContent
                                 item={item}
                                 state={state}
                                 onItemChange={onItemChange}
                                 onStateChange={onStateChange}
+                                loading={loading}
                                 exchanges={exchanges}
                                 tickers={tickers}
                             />
                         );
                     }}
                 </AdminManagement>
-            }
+            )}
         />
-    );
+    )
 }

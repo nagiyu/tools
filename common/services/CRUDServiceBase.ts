@@ -7,14 +7,14 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
   private readonly dataAccessor: DataAccessorBase<RecordType>;
   private readonly dataToRecord: (data: DataType) => RecordType;
   private readonly recordToData: (record: RecordType) => DataType;
-  private readonly useCache: boolean = false;
+  private readonly useCache: boolean;
   private readonly cacheKey: string;
 
   protected constructor(
     dataAccessor: DataAccessorBase<RecordType>,
     dataToRecord: (data: DataType) => RecordType,
     recordToData: (record: RecordType) => DataType,
-    useCache: boolean = false
+    useCache: boolean = true
   ) {
     this.dataAccessor = dataAccessor;
     this.dataToRecord = dataToRecord;

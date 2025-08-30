@@ -9,6 +9,7 @@ interface BasicSelectProps {
     options: SelectOptionType[];
     value: string;
     defaultValue?: string;
+    disabled?: boolean;
     onChange: (value: string) => void;
 }
 
@@ -17,6 +18,7 @@ export default function BasicSelect({
     options,
     value,
     defaultValue,
+    disabled = false,
     onChange,
 }: BasicSelectProps) {
     const labelId = label ? `${label.replace(/\s+/g, '-').toLowerCase()}-label` : undefined;
@@ -33,6 +35,7 @@ export default function BasicSelect({
                 value={value}
                 defaultValue={defaultValue}
                 label={label}
+                disabled={disabled}
                 onChange={handleChange}
             >
                 {options.map((option) => (
