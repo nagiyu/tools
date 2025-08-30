@@ -30,27 +30,31 @@ export default function NotificationSettingDialog({
             title="Notification Settings"
             onClose={onClose}
         >
-            {!isSupported && (
-                <WarningAlert message="Push notifications are not supported in this browser." />
-            )}
+            {(loading, runWithLoading) => (
+                <>
+                    {!isSupported && (
+                        <WarningAlert message="Push notifications are not supported in this browser." />
+                    )}
 
-            {error && (
-                <ErrorAlert message={error} />
-            )}
+                    {error && (
+                        <ErrorAlert message={error} />
+                    )}
 
-            <BasicStack>
-                <div>Status: {subscription ? 'Subscribed' : 'Unsubscribed'}</div>
-                <ContainedButton
-                    label='Enable'
-                    onClick={subscribeToPush}
-                    disabled={!isSupported || !!subscription}
-                />
-                <ContainedButton
-                    label='Disable'
-                    onClick={unsubscribeFromPush}
-                    disabled={!isSupported || !subscription}
-                />
-            </BasicStack>
+                    <BasicStack>
+                        <div>Status: {subscription ? 'Subscribed' : 'Unsubscribed'}</div>
+                        <ContainedButton
+                            label='Enable'
+                            onClick={() => runWithLoading(subscribeToPush)}
+                            disabled={loading || !isSupported || !!subscription}
+                        />
+                        <ContainedButton
+                            label='Disable'
+                            onClick={() => runWithLoading(unsubscribeFromPush)}
+                            disabled={loading || !isSupported || !subscription}
+                        />
+                    </BasicStack>
+                </>
+            )}
         </BasicDialog>
     )
 }

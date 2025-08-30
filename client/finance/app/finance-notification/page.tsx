@@ -177,13 +177,14 @@ export default function FinanceNotificationPage() {
                     onUpdate={(item) => runWithLoading(() => onUpdate(item))}
                     onDelete={(id) => runWithLoading(() => onDelete(id))}
                 >
-                    {(item, state, onItemChange, onStateChange) => {
+                    {(item, state, onItemChange, onStateChange, loading) => {
                         return (
                             <FinanceNotificationEditDialogContent
                                 item={item}
                                 state={state}
                                 onItemChange={onItemChange}
                                 onStateChange={onStateChange}
+                                loading={loading}
                                 exchanges={exchanges}
                                 tickers={tickers}
                             />

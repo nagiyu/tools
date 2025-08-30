@@ -32,7 +32,9 @@ interface AdminManagementProps<ItemType extends DataTypeBase, StateType extends 
         item: ItemType,
         state: StateType,
         onItemChange: (updates: ItemType) => void,
-        onStateChange: (updates: StateType) => void
+        onStateChange: (updates: StateType) => void,
+        loading?: boolean,
+        runWithLoading?: <T>(func: () => Promise<T>) => Promise<T>
     ) => React.ReactNode;
 };
 
@@ -112,7 +114,7 @@ export default function AdminManagement<ItemType extends DataTypeBase, StateType
 
     return (
         <>
-            <ContainsButton label='Create' onClick={onCreateClick} />
+            <ContainsButton label='Create' onClick={onCreateClick} disabled={loading} />
             <BasicTable columns={columns} data={items} loading={loading} />
             <EditDialog
                 open={editDialogOpen}
