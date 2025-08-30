@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+import AuthUtil from '@client-common/auth/AuthUtil';
 import CommonLayout from '@client-common/components/layout/CommonLayout';
 import { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 
@@ -37,12 +38,22 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isAuthenticated = async () => {
+    const session = await AuthUtil.getServerSession();
+
+    if (session) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   return (
     <CommonLayout
       title='Finance'
       menuItems={await getMenuItems()}
       enableAuthentication={true}
-      isAuthenticated={await FinanceAuthorizer.isUser()}
+      isAuthenticated={await isAuthenticated()}
       enableNotification={true}
     >
       {children}

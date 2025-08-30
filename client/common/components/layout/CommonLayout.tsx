@@ -1,15 +1,14 @@
-'use client';
-
 import React from 'react';
+
 import { Geist, Geist_Mono } from 'next/font/google';
 
+import AccountContent from '@client-common/components/content/AccountContent';
 import BasicAppBar from '@client-common/components/surfaces/AppBars/BasicAppBar';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import LinkMenu, { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 import NotificationSettingButton from '@client-common/components/inputs/buttons/NotificationSettingButton';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
-import UserIconAvatar from '@client-common/components/data/avatar/UserIconAvatar';
 
 interface CommonLayoutProps {
     title: string;
@@ -43,14 +42,6 @@ export default function CommonLayout({
     enableNotification = false,
     children
 }: CommonLayoutProps) {
-    const leftContent = (): React.ReactNode => {
-        if (!enableAuthentication || !isAuthenticated) {
-            return null;
-        }
-
-        return <UserIconAvatar />;
-    }
-
     const authenticatedContent = (): React.ReactNode => {
         if (!enableAuthentication) {
             return null;
@@ -90,7 +81,10 @@ export default function CommonLayout({
                 <BasicAppBar
                     left={
                         <DirectionStack>
-                            {leftContent()}
+                            <AccountContent
+                                enableAuthentication={enableAuthentication}
+                                isAuthenticated={isAuthenticated}
+                            />
                         </DirectionStack>
                     }
                     center={
