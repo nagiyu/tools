@@ -7,12 +7,10 @@ import AccountFetchService from '@client-common/services/auth/AccountFetchServic
 import UserIconAvatar from '@client-common/components/data/avatar/UserIconAvatar';
 
 interface AccountContentProps {
-    enableAuthentication?: boolean;
     isAuthenticated?: boolean;
 }
 
 export default function AccountContent({
-    enableAuthentication = false,
     isAuthenticated = false,
 }: AccountContentProps) {
     const [accountSettingDialogOpen, setAccountSettingDialogOpen] = useState(false);
@@ -21,14 +19,14 @@ export default function AccountContent({
 
     useEffect(() => {
         (async () => {
-            if (!enableAuthentication || !isAuthenticated) {
+            if (!isAuthenticated) {
                 return;
             }
 
             try {
                 // Check if user has account data - only open dialog for new users
                 const accounts = await accountFetchService.get();
-                
+
                 if (accounts.length === 0) {
                     // New user - automatically open dialog for account setup
                     setAccountSettingDialogOpen(true);
@@ -43,7 +41,7 @@ export default function AccountContent({
 
     return (
         <>
-            <UserIconAvatar onClick={() => setAccountSettingDialogOpen(true)} />
+            {isAuthenticated && <UserIconAvatar onClick={() => setAccountSettingDialogOpen(true)} />}
             <AccountSettingDialog
                 open={accountSettingDialogOpen}
                 onClose={() => setAccountSettingDialogOpen(false)}
