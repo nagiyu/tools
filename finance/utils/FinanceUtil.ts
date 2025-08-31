@@ -2,6 +2,13 @@ import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 import * as TradingView from '@mathieuc/tradingview';
 import { PricePeriod } from '@mathieuc/tradingview';
 
+type TimeFrame = "1" | "3" | "5" | "15" | "30" | "45" | "60" | "120" | "180" | "240";
+
+export interface GetStockPriceDataOptions {
+  count?: number;      // 取得件数（デフォルト: 30）
+  timeframe?: TimeFrame;  // タイムフレーム（デフォルト: '1'）
+}
+
 export default class FinanceUtil {
   public static getFinanceTableName(): string {
     switch (EnvironmentalUtil.GetProcessEnv()) {
@@ -15,15 +22,17 @@ export default class FinanceUtil {
     }
   }
 
-  public static async getStockPriceData(exchange: string, ticker: string): Promise<any> {
+  public static async getStockPriceData(exchange: string, ticker: string, options?: GetStockPriceDataOptions): Promise<any> {
     const market = `${exchange}:${ticker}`;
+    const count = options?.count ?? 30;
+    const timeframe: TimeFrame = options?.timeframe ?? '1';
 
     const result = await new Promise((resolve, reject) => {
       const client = new TradingView.Client();
       const chart = new client.Session.Chart();
 
       chart.setMarket(market, {
-        timeframe: '1',
+        timeframe: timeframe,
       });
 
       chart.onError((...err) => { // Listen for errors (can avoid crash)
@@ -45,8 +54,8 @@ export default class FinanceUtil {
           return;
         }
 
-        // periodsは新しい順なので、直近30本を昇順に並べ替え
-        const periods = (chart.periods.slice(0, 30) as PricePeriod[]).reverse();
+        // periodsは新しい順なので、指定件数を昇順に並べ替え
+        const periods = (chart.periods.slice(0, count) as PricePeriod[]).reverse();
         const data = periods.map((p) => ({
           date: p.time
             ? new Date(p.time * 1000).toISOString().slice(0, 16).replace('T', ' ')
