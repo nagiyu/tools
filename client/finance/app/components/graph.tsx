@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from 'react';
 
 import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
+import { useResponsiveGraphItems } from '@client-common/hooks/useResponsiveGraphItems';
 
 type GraphProps = {
     exchange: string;
@@ -13,6 +14,7 @@ type GraphProps = {
 
 export default function Graph({ exchange, ticker }: GraphProps) {
     const [data, setData] = useState<CandleStickData[] | null>(null);
+    const itemCount = useResponsiveGraphItems();
 
     useEffect(() => {
         (async () => {
@@ -26,7 +28,7 @@ export default function Graph({ exchange, ticker }: GraphProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ exchange, ticker }),
+                body: JSON.stringify({ exchange, ticker, itemCount }),
             });
 
             if (!response.ok) throw new Error('Network response was not ok');
@@ -35,7 +37,7 @@ export default function Graph({ exchange, ticker }: GraphProps) {
 
             setData(json);
         })();
-    }, [ticker]);
+    }, [ticker, itemCount]);
 
     if (!data) {
         return <div>Loading...</div>;

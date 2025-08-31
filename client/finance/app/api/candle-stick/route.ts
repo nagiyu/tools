@@ -11,9 +11,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { exchange, ticker } = await req.json();
+    const { exchange, ticker, itemCount = 30 } = await req.json();
     
-    const result = await FinanceUtil.getStockPriceData(exchange, ticker);
+    const result = await FinanceUtil.getStockPriceData(exchange, ticker, itemCount);
 
     return NextResponse.json(result);
   } catch (err) {

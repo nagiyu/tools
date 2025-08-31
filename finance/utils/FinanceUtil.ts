@@ -15,7 +15,7 @@ export default class FinanceUtil {
     }
   }
 
-  public static async getStockPriceData(exchange: string, ticker: string): Promise<any> {
+  public static async getStockPriceData(exchange: string, ticker: string, itemCount: number = 30): Promise<any> {
     const market = `${exchange}:${ticker}`;
 
     const result = await new Promise((resolve, reject) => {
@@ -45,8 +45,8 @@ export default class FinanceUtil {
           return;
         }
 
-        // periodsは新しい順なので、直近30本を昇順に並べ替え
-        const periods = (chart.periods.slice(0, 30) as PricePeriod[]).reverse();
+        // periodsは新しい順なので、直近指定本数を昇順に並べ替え
+        const periods = (chart.periods.slice(0, itemCount) as PricePeriod[]).reverse();
         const data = periods.map((p) => ({
           date: p.time
             ? new Date(p.time * 1000).toISOString().slice(0, 16).replace('T', ' ')
