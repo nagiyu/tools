@@ -3,6 +3,9 @@ import { getServerSession, Session } from 'next-auth';
 
 import { authOptions } from '@client-common/auth/authOptions';
 
+/**
+ * @deprecated Use SessionUtil instead.
+ */
 export default class AuthUtil {
   /**
    * Get the current server session.
