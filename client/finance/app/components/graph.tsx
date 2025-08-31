@@ -28,7 +28,7 @@ export default function Graph({ exchange, ticker }: GraphProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ exchange, ticker, itemCount }),
+                body: JSON.stringify({ exchange, ticker, options: { count: itemCount } }),
             });
 
             if (!response.ok) throw new Error('Network response was not ok');
