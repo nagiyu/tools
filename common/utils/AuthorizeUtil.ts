@@ -1,4 +1,4 @@
-import AuthDataAccessor from '@common/auth/AuthDataAccessor';
+import AuthDataAccessor from '@common/services/auth/AuthDataAccessor';
 import CacheUtil from '@common/utils/CacheUtil';
 import { AuthRecordType } from '@common/interfaces/record/AuthRecordType';
 
@@ -29,7 +29,8 @@ export default class AuthorizeUtil {
       return cacheData;
     }
 
-    const authRecord = await AuthDataAccessor.get<T>();
+    const dataAccessor = new AuthDataAccessor<T>();
+    const authRecord = await dataAccessor.get();
 
     CacheUtil.set(this.CACHE_KEY, authRecord);
 

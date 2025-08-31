@@ -12,7 +12,7 @@ import LoadingContent from '@client-common/components/content/LoadingContent';
 export interface BasicDialogProps {
   open: boolean;
   title?: string;
-  children?: (
+  children: (
     loading: boolean,
     runWithLoading: <T>(func: () => Promise<T>) => Promise<T>
   ) => React.ReactNode;
