@@ -4,6 +4,8 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { TimeFrame } from '@finance/utils/FinanceUtil';
+
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
@@ -20,6 +22,54 @@ import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.clien
 import Graph from '@/app/components/graph';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 
+interface TimeFrameOption {
+  value: TimeFrame;
+  label: string;
+}
+
+class TimeFrameUtil {
+  // Available timeframes with user-friendly labels
+  private static readonly TIMEFRAME_OPTIONS: TimeFrameOption[] = [
+    { value: "1", label: "1分" },
+    { value: "3", label: "3分" },
+    { value: "5", label: "5分" },
+    { value: "15", label: "15分" },
+    { value: "30", label: "30分" },
+    { value: "45", label: "45分" },
+    { value: "60", label: "1時間" },
+    { value: "120", label: "2時間" },
+    { value: "180", label: "3時間" },
+    { value: "240", label: "4時間" },
+    { value: "D", label: "日足" },
+    { value: "W", label: "週足" },
+    { value: "M", label: "月足" },
+  ];
+
+  /**
+   * Convert timeframe options to SelectOption format for use with BasicSelect component
+   */
+  public static toSelectOptions(): SelectOptionType[] {
+    return this.TIMEFRAME_OPTIONS.map(option => ({
+      label: option.label,
+      value: option.value
+    }));
+  }
+
+  /**
+   * Get the default timeframe
+   */
+  public static getDefaultTimeFrame(): TimeFrame {
+    return "1";
+  }
+
+  /**
+   * Validate if a string is a valid timeframe
+   */
+  public static isValidTimeFrame(value: string): value is TimeFrame {
+    return this.TIMEFRAME_OPTIONS.some(option => option.value === value);
+  }
+}
+
 export default function Home() {
   const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
   const [tickers, setTickers] = useState<TickerDataType[]>([]);
@@ -27,6 +77,7 @@ export default function Home() {
   const [tickerOptions, setTickerOptions] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
+  const [timeframe, setTimeframe] = useState<string>(TimeFrameUtil.getDefaultTimeFrame());
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
@@ -77,7 +128,10 @@ export default function Home() {
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} />
+          <DirectionStack>
+            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => setTimeframe(value)} />
+          </DirectionStack>
         </BasicStack>
       }
     />
