@@ -84,7 +84,7 @@ export default class FinanceUtil {
    */
   public static async getCurrentStockPrice(exchange: string, ticker: string): Promise<number | null> {
     try {
-      const stockData = await this.getStockPriceData(exchange, ticker);
+      const stockData = await this.getStockPriceData(exchange, ticker, { count: 1 });
       
       if (!stockData || !Array.isArray(stockData) || stockData.length === 0) {
         return null;
