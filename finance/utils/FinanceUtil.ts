@@ -1,8 +1,9 @@
-import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 import * as TradingView from '@mathieuc/tradingview';
-import { PricePeriod } from '@mathieuc/tradingview';
+import { PricePeriod, TimeFrame } from '@mathieuc/tradingview';
 
-type TimeFrame = "1" | "3" | "5" | "15" | "30" | "45" | "60" | "120" | "180" | "240";
+import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+
+export type { TimeFrame } from '@mathieuc/tradingview';
 
 export interface GetStockPriceDataOptions {
   count?: number;      // 取得件数（デフォルト: 30）
@@ -85,7 +86,7 @@ export default class FinanceUtil {
   public static async getCurrentStockPrice(exchange: string, ticker: string): Promise<number | null> {
     try {
       const stockData = await this.getStockPriceData(exchange, ticker, { count: 1 });
-      
+
       if (!stockData || !Array.isArray(stockData) || stockData.length === 0) {
         return null;
       }
