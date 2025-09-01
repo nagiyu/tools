@@ -7,6 +7,7 @@ import BasicAppBar from '@client-common/components/surfaces/AppBars/BasicAppBar'
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import LinkMenu, { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 import NotificationSettingButton from '@client-common/components/inputs/buttons/NotificationSettingButton';
+import SessionUtil from '@client-common/utils/SessionUtil.server';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
 
@@ -16,7 +17,6 @@ interface CommonLayoutProps {
 
     // Authentication
     enableAuthentication?: boolean;
-    isAuthenticated?: boolean;
 
     // Notification
     enableNotification?: boolean;
@@ -34,34 +34,23 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export default function CommonLayout({
+const isAuthenticated = async () => {
+    return await SessionUtil.hasSession();
+}
+
+export default async function CommonLayout({
     title,
     menuItems = [],
     enableAuthentication = false,
-    isAuthenticated = false,
     enableNotification = false,
     children
 }: CommonLayoutProps) {
-    const authenticatedContent = (): React.ReactNode => {
-        if (!enableAuthentication) {
-            return null;
-        }
-
-        if (!isAuthenticated) {
+    const authenticatedContent = async (): Promise<React.ReactNode> => {
+        if (!(await isAuthenticated())) {
             return <SignInButton />;
         } else {
             return <SignoutButton />;
         }
-    }
-
-    const notificationContent = (): React.ReactNode => {
-        if (!enableNotification) {
-            return null;
-        }
-
-        return (
-            <NotificationSettingButton />
-        );
     }
 
     const menuContent = (): React.ReactNode => {
@@ -81,10 +70,7 @@ export default function CommonLayout({
                 <BasicAppBar
                     left={
                         <DirectionStack>
-                            <AccountContent
-                                enableAuthentication={enableAuthentication}
-                                isAuthenticated={isAuthenticated}
-                            />
+                            {enableAuthentication && <AccountContent isAuthenticated={await isAuthenticated()} />}
                         </DirectionStack>
                     }
                     center={
@@ -92,8 +78,8 @@ export default function CommonLayout({
                     }
                     right={
                         <DirectionStack>
-                            {authenticatedContent()}
-                            {notificationContent()}
+                            {enableAuthentication && await authenticatedContent()}
+                            {enableNotification && <NotificationSettingButton />}
                             {menuContent()}
                         </DirectionStack>
                     }
