@@ -16,7 +16,7 @@ function getOption(data: CandleStickData[], isMobile: boolean) {
         grid: {
             left: isMobile ? '15%' : '10%',
             right: isMobile ? '15%' : '10%',
-            bottom: isMobile ? '20%' : '15%',
+            bottom: isMobile ? '25%' : '20%',
             top: '10%'
         },
         xAxis: {
