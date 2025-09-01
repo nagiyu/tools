@@ -13,6 +13,7 @@ import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
+import TimeFrameUtil from '@finance/utils/TimeFrameUtil';
 
 import Auth from '@/app/components/Auth';
 import AuthAPIUtil from '@/app/utils/AuthAPIUtil';
@@ -27,6 +28,7 @@ export default function Home() {
   const [tickerOptions, setTickerOptions] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
+  const [timeframe, setTimeframe] = useState<string>(TimeFrameUtil.getDefaultTimeFrame());
 
   const exchangeFetchService = new ExchangeFetchService();
   const tickerFetchService = new TickerFetchService();
@@ -76,8 +78,9 @@ export default function Home() {
           <DirectionStack>
             <BasicSelect label='Exchange' options={exchangeOptions} value={exchange} onChange={(value) => setExchange(value)} />
             <BasicSelect label='Ticker' options={tickerOptions} value={ticker} onChange={(value) => setTicker(value)} />
+            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => setTimeframe(value)} />
           </DirectionStack>
-          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} />
+          <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} />
         </BasicStack>
       }
     />

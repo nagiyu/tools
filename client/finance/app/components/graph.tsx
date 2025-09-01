@@ -10,9 +10,10 @@ import { useResponsiveGraphItems } from '@client-common/hooks/useResponsiveGraph
 type GraphProps = {
     exchange: string;
     ticker: string;
+    timeframe: string;
 };
 
-export default function Graph({ exchange, ticker }: GraphProps) {
+export default function Graph({ exchange, ticker, timeframe }: GraphProps) {
     const [data, setData] = useState<CandleStickData[] | null>(null);
     const itemCount = useResponsiveGraphItems();
 
@@ -28,7 +29,7 @@ export default function Graph({ exchange, ticker }: GraphProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ exchange, ticker, options: { count: itemCount } }),
+                body: JSON.stringify({ exchange, ticker, options: { count: itemCount, timeframe } }),
             });
 
             if (!response.ok) throw new Error('Network response was not ok');
@@ -37,7 +38,7 @@ export default function Graph({ exchange, ticker }: GraphProps) {
 
             setData(json);
         })();
-    }, [ticker, itemCount]);
+    }, [ticker, itemCount, timeframe]);
 
     if (!data) {
         return <div>Loading...</div>;
