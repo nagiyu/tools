@@ -36,7 +36,8 @@ async function getMenuItems(): Promise<MenuItemData[]> {
     { title: 'Sample Text Field', url: '/sample-text-field' },
     { title: 'Sample Radio Group', url: '/sample-radio-group' },
     { title: 'Sample Dialogs', url: '/sample/dialogs' },
-    { title: 'Sample Table', url: '/sample/table' }
+    { title: 'Sample Table', url: '/sample/table' },
+    { title: 'Sample Editable Table', url: '/sample-editable-table' }
   ];
 
   if (session) {
