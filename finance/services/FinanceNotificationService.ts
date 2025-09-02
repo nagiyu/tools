@@ -36,10 +36,37 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
         console.log(`Checking condition for ${exchangeKey}:${tickerKey}`);
 
-        // Check if condition is met
-        const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+        // Check if condition is met - handle both legacy and new formats
+        let conditionMet = false;
+        let conditionMessage = '';
 
-        if (!condition.met) {
+        if (notification.mode && notification.conditions) {
+          // New multi-condition format
+          try {
+            const conditions: string[] = JSON.parse(notification.conditions);
+            for (const conditionType of conditions) {
+              const condition = await this.checkCondition(conditionType as FinanceNotificationConditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+              if (condition.met) {
+                conditionMet = true;
+                conditionMessage = condition.message;
+                break; // If any condition is met, trigger notification
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing conditions JSON:', error);
+            // Fall back to legacy format
+            const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+            conditionMet = condition.met;
+            conditionMessage = condition.message;
+          }
+        } else {
+          // Legacy single condition format
+          const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+          conditionMet = condition.met;
+          conditionMessage = condition.message;
+        }
+
+        if (!conditionMet) {
           continue;
         }
 
@@ -54,7 +81,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           }
         };
 
-        await NotificationUtil.sendPushNotification(endpoint, condition.message, subscription);
+        await NotificationUtil.sendPushNotification(endpoint, conditionMessage, subscription);
       } catch (error) {
         if (error instanceof Error) {
           errors.push(`Error processing notification ${notification.id}: ${error.message}`);
@@ -81,6 +108,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       TickerID: data.tickerId,
       ConditionType: data.conditionType,
       ConditionValue: data.conditionValue,
+      Mode: data.mode,
+      Conditions: data.conditions,
       TimeFrame: data.timeFrame,
       Create: data.create,
       Update: data.update,
@@ -98,6 +127,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       tickerId: record.TickerID,
       conditionType: record.ConditionType,
       conditionValue: record.ConditionValue,
+      mode: record.Mode,
+      conditions: record.Conditions,
       timeFrame: record.TimeFrame,
       create: record.Create,
       update: record.Update,
