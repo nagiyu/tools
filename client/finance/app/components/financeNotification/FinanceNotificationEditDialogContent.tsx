@@ -11,7 +11,6 @@ import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNot
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
-import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
@@ -29,15 +28,7 @@ interface FinanceNotificationEditDialogContentProps {
     tickers: TickerDataType[];
 }
 
-// Legacy condition options for backward compatibility
-const legacyConditionTypeOptions: SelectOptionType[] = [
-    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN, label: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN },
-    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN, label: FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN },
-    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS, label: 'Three Red Soldiers (赤三兵)' },
-    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR, label: 'Three River Evening Star (三川明けの明星)' },
-];
-
-// Condition labels for the new system
+// Condition labels for the notification system
 const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN]: '指定価格を上回る',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN]: '指定価格を下回る', 
@@ -95,11 +86,18 @@ export default function FinanceNotificationEditDialogContent({
         return [];
     };
 
-    // Helper function to update selected conditions
+    // Helper function to update selected conditions with mutual exclusivity for price conditions
     const updateConditions = (conditionType: FinanceNotificationConditionType, checked: boolean) => {
         let selectedConditions = getSelectedConditions();
         
         if (checked) {
+            // If selecting a price condition, remove the other price condition first
+            if (conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) {
+                selectedConditions = selectedConditions.filter(c => c !== FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
+            } else if (conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) {
+                selectedConditions = selectedConditions.filter(c => c !== FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN);
+            }
+            
             if (!selectedConditions.includes(conditionType)) {
                 selectedConditions.push(conditionType);
             }
@@ -113,14 +111,12 @@ export default function FinanceNotificationEditDialogContent({
         });
     };
 
-    // Check if using new mode-based system
-    const isLegacyMode = !item.mode;
+    // Check if using new mode-based system (always true now since legacy mode is removed)
+    const isLegacyMode = false;
     
     // Determine if condition value is needed
     const selectedConditions = getSelectedConditions();
-    const needsConditionValue = isLegacyMode 
-        ? (item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN)
-        : selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) || selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
+    const needsConditionValue = selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) || selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
 
     useEffect(() => {
         if (exchanges.length === 0 || tickers.length === 0) {
@@ -133,10 +129,15 @@ export default function FinanceNotificationEditDialogContent({
             ? item.tickerId
             : (filteredTickers.length > 0 ? filteredTickers[0].id : '');
 
+        // Ensure new items have a default mode if not set
+        const mode = item.mode || FINANCE_NOTIFICATION_MODE.BUY;
+
         onItemChange({
             ...item,
             exchangeId: exchangeId,
-            tickerId: tickerId
+            tickerId: tickerId,
+            mode: mode,
+            conditions: item.conditions || JSON.stringify([])
         });
         onStateChange({ ...state, filteredTickers });
     }, [exchanges, tickers]);
@@ -167,84 +168,59 @@ export default function FinanceNotificationEditDialogContent({
                 <FormLabel component="legend">通知モード</FormLabel>
                 <RadioGroup
                     row
-                    value={item.mode || 'legacy'}
+                    value={item.mode || FINANCE_NOTIFICATION_MODE.BUY}
                     onChange={(e) => {
-                        const newMode = e.target.value;
-                        if (newMode === 'legacy') {
-                            // Switch to legacy mode
-                            onItemChange({
-                                ...item,
-                                mode: undefined,
-                                conditions: undefined,
-                                conditionType: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN
-                            });
-                        } else {
-                            // Switch to new mode
-                            onItemChange({
-                                ...item,
-                                mode: newMode as FinanceNotificationModeType,
-                                conditions: JSON.stringify([])
-                            });
-                        }
+                        const newMode = e.target.value as FinanceNotificationModeType;
+                        onItemChange({
+                            ...item,
+                            mode: newMode,
+                            conditions: JSON.stringify([])
+                        });
                     }}
                 >
-                    <FormControlLabel value="legacy" control={<Radio />} label="シンプルモード" />
                     <FormControlLabel value={FINANCE_NOTIFICATION_MODE.BUY} control={<Radio />} label="買い" />
                     <FormControlLabel value={FINANCE_NOTIFICATION_MODE.SELL} control={<Radio />} label="売り" />
                 </RadioGroup>
             </FormControl>
 
-            {isLegacyMode ? (
-                // Legacy single condition selection
-                <>
-                    <BasicSelect
-                        label='Condition Type'
-                        options={legacyConditionTypeOptions}
-                        value={item.conditionType}
-                        disabled={loading}
-                        onChange={(value) => onItemChange({ ...item, conditionType: value as FinanceNotificationConditionType })}
-                    />
-                    {(item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || 
-                      item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) && (
-                        <BasicNumberField
-                            label='Condition Value'
-                            value={item.conditionValue}
-                            disabled={loading}
-                            onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
-                        />
-                    )}
-                </>
-            ) : (
-                // New mode-based condition selection
-                <>
-                    <Box sx={{ mt: 2 }}>
-                        <Typography variant="h6" gutterBottom>
-                            {item.mode === FINANCE_NOTIFICATION_MODE.BUY ? '買い条件' : '売り条件'}
-                        </Typography>
-                        
-                        {(item.mode === FINANCE_NOTIFICATION_MODE.BUY ? BUY_CONDITIONS : SELL_CONDITIONS).map((conditionType) => (
-                            <Box key={conditionType} sx={{ mb: 1 }}>
-                                <ControlledCheckbox
-                                    label={conditionLabels[conditionType]}
-                                    checked={selectedConditions.includes(conditionType)}
-                                    onChange={(e) => updateConditions(conditionType, e.target.checked)}
-                                />
-                                <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mt: 0.5 }}>
-                                    {getConditionDescription(conditionType, item.mode)}
-                                </Typography>
-                            </Box>
-                        ))}
-                    </Box>
-                    
-                    {needsConditionValue && (
-                        <BasicNumberField
-                            label='目標価格'
-                            value={item.conditionValue}
-                            disabled={loading}
-                            onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
-                        />
-                    )}
-                </>
+            {/* New mode-based condition selection */}
+            <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                    {item.mode === FINANCE_NOTIFICATION_MODE.BUY ? '買い条件' : '売り条件'}
+                </Typography>
+                
+                {(item.mode === FINANCE_NOTIFICATION_MODE.BUY ? BUY_CONDITIONS : SELL_CONDITIONS).map((conditionType) => {
+                    // Check if this is a price condition that should be disabled due to mutual exclusivity
+                    const isPriceCondition = conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN;
+                    const isOtherPriceConditionSelected = isPriceCondition && selectedConditions.some(c => 
+                        c !== conditionType && (c === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || c === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN)
+                    );
+                    const isCurrentlySelected = selectedConditions.includes(conditionType);
+                    const isDisabled = loading || (isPriceCondition && isOtherPriceConditionSelected && !isCurrentlySelected);
+
+                    return (
+                        <Box key={conditionType} sx={{ mb: 1 }}>
+                            <ControlledCheckbox
+                                label={conditionLabels[conditionType]}
+                                checked={isCurrentlySelected}
+                                disabled={isDisabled}
+                                onChange={(e) => updateConditions(conditionType, e.target.checked)}
+                            />
+                            <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mt: 0.5 }}>
+                                {getConditionDescription(conditionType, item.mode)}
+                            </Typography>
+                        </Box>
+                    );
+                })}
+            </Box>
+            
+            {needsConditionValue && (
+                <BasicNumberField
+                    label='目標価格'
+                    value={item.conditionValue}
+                    disabled={loading}
+                    onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
+                />
             )}
         </>
     );
