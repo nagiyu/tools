@@ -45,12 +45,32 @@ const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR]: 'Three River Evening Star (三川明けの明星)',
 };
 
-// Condition descriptions
-const conditionDescriptions: Record<FinanceNotificationConditionType, string> = {
-    [FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN]: '株価が指定した価格を上回った時に通知します',
-    [FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN]: '株価が指定した価格を下回った時に通知します',
-    [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS]: '3本の連続する強気ローソク足パターンを検出した時に通知します',
-    [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR]: '潜在的な反転シグナルパターンを検出した時に通知します',
+// Condition descriptions - function to provide context-aware descriptions
+const getConditionDescription = (conditionType: FinanceNotificationConditionType, mode?: FinanceNotificationModeType): string => {
+    switch (conditionType) {
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
+            if (mode === FINANCE_NOTIFICATION_MODE.BUY) {
+                return '株価が指定した価格を上回った時に通知します（ブレイクアウト買いなど）';
+            } else if (mode === FINANCE_NOTIFICATION_MODE.SELL) {
+                return '株価が指定した価格を上回った時に通知します（利益確定売りなど）';
+            } else {
+                return '株価が指定した価格を上回った時に通知します';
+            }
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN:
+            if (mode === FINANCE_NOTIFICATION_MODE.BUY) {
+                return '株価が指定した価格を下回った時に通知します（押し目買いなど）';
+            } else if (mode === FINANCE_NOTIFICATION_MODE.SELL) {
+                return '株価が指定した価格を下回った時に通知します（損切り売りなど）';
+            } else {
+                return '株価が指定した価格を下回った時に通知します';
+            }
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS:
+            return '3本の連続する強気ローソク足パターンを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
+            return '潜在的な反転シグナルパターンを検出した時に通知します';
+        default:
+            return '';
+    }
 };
 
 export default function FinanceNotificationEditDialogContent({
@@ -210,7 +230,7 @@ export default function FinanceNotificationEditDialogContent({
                                     onChange={(e) => updateConditions(conditionType, e.target.checked)}
                                 />
                                 <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mt: 0.5 }}>
-                                    {conditionDescriptions[conditionType]}
+                                    {getConditionDescription(conditionType, item.mode)}
                                 </Typography>
                             </Box>
                         ))}
