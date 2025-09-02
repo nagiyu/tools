@@ -30,6 +30,8 @@ interface FinanceNotificationEditDialogContentProps {
 const conditionTypeOptions: SelectOptionType[] = [
     { value: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN, label: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN },
     { value: FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN, label: FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN },
+    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS, label: 'Three Red Soldiers (赤三兵)' },
+    { value: FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR, label: 'Three River Evening Star (三川明けの明星)' },
 ];
 
 export default function FinanceNotificationEditDialogContent({
@@ -87,12 +89,15 @@ export default function FinanceNotificationEditDialogContent({
                 disabled={loading}
                 onChange={(value) => onItemChange({ ...item, conditionType: value as FinanceNotificationConditionType })}
             />
-            <BasicNumberField
-                label='Condition Value'
-                value={item.conditionValue}
-                disabled={loading}
-                onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
-            />
+            {(item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || 
+              item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) && (
+                <BasicNumberField
+                    label='Condition Value'
+                    value={item.conditionValue}
+                    disabled={loading}
+                    onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
+                />
+            )}
         </>
     );
 }

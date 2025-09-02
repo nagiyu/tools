@@ -1,6 +1,8 @@
 export const FINANCE_NOTIFICATION_CONDITION_TYPE = {
   GREATER_THAN: 'GreaterThan',
   LESS_THAN: 'LessThan',
+  THREE_RED_SOLDIERS: 'ThreeRedSoldiers',
+  THREE_RIVER_EVENING_STAR: 'ThreeRiverEveningStar',
 } as const;
 
 export type FinanceNotificationConditionType = typeof FINANCE_NOTIFICATION_CONDITION_TYPE[keyof typeof FINANCE_NOTIFICATION_CONDITION_TYPE];

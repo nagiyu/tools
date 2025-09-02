@@ -143,7 +143,10 @@ export default function FinanceNotificationPage() {
             return 'Ticker is required.';
         }
 
-        if (item.conditionValue <= 0) {
+        // Only validate condition value for price-based conditions
+        if ((item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || 
+             item.conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) && 
+            item.conditionValue <= 0) {
             return 'Condition Value must be greater than 0.';
         }
 
