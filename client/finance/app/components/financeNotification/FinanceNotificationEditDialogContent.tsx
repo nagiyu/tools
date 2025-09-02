@@ -3,7 +3,6 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { RadioGroup, FormControlLabel, Radio, FormControl, FormLabel, Box, Typography } from '@mui/material';
 
 import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, FinanceNotificationModeType, FINANCE_NOTIFICATION_MODE, BUY_CONDITIONS, SELL_CONDITIONS } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
@@ -111,9 +110,6 @@ export default function FinanceNotificationEditDialogContent({
         });
     };
 
-    // Check if using new mode-based system (always true now since legacy mode is removed)
-    const isLegacyMode = false;
-    
     // Determine if condition value is needed
     const selectedConditions = getSelectedConditions();
     const needsConditionValue = selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) || selectedConditions.includes(FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
@@ -164,30 +160,53 @@ export default function FinanceNotificationEditDialogContent({
             />
             
             {/* Mode Selection */}
-            <FormControl component="fieldset" disabled={loading}>
-                <FormLabel component="legend">通知モード</FormLabel>
-                <RadioGroup
-                    row
-                    value={item.mode || FINANCE_NOTIFICATION_MODE.BUY}
-                    onChange={(e) => {
-                        const newMode = e.target.value as FinanceNotificationModeType;
-                        onItemChange({
-                            ...item,
-                            mode: newMode,
-                            conditions: JSON.stringify([])
-                        });
-                    }}
-                >
-                    <FormControlLabel value={FINANCE_NOTIFICATION_MODE.BUY} control={<Radio />} label="買い" />
-                    <FormControlLabel value={FINANCE_NOTIFICATION_MODE.SELL} control={<Radio />} label="売り" />
-                </RadioGroup>
-            </FormControl>
+            <fieldset disabled={loading} style={{ border: 'none', padding: 0, margin: '16px 0' }}>
+                <legend style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '8px' }}>通知モード</legend>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                            type="radio"
+                            name="notificationMode"
+                            value={FINANCE_NOTIFICATION_MODE.BUY}
+                            checked={(item.mode || FINANCE_NOTIFICATION_MODE.BUY) === FINANCE_NOTIFICATION_MODE.BUY}
+                            disabled={loading}
+                            onChange={(e) => {
+                                const newMode = e.target.value as FinanceNotificationModeType;
+                                onItemChange({
+                                    ...item,
+                                    mode: newMode,
+                                    conditions: JSON.stringify([])
+                                });
+                            }}
+                        />
+                        買い
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                            type="radio"
+                            name="notificationMode"
+                            value={FINANCE_NOTIFICATION_MODE.SELL}
+                            checked={(item.mode || FINANCE_NOTIFICATION_MODE.BUY) === FINANCE_NOTIFICATION_MODE.SELL}
+                            disabled={loading}
+                            onChange={(e) => {
+                                const newMode = e.target.value as FinanceNotificationModeType;
+                                onItemChange({
+                                    ...item,
+                                    mode: newMode,
+                                    conditions: JSON.stringify([])
+                                });
+                            }}
+                        />
+                        売り
+                    </label>
+                </div>
+            </fieldset>
 
             {/* New mode-based condition selection */}
-            <Box sx={{ mt: 2 }}>
-                <Typography variant="h6" gutterBottom>
+            <div style={{ marginTop: '16px' }}>
+                <h3 style={{ marginBottom: '16px', fontSize: '1.25rem', fontWeight: 500 }}>
                     {item.mode === FINANCE_NOTIFICATION_MODE.BUY ? '買い条件' : '売り条件'}
-                </Typography>
+                </h3>
                 
                 {(item.mode === FINANCE_NOTIFICATION_MODE.BUY ? BUY_CONDITIONS : SELL_CONDITIONS).map((conditionType) => {
                     // Check if this is a price condition that should be disabled due to mutual exclusivity
@@ -199,20 +218,20 @@ export default function FinanceNotificationEditDialogContent({
                     const isDisabled = loading || (isPriceCondition && isOtherPriceConditionSelected && !isCurrentlySelected);
 
                     return (
-                        <Box key={conditionType} sx={{ mb: 1 }}>
+                        <div key={conditionType} style={{ marginBottom: '8px' }}>
                             <ControlledCheckbox
                                 label={conditionLabels[conditionType]}
                                 checked={isCurrentlySelected}
                                 disabled={isDisabled}
                                 onChange={(e) => updateConditions(conditionType, e.target.checked)}
                             />
-                            <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mt: 0.5 }}>
+                            <p style={{ marginLeft: '32px', marginTop: '4px', fontSize: '0.875rem', color: '#666' }}>
                                 {getConditionDescription(conditionType, item.mode)}
-                            </Typography>
-                        </Box>
+                            </p>
+                        </div>
                     );
                 })}
-            </Box>
+            </div>
             
             {needsConditionValue && (
                 <BasicNumberField
