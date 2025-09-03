@@ -1,4 +1,4 @@
-import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType, FinanceNotificationModeType } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType, FinanceNotificationModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FinanceRecordTypeBase } from '@finance/interfaces/record/FinanceRecordTypeBase';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
@@ -17,4 +17,5 @@ export interface FinanceNotificationRecordType extends FinanceRecordTypeBase {
   Mode?: FinanceNotificationModeType;
   Conditions?: string; // JSON-stringified array
   TimeFrame: FinanceNotificationTimeFrameType;
+  Frequency?: FinanceNotificationFrequencyType;
 }

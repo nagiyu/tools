@@ -34,3 +34,22 @@ export const FINANCE_NOTIFICATION_TIME_FRAME = {
 } as const;
 
 export type FinanceNotificationTimeFrameType = typeof FINANCE_NOTIFICATION_TIME_FRAME[keyof typeof FINANCE_NOTIFICATION_TIME_FRAME];
+
+// Notification frequency control
+export const FINANCE_NOTIFICATION_FREQUENCY = {
+  EXCHANGE_START_ONLY: 'ExchangeStartOnly',
+  MINUTE_LEVEL: 'MinuteLevel',
+} as const;
+
+export type FinanceNotificationFrequencyType = typeof FINANCE_NOTIFICATION_FREQUENCY[keyof typeof FINANCE_NOTIFICATION_FREQUENCY];
+
+// Condition type categories for timing
+export const DAILY_CONDITION_TYPES = [
+  FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS,
+  FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR,
+] as const;
+
+export const MINUTE_LEVEL_CONDITION_TYPES = [
+  FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
+  FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN,
+] as const;

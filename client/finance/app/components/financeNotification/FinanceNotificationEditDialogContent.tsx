@@ -4,12 +4,13 @@
 
 import React, { useEffect } from 'react';
 
-import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, FinanceNotificationModeType, FINANCE_NOTIFICATION_MODE, BUY_CONDITIONS, SELL_CONDITIONS } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, FinanceNotificationModeType, FINANCE_NOTIFICATION_MODE, BUY_CONDITIONS, SELL_CONDITIONS, FINANCE_NOTIFICATION_FREQUENCY, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
+import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
@@ -160,47 +161,53 @@ export default function FinanceNotificationEditDialogContent({
             />
             
             {/* Mode Selection */}
-            <fieldset disabled={loading} style={{ border: 'none', padding: 0, margin: '16px 0' }}>
-                <legend style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '8px' }}>通知モード</legend>
-                <div style={{ display: 'flex', gap: '16px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <input
-                            type="radio"
-                            name="notificationMode"
-                            value={FINANCE_NOTIFICATION_MODE.BUY}
-                            checked={(item.mode || FINANCE_NOTIFICATION_MODE.BUY) === FINANCE_NOTIFICATION_MODE.BUY}
-                            disabled={loading}
-                            onChange={(e) => {
-                                const newMode = e.target.value as FinanceNotificationModeType;
-                                onItemChange({
-                                    ...item,
-                                    mode: newMode,
-                                    conditions: JSON.stringify([])
-                                });
-                            }}
-                        />
-                        買い
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <input
-                            type="radio"
-                            name="notificationMode"
-                            value={FINANCE_NOTIFICATION_MODE.SELL}
-                            checked={(item.mode || FINANCE_NOTIFICATION_MODE.BUY) === FINANCE_NOTIFICATION_MODE.SELL}
-                            disabled={loading}
-                            onChange={(e) => {
-                                const newMode = e.target.value as FinanceNotificationModeType;
-                                onItemChange({
-                                    ...item,
-                                    mode: newMode,
-                                    conditions: JSON.stringify([])
-                                });
-                            }}
-                        />
-                        売り
-                    </label>
-                </div>
-            </fieldset>
+            <BasicRadioGroup
+                label="通知モード"
+                name="notificationMode"
+                value={item.mode || FINANCE_NOTIFICATION_MODE.BUY}
+                options={[
+                    { label: '買い', value: FINANCE_NOTIFICATION_MODE.BUY },
+                    { label: '売り', value: FINANCE_NOTIFICATION_MODE.SELL }
+                ]}
+                row={true}
+                disabled={loading}
+                onChange={(e) => {
+                    const newMode = e.target.value as FinanceNotificationModeType;
+                    onItemChange({
+                        ...item,
+                        mode: newMode,
+                        conditions: JSON.stringify([])
+                    });
+                }}
+            />
+
+            {/* Notification Frequency Selection */}
+            <BasicRadioGroup
+                label="通知頻度"
+                name="notificationFrequency" 
+                value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
+                options={[
+                    { 
+                        label: '1分ごと', 
+                        value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+                        description: '価格条件は1分ごと、パターン条件は取引開始時のみ通知'
+                    },
+                    { 
+                        label: '取引開始時のみ', 
+                        value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
+                        description: 'すべての条件で取引開始時にのみ通知'
+                    }
+                ]}
+                row={false}
+                disabled={loading}
+                onChange={(e) => {
+                    const newFrequency = e.target.value as FinanceNotificationFrequencyType;
+                    onItemChange({
+                        ...item,
+                        frequency: newFrequency
+                    });
+                }}
+            />
 
             {/* New mode-based condition selection */}
             <div style={{ marginTop: '16px' }}>
