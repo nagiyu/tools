@@ -34,6 +34,15 @@ const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN]: '指定価格を下回る', 
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS]: 'Three Red Soldiers (赤三兵)',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR]: 'Three River Evening Star (三川明けの明星)',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES]: '二本たくり線',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.SWALLOW_RETURN]: 'つばめ返し',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.FIREWORKS]: '仕掛け花火',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.OKAJI_THREE_CROWS]: '岡時三羽',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES]: '小石崩れ',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS]: '陽の両はらみ',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL]: '鷹かえし',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS]: '陰の三つ星',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR]: '流れ星',
 };
 
 // Condition descriptions - function to provide context-aware descriptions
@@ -59,6 +68,24 @@ const getConditionDescription = (conditionType: FinanceNotificationConditionType
             return '3本の連続する強気ローソク足パターンを検出した時に通知します';
         case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
             return '潜在的な反転シグナルパターンを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES:
+            return '安値がほぼ同じような下影陰線が２本現れた後、同じような安値の寄引同事線が出た買いシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.SWALLOW_RETURN:
+            return '前日終値より高い始値を付けたが陰線で終わることが２回連続した後に陽線が現れた買いシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.FIREWORKS:
+            return '長い上ヒゲと短い実体部を持ち下ヒゲがほぼない売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.OKAJI_THREE_CROWS:
+            return '3本の陰線が並び、各ローソク足の終値と次の始値が同じパターンの売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES:
+            return '大陽線の後、徐々に安値を切り下げる下降ウェッジの売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS:
+            return '２本目のローソク足の実体に1本目と3本目が収まっている売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL:
+            return '上昇中に陰線が前のローソク足を包み込んだ売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS:
+            return '小陰線などの胴体の短いローソク足が3つ連続して現れる売りシグナルを検出した時に通知します';
+        case FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR:
+            return '上昇トレンド中高値圏で出る長い上ヒゲ・短い実体の売りシグナルを検出した時に通知します';
         default:
             return '';
     }
