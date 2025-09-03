@@ -108,7 +108,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Update first notification flag if this is the first notification for pattern conditions
         if (!notification.firstNotificationSent) {
           const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
-          if (hasDailyCondition) {
+          const isMinuteLevel = (notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL) === FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+          
+          if (hasDailyCondition && isMinuteLevel) {
             console.log(`Marking first notification as sent for ${notification.id}`);
             await this.update({
               ...notification,
@@ -277,7 +279,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         break;
         
       case FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL:
-        // Every minute for price conditions, exchange start for pattern conditions
+        // Every minute for price conditions, special logic for pattern conditions
         if (hasDailyCondition) {
           // Pattern conditions: first time OR exchange start time
           if (!notification.firstNotificationSent) {
@@ -285,11 +287,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
             console.log(`Notification ${notification.id} - first notification for pattern condition`);
             break;
           } else if (!this.isExchangeStartTime(exchange, currentTime)) {
+            // Subsequent notifications only at exchange start
             console.log(`Notification ${notification.id} skipped - pattern condition outside start time`);
             return false;
           }
         }
-        // Price conditions: always allow during exchange hours
+        // Price conditions: always allow during exchange hours (no additional restrictions)
         break;
         
       case FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL:
