@@ -1,4 +1,4 @@
-import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType, FinanceNotificationModeType } from '@finance/types/FinanceNotificationType';
 import { FinanceRecordTypeBase } from '@finance/interfaces/record/FinanceRecordTypeBase';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
@@ -10,7 +10,11 @@ export interface FinanceNotificationRecordType extends FinanceRecordTypeBase {
   SubscriptionKeysAuth: string;
   ExchangeID: string;
   TickerID: string;
+  // Legacy fields (for backward compatibility)
   ConditionType: FinanceNotificationConditionType;
   ConditionValue: number;
+  // New fields
+  Mode?: FinanceNotificationModeType;
+  Conditions?: string; // JSON-stringified array
   TimeFrame: FinanceNotificationTimeFrameType;
 }

@@ -34,22 +34,39 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         const exchangeKey = await this.getExchangeKey(notification.exchangeId);
         const tickerKey = await this.getTickerKey(notification.tickerId);
 
-        console.log(`Checking stock price for ${exchangeKey}:${tickerKey}`);
+        console.log(`Checking condition for ${exchangeKey}:${tickerKey}`);
 
-        // Get current stock price using the actual keys
-        const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey);
+        // Check if condition is met - handle both legacy and new formats
+        let conditionMet = false;
+        let conditionMessage = '';
 
-        if (currentPrice === null) {
-          errors.push(`No stock data available for ${exchangeKey}:${tickerKey}`);
-          continue;
+        if (notification.mode && notification.conditions) {
+          // New multi-condition format
+          try {
+            const conditions: string[] = JSON.parse(notification.conditions);
+            for (const conditionType of conditions) {
+              const condition = await this.checkCondition(conditionType as FinanceNotificationConditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+              if (condition.met) {
+                conditionMet = true;
+                conditionMessage = condition.message;
+                break; // If any condition is met, trigger notification
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing conditions JSON:', error);
+            // Fall back to legacy format
+            const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+            conditionMet = condition.met;
+            conditionMessage = condition.message;
+          }
+        } else {
+          // Legacy single condition format
+          const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue);
+          conditionMet = condition.met;
+          conditionMessage = condition.message;
         }
 
-        console.log(`Current price for ${exchangeKey}:${tickerKey}: ${currentPrice}, condition: ${notification.conditionType} ${notification.conditionValue}`);
-
-        // Check if condition is met
-        const condition = this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, currentPrice, notification.conditionValue);
-
-        if (!condition.met) {
+        if (!conditionMet) {
           continue;
         }
 
@@ -64,7 +81,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           }
         };
 
-        await NotificationUtil.sendPushNotification(endpoint, condition.message, subscription);
+        await NotificationUtil.sendPushNotification(endpoint, conditionMessage, subscription);
       } catch (error) {
         if (error instanceof Error) {
           errors.push(`Error processing notification ${notification.id}: ${error.message}`);
@@ -91,6 +108,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       TickerID: data.tickerId,
       ConditionType: data.conditionType,
       ConditionValue: data.conditionValue,
+      Mode: data.mode,
+      Conditions: data.conditions,
       TimeFrame: data.timeFrame,
       Create: data.create,
       Update: data.update,
@@ -108,6 +127,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       tickerId: record.TickerID,
       conditionType: record.ConditionType,
       conditionValue: record.ConditionValue,
+      mode: record.Mode,
+      conditions: record.Conditions,
       timeFrame: record.TimeFrame,
       create: record.Create,
       update: record.Update,
@@ -138,7 +159,34 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return ticker.key;
   }
 
-  private checkCondition(conditionType: FinanceNotificationConditionType, target: string, currentPrice: number, conditionValue: number): Condition {
+  private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {
+    switch (conditionType) {
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN:
+        return await this.checkPriceCondition(conditionType, target, exchangeKey, tickerKey, conditionValue);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS:
+        return await this.checkThreeRedSoldiers(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
+        return await this.checkThreeRiverEveningStar(target, exchangeKey, tickerKey);
+
+      default:
+        ErrorUtil.throwError(`Unknown condition type: ${conditionType}`);
+    }
+
+    return { met: false, message: '' };
+  }
+
+  private async checkPriceCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {
+    const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey);
+
+    if (currentPrice === null) {
+      return { met: false, message: `No stock data available for ${target}` };
+    }
+
+    console.log(`Current price for ${target}: ${currentPrice}, condition: ${conditionType} ${conditionValue}`);
+
     switch (conditionType) {
       case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
         if (this.checkGreaterThan(currentPrice, conditionValue)) {
@@ -151,12 +199,96 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           return { met: true, message: `${target} price ${currentPrice} is below your target of ${conditionValue}` };
         }
         break;
-
-      default:
-        ErrorUtil.throwError(`Unknown condition type: ${conditionType}`);
     }
 
     return { met: false, message: '' };
+  }
+
+  private async checkThreeRedSoldiers(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      // Get the last 3 candles (most recent data)
+      const candles = stockData.slice(-3);
+      
+      // Check if all 3 candles are bullish (close > open)
+      const allBullish = candles.every(candle => candle.data[1] > candle.data[0]); // close > open
+
+      if (!allBullish) {
+        return { met: false, message: '' };
+      }
+
+      // Check if 2nd and 3rd candles start within the range of the previous candle
+      const firstCandle = candles[0];
+      const secondCandle = candles[1];
+      const thirdCandle = candles[2];
+
+      const firstLow = firstCandle.data[2];
+      const firstHigh = firstCandle.data[3];
+      const secondOpen = secondCandle.data[0];
+      const secondLow = secondCandle.data[2];
+      const secondHigh = secondCandle.data[3];
+      const thirdOpen = thirdCandle.data[0];
+
+      // Second candle should start within first candle's range
+      const secondStartsInRange = secondOpen >= firstLow && secondOpen <= firstHigh;
+      
+      // Third candle should start within second candle's range
+      const thirdStartsInRange = thirdOpen >= secondLow && thirdOpen <= secondHigh;
+
+      if (secondStartsInRange && thirdStartsInRange) {
+        return { met: true, message: `${target} shows Three Red Soldiers pattern - strong bullish signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Three Red Soldiers pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkThreeRiverEveningStar(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      // Get the last 3 candles (most recent data)
+      const candles = stockData.slice(-3);
+      
+      const firstCandle = candles[0];
+      const secondCandle = candles[1];
+      const thirdCandle = candles[2];
+
+      // First candle should be a long bearish candle
+      const firstIsBearish = firstCandle.data[1] < firstCandle.data[0]; // close < open
+      const firstCandleSize = Math.abs(firstCandle.data[1] - firstCandle.data[0]);
+      const firstIsLong = firstCandleSize > (firstCandle.data[3] - firstCandle.data[2]) * 0.6; // body is more than 60% of the range
+
+      // Second candle should be a small bullish candle with a gap up
+      const secondIsBullish = secondCandle.data[1] > secondCandle.data[0]; // close > open
+      const secondCandleSize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
+      const secondIsSmall = secondCandleSize < firstCandleSize * 0.5; // less than half the size of first candle
+      const hasGapUp = secondCandle.data[2] > firstCandle.data[3]; // second candle's low > first candle's high
+
+      // Third candle should be bullish
+      const thirdIsBullish = thirdCandle.data[1] > thirdCandle.data[0]; // close > open
+
+      if (firstIsBearish && firstIsLong && secondIsBullish && secondIsSmall && hasGapUp && thirdIsBullish) {
+        return { met: true, message: `${target} shows Three River Evening Star pattern - potential reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Three River Evening Star pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
   }
 
   private checkGreaterThan(currentPrice: number, conditionValue: number): boolean {

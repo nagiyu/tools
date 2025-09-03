@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME } from '@finance/types/FinanceNotificationType';
+import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME, FINANCE_NOTIFICATION_MODE } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
@@ -49,12 +49,23 @@ export default function FinanceNotificationPage() {
             format: (cell) => cell ? tickers.find(ticker => ticker.id === cell)?.name : ''
         },
         {
+            id: 'mode',
+            label: 'Mode',
+            format: (cell) => {
+                if (cell) {
+                    return cell === 'Buy' ? '買い' : '売り';
+                }
+                return 'シンプル';
+            }
+        },
+        {
             id: 'conditionType',
-            label: 'Condition Type'
+            label: 'Conditions',
+            // We'll need to modify this later when we can access the full row
         },
         {
             id: 'conditionValue',
-            label: 'Condition Value'
+            label: 'Target Price'
         },
         {
             id: 'action',
@@ -70,6 +81,8 @@ export default function FinanceNotificationPage() {
         subscriptionKeysAuth: '',
         exchangeId: '',
         tickerId: '',
+        mode: FINANCE_NOTIFICATION_MODE.BUY,
+        conditions: JSON.stringify([]),
         conditionType: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
         conditionValue: 0,
         timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
@@ -143,8 +156,27 @@ export default function FinanceNotificationPage() {
             return 'Ticker is required.';
         }
 
-        if (item.conditionValue <= 0) {
-            return 'Condition Value must be greater than 0.';
+        // Validate based on mode (always in mode-based system now)
+        if (!item.conditions) {
+            return 'At least one condition must be selected.';
+        }
+        
+        try {
+            const conditions = JSON.parse(item.conditions);
+            if (!Array.isArray(conditions) || conditions.length === 0) {
+                return 'At least one condition must be selected.';
+            }
+            
+            // Check if price-based conditions are selected and require condition value
+            const needsValue = conditions.some((c: string) => 
+                c === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || 
+                c === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN);
+            
+            if (needsValue && item.conditionValue <= 0) {
+                return 'Target price must be greater than 0 for price-based conditions.';
+            }
+        } catch (error) {
+            return 'Invalid conditions format.';
         }
 
         return null;
