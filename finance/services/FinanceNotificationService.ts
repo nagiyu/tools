@@ -287,6 +287,33 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
         return await this.checkThreeRiverEveningStar(target, exchangeKey, tickerKey);
 
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES:
+        return await this.checkTwoTakuriLines(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.SWALLOW_RETURN:
+        return await this.checkSwallowReturn(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.FIREWORKS:
+        return await this.checkFireworks(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.OKAJI_THREE_CROWS:
+        return await this.checkOkajiThreeCrows(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.FALLING_STONES:
+        return await this.checkFallingStones(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS:
+        return await this.checkBullishHaramiCross(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL:
+        return await this.checkHawkReversal(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS:
+        return await this.checkThreeDarkStars(target, exchangeKey, tickerKey);
+
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR:
+        return await this.checkShootingStar(target, exchangeKey, tickerKey);
+
       default:
         ErrorUtil.throwError(`Unknown condition type: ${conditionType}`);
     }
@@ -413,5 +440,333 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
   private checkLessThan(currentPrice: number, conditionValue: number): boolean {
     return currentPrice < conditionValue;
+  }
+
+  private async checkTwoTakuriLines(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-3);
+      const [firstCandle, secondCandle, thirdCandle] = candles;
+
+      // First two candles should be bearish with long lower shadows
+      const firstIsBearish = firstCandle.data[1] < firstCandle.data[0]; // close < open
+      const secondIsBearish = secondCandle.data[1] < secondCandle.data[0]; // close < open
+      
+      // Check for significant lower shadows
+      const firstBodyBottom = Math.min(firstCandle.data[0], firstCandle.data[1]);
+      const firstLowerShadow = firstBodyBottom - firstCandle.data[2];
+      const firstBodySize = Math.abs(firstCandle.data[1] - firstCandle.data[0]);
+      const firstHasLongLowerShadow = firstLowerShadow > firstBodySize;
+
+      const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
+      const secondLowerShadow = secondBodyBottom - secondCandle.data[2];
+      const secondBodySize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
+      const secondHasLongLowerShadow = secondLowerShadow > secondBodySize;
+
+      // Lows should be similar (within 2% tolerance)
+      const lowTolerance = Math.abs(firstCandle.data[2] - secondCandle.data[2]) / firstCandle.data[2];
+      const similarLows = lowTolerance < 0.02;
+
+      // Third candle should be a doji-like with similar low
+      const thirdBodySize = Math.abs(thirdCandle.data[1] - thirdCandle.data[0]);
+      const thirdRange = thirdCandle.data[3] - thirdCandle.data[2];
+      const thirdIsDoji = thirdBodySize < thirdRange * 0.1; // body is less than 10% of range
+      
+      const thirdLowTolerance = Math.abs(firstCandle.data[2] - thirdCandle.data[2]) / firstCandle.data[2];
+      const thirdSimilarLow = thirdLowTolerance < 0.02;
+
+      if (firstIsBearish && secondIsBearish && firstHasLongLowerShadow && secondHasLongLowerShadow && 
+          similarLows && thirdIsDoji && thirdSimilarLow) {
+        return { met: true, message: `${target} shows Two Takuri Lines pattern - potential bullish reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Two Takuri Lines pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkSwallowReturn(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 4 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 4) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-4);
+      const [baseCandle, firstCandle, secondCandle, thirdCandle] = candles;
+
+      // First and second candles should open higher than previous close but end bearish
+      const firstGapsUp = firstCandle.data[0] > baseCandle.data[1];
+      const firstIsBearish = firstCandle.data[1] < firstCandle.data[0];
+      
+      const secondGapsUp = secondCandle.data[0] > firstCandle.data[1];
+      const secondIsBearish = secondCandle.data[1] < secondCandle.data[0];
+
+      // Third candle should be bullish
+      const thirdIsBullish = thirdCandle.data[1] > thirdCandle.data[0];
+
+      if (firstGapsUp && firstIsBearish && secondGapsUp && secondIsBearish && thirdIsBullish) {
+        return { met: true, message: `${target} shows Swallow Return pattern - bullish reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Swallow Return pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkFireworks(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 1) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candle = stockData[stockData.length - 1];
+      const [open, close, low, high] = candle.data;
+
+      // Calculate body and shadows
+      const bodyTop = Math.max(open, close);
+      const bodyBottom = Math.min(open, close);
+      const bodySize = Math.abs(close - open);
+      const upperShadow = high - bodyTop;
+      const lowerShadow = bodyBottom - low;
+
+      // Long upper shadow, short body, almost no lower shadow
+      const hasLongUpperShadow = upperShadow > bodySize * 2;
+      const hasShortBody = bodySize < (high - low) * 0.3;
+      const hasMinimalLowerShadow = lowerShadow < bodySize * 0.1;
+
+      if (hasLongUpperShadow && hasShortBody && hasMinimalLowerShadow) {
+        return { met: true, message: `${target} shows Fireworks pattern - bearish reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Fireworks pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkOkajiThreeCrows(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-3);
+      const [firstCandle, secondCandle, thirdCandle] = candles;
+
+      // All candles should be bearish
+      const allBearish = candles.every(candle => candle.data[1] < candle.data[0]);
+
+      // Check gap patterns: first close = second open, second close = third open
+      const firstCloseEqualsSecondOpen = Math.abs(firstCandle.data[1] - secondCandle.data[0]) < firstCandle.data[1] * 0.001;
+      const secondCloseEqualsThirdOpen = Math.abs(secondCandle.data[1] - thirdCandle.data[0]) < secondCandle.data[1] * 0.001;
+
+      if (allBearish && firstCloseEqualsSecondOpen && secondCloseEqualsThirdOpen) {
+        return { met: true, message: `${target} shows Okaji Three Crows pattern - strong bearish signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Okaji Three Crows pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkFallingStones(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 5 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 5) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-5);
+      const [bigBullCandle, ...smallCandles] = candles;
+
+      // First candle should be a large bullish candle
+      const firstIsBullish = bigBullCandle.data[1] > bigBullCandle.data[0];
+      const firstBodySize = Math.abs(bigBullCandle.data[1] - bigBullCandle.data[0]);
+      const firstRange = bigBullCandle.data[3] - bigBullCandle.data[2];
+      const firstIsLarge = firstBodySize > firstRange * 0.7;
+
+      // Following candles show gradual decline with lower lows
+      let hasLowerLows = true;
+      let previousLow = bigBullCandle.data[2];
+      
+      for (const candle of smallCandles) {
+        if (candle.data[2] >= previousLow) {
+          hasLowerLows = false;
+          break;
+        }
+        previousLow = candle.data[2];
+      }
+
+      // Most of the following candles should be small
+      const hasSmallCandles = smallCandles.every(candle => {
+        const bodySize = Math.abs(candle.data[1] - candle.data[0]);
+        return bodySize < firstBodySize * 0.5;
+      });
+
+      if (firstIsBullish && firstIsLarge && hasLowerLows && hasSmallCandles) {
+        return { met: true, message: `${target} shows Falling Stones pattern - descending wedge bearish signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Falling Stones pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkBullishHaramiCross(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-3);
+      const [firstCandle, secondCandle, thirdCandle] = candles;
+
+      // Second candle should have a large body
+      const secondBodyTop = Math.max(secondCandle.data[0], secondCandle.data[1]);
+      const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
+      const secondBodySize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
+      const secondRange = secondCandle.data[3] - secondCandle.data[2];
+      const secondHasLargeBody = secondBodySize > secondRange * 0.6;
+
+      // First and third candles should be contained within second candle's body
+      const firstHigh = Math.max(firstCandle.data[0], firstCandle.data[1]);
+      const firstLow = Math.min(firstCandle.data[0], firstCandle.data[1]);
+      const firstContained = firstHigh <= secondBodyTop && firstLow >= secondBodyBottom;
+
+      const thirdHigh = Math.max(thirdCandle.data[0], thirdCandle.data[1]);
+      const thirdLow = Math.min(thirdCandle.data[0], thirdCandle.data[1]);
+      const thirdContained = thirdHigh <= secondBodyTop && thirdLow >= secondBodyBottom;
+
+      if (secondHasLargeBody && firstContained && thirdContained) {
+        return { met: true, message: `${target} shows Bullish Harami Cross pattern - potential reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Bullish Harami Cross pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkHawkReversal(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 2 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 2) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-2);
+      const [firstCandle, secondCandle] = candles;
+
+      // Second candle should be bearish and engulf the first candle
+      const secondIsBearish = secondCandle.data[1] < secondCandle.data[0];
+      
+      // Engulfing pattern: second candle's body completely contains first candle's body
+      const firstBodyTop = Math.max(firstCandle.data[0], firstCandle.data[1]);
+      const firstBodyBottom = Math.min(firstCandle.data[0], firstCandle.data[1]);
+      const secondBodyTop = Math.max(secondCandle.data[0], secondCandle.data[1]);
+      const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
+
+      const isEngulfing = secondBodyTop > firstBodyTop && secondBodyBottom < firstBodyBottom;
+
+      if (secondIsBearish && isEngulfing) {
+        return { met: true, message: `${target} shows Hawk Reversal pattern - bearish engulfing signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Hawk Reversal pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkThreeDarkStars(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-3);
+
+      // All candles should be bearish with small bodies
+      const allBearishAndSmall = candles.every(candle => {
+        const isBearish = candle.data[1] < candle.data[0];
+        const bodySize = Math.abs(candle.data[1] - candle.data[0]);
+        const range = candle.data[3] - candle.data[2];
+        const hasSmallBody = bodySize < range * 0.3;
+        return isBearish && hasSmallBody;
+      });
+
+      if (allBearishAndSmall) {
+        return { met: true, message: `${target} shows Three Dark Stars pattern - bearish continuation signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Three Dark Stars pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkShootingStar(target: string, exchangeKey: string, tickerKey: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 1 });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 1) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candle = stockData[stockData.length - 1];
+      const [open, close, low, high] = candle.data;
+
+      // Calculate body and shadows
+      const bodyTop = Math.max(open, close);
+      const bodyBottom = Math.min(open, close);
+      const bodySize = Math.abs(close - open);
+      const upperShadow = high - bodyTop;
+      const lowerShadow = bodyBottom - low;
+      const range = high - low;
+
+      // Long upper shadow, short body (usually bearish), small lower shadow
+      const hasLongUpperShadow = upperShadow > bodySize * 2;
+      const hasShortBody = bodySize < range * 0.3;
+      const hasSmallLowerShadow = lowerShadow < bodySize;
+      const isBearish = close < open;
+
+      if (hasLongUpperShadow && hasShortBody && hasSmallLowerShadow && isBearish) {
+        return { met: true, message: `${target} shows Shooting Star pattern - bearish reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Shooting Star pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
   }
 }
