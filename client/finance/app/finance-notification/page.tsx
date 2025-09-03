@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME, FINANCE_NOTIFICATION_MODE } from '@finance/types/FinanceNotificationType';
+import { FINANCE_NOTIFICATION_CONDITION_TYPE, FINANCE_NOTIFICATION_TIME_FRAME, FINANCE_NOTIFICATION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
@@ -86,6 +86,7 @@ export default function FinanceNotificationPage() {
         conditionType: FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
         conditionValue: 0,
         timeFrame: FINANCE_NOTIFICATION_TIME_FRAME.ONE_MINUTE,
+        frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
         create: Date.now(),
         update: Date.now(),
     };

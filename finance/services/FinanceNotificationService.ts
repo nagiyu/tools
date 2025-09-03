@@ -2,15 +2,17 @@ import CRUDServiceBase from '@common/services/CRUDServiceBase';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import NotificationUtil from '@common/utils/NotificationUtil';
 import { SubscriptionType } from '@common/interfaces/SubscriptionType';
+import { TimeType } from '@common/interfaces/TimeType';
 
 import ExchangeService from '@finance/services/ExchangeService';
 import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import FinanceUtil from '@finance/utils/FinanceUtil';
 import TickerService from '@finance/services/TickerService';
-import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, DAILY_CONDITION_TYPES, MINUTE_LEVEL_CONDITION_TYPES, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
+import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
 
 interface Condition {
   met: boolean;
@@ -31,10 +33,30 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       try {
         console.log(`Looking up exchange and ticker data for notification ${notification.id}`);
 
-        const exchangeKey = await this.getExchangeKey(notification.exchangeId);
+        const exchange = await this.getExchange(notification.exchangeId);
+        const exchangeKey = exchange.key;
         const tickerKey = await this.getTickerKey(notification.tickerId);
 
         console.log(`Checking condition for ${exchangeKey}:${tickerKey}`);
+
+        // Determine condition types for timing validation
+        let conditionTypes: FinanceNotificationConditionType[] = [];
+        
+        if (notification.mode && notification.conditions) {
+          try {
+            conditionTypes = JSON.parse(notification.conditions) as FinanceNotificationConditionType[];
+          } catch (error) {
+            console.error('Error parsing conditions JSON:', error);
+            conditionTypes = [notification.conditionType];
+          }
+        } else {
+          conditionTypes = [notification.conditionType];
+        }
+
+        // Check timing constraints before checking conditions
+        if (!this.shouldSendNotification(notification, exchange, conditionTypes)) {
+          continue;
+        }
 
         // Check if condition is met - handle both legacy and new formats
         let conditionMet = false;
@@ -111,6 +133,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       Mode: data.mode,
       Conditions: data.conditions,
       TimeFrame: data.timeFrame,
+      Frequency: data.frequency,
       Create: data.create,
       Update: data.update,
     };
@@ -130,6 +153,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       mode: record.Mode,
       conditions: record.Conditions,
       timeFrame: record.TimeFrame,
+      frequency: record.Frequency,
       create: record.Create,
       update: record.Update,
     };
@@ -147,6 +171,18 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     return exchange.key;
   }
 
+  private async getExchange(exchangeId: string): Promise<ExchangeDataType> {
+    const service = new ExchangeService();
+    const exchanges = await service.get();
+    const exchange = exchanges.find(e => e.id === exchangeId);
+
+    if (!exchange) {
+      ErrorUtil.throwError(`Exchange not found for ID: ${exchangeId}`);
+    }
+
+    return exchange;
+  }
+
   private async getTickerKey(tickerId: string): Promise<string> {
     const service = new TickerService();
     const tickers = await service.get();
@@ -157,6 +193,86 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
 
     return ticker.key;
+  }
+
+  /**
+   * Check if current time is within exchange operating hours
+   */
+  private isWithinExchangeHours(exchange: ExchangeDataType, currentTime: Date = new Date()): boolean {
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
+    const currentTotalMinutes = currentHour * 60 + currentMinute;
+    
+    const startTotalMinutes = exchange.start.hour * 60 + exchange.start.minute;
+    const endTotalMinutes = exchange.end.hour * 60 + exchange.end.minute;
+    
+    // Check if exchange operates across midnight (e.g., 23:00 to 01:00)
+    if (startTotalMinutes > endTotalMinutes) {
+      // Exchange crosses midnight - check both ranges
+      return currentTotalMinutes >= startTotalMinutes || currentTotalMinutes <= endTotalMinutes;
+    } else {
+      // Normal case - start time is before end time
+      return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes;
+    }
+  }
+
+  /**
+   * Check if current time is the start of exchange hours (for daily notifications)
+   */
+  private isExchangeStartTime(exchange: ExchangeDataType, currentTime: Date = new Date()): boolean {
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
+    
+    return currentHour === exchange.start.hour && currentMinute === exchange.start.minute;
+  }
+
+  /**
+   * Determine if condition type is daily-based or minute-level
+   */
+  private isDailyCondition(conditionType: FinanceNotificationConditionType): boolean {
+    return DAILY_CONDITION_TYPES.includes(conditionType as any);
+  }
+
+  /**
+   * Check if notification should be sent based on timing rules
+   */
+  private shouldSendNotification(
+    notification: FinanceNotificationDataType, 
+    exchange: ExchangeDataType, 
+    conditionTypes: FinanceNotificationConditionType[]
+  ): boolean {
+    const currentTime = new Date();
+    
+    // First check if we're within exchange hours
+    if (!this.isWithinExchangeHours(exchange, currentTime)) {
+      console.log(`Notification ${notification.id} skipped - outside exchange hours`);
+      return false;
+    }
+
+    // Check frequency preference
+    const frequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+    
+    if (frequency === FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY) {
+      // Only send at exchange start
+      if (!this.isExchangeStartTime(exchange, currentTime)) {
+        console.log(`Notification ${notification.id} skipped - not exchange start time`);
+        return false;
+      }
+    } else {
+      // MINUTE_LEVEL frequency - check condition types
+      const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
+      
+      if (hasDailyCondition) {
+        // For daily conditions, only notify at exchange start unless explicitly allowed
+        if (!this.isExchangeStartTime(exchange, currentTime)) {
+          console.log(`Notification ${notification.id} skipped - daily condition outside start time`);
+          return false;
+        }
+      }
+      // For minute-level conditions, always allow during exchange hours
+    }
+    
+    return true;
   }
 
   private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number): Promise<Condition> {

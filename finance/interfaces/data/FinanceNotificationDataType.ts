@@ -1,5 +1,5 @@
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
-import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType, FinanceNotificationModeType } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FinanceNotificationTimeFrameType, FinanceNotificationModeType, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 
 export interface FinanceNotificationDataType extends DataTypeBase {
   terminalId: string;
@@ -15,4 +15,6 @@ export interface FinanceNotificationDataType extends DataTypeBase {
   mode?: FinanceNotificationModeType;
   conditions?: string; // JSON-stringified array of conditions
   timeFrame: FinanceNotificationTimeFrameType;
+  // Notification frequency control
+  frequency?: FinanceNotificationFrequencyType;
 }

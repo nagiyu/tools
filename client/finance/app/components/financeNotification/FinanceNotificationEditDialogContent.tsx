@@ -4,7 +4,7 @@
 
 import React, { useEffect } from 'react';
 
-import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, FinanceNotificationModeType, FINANCE_NOTIFICATION_MODE, BUY_CONDITIONS, SELL_CONDITIONS } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, FinanceNotificationModeType, FINANCE_NOTIFICATION_MODE, BUY_CONDITIONS, SELL_CONDITIONS, FINANCE_NOTIFICATION_FREQUENCY, FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
@@ -198,6 +198,59 @@ export default function FinanceNotificationEditDialogContent({
                             }}
                         />
                         売り
+                    </label>
+                </div>
+            </fieldset>
+
+            {/* Notification Frequency Selection */}
+            <fieldset disabled={loading} style={{ border: 'none', padding: 0, margin: '16px 0' }}>
+                <legend style={{ fontSize: '1rem', fontWeight: 500, marginBottom: '8px' }}>通知頻度</legend>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                            type="radio"
+                            name="notificationFrequency"
+                            value={FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
+                            checked={(item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL) === FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
+                            disabled={loading}
+                            onChange={(e) => {
+                                const newFrequency = e.target.value as FinanceNotificationFrequencyType;
+                                onItemChange({
+                                    ...item,
+                                    frequency: newFrequency
+                                });
+                            }}
+                        />
+                        <span>
+                            1分ごと
+                            <br />
+                            <small style={{ color: '#666', fontSize: '0.75rem' }}>
+                                価格条件は1分ごと、パターン条件は取引開始時のみ通知
+                            </small>
+                        </span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input
+                            type="radio"
+                            name="notificationFrequency"
+                            value={FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY}
+                            checked={(item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL) === FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY}
+                            disabled={loading}
+                            onChange={(e) => {
+                                const newFrequency = e.target.value as FinanceNotificationFrequencyType;
+                                onItemChange({
+                                    ...item,
+                                    frequency: newFrequency
+                                });
+                            }}
+                        />
+                        <span>
+                            取引開始時のみ
+                            <br />
+                            <small style={{ color: '#666', fontSize: '0.75rem' }}>
+                                すべての条件で取引開始時にのみ通知
+                            </small>
+                        </span>
                     </label>
                 </div>
             </fieldset>
