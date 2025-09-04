@@ -11,12 +11,50 @@ import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
+import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import ExchangeUtil from '@/utils/ExchangeUtil';
 import TickerUtil from '@/utils/TickerUtil';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 import { StateType } from '@/app/finance-notification/page';
+
+interface SessionOption {
+  value: string;
+  label: string;
+}
+
+class SessionUtil {
+  // Available session options with user-friendly labels
+  private static readonly SESSION_OPTIONS: SessionOption[] = [
+    { value: "regular", label: "通常時間" },
+    { value: "extended", label: "時間外取引含む" },
+  ];
+
+  /**
+   * Convert session options to SelectOption format for use with BasicSelect component
+   */
+  public static toSelectOptions(): SelectOptionType[] {
+    return this.SESSION_OPTIONS.map(option => ({
+      label: option.label,
+      value: option.value
+    }));
+  }
+
+  /**
+   * Get the default session (extended as specified in requirements)
+   */
+  public static getDefaultSession(): string {
+    return "extended";
+  }
+
+  /**
+   * Validate if a string is a valid session
+   */
+  public static isValidSession(value: string): boolean {
+    return this.SESSION_OPTIONS.some(option => option.value === value);
+  }
+}
 
 interface FinanceNotificationEditDialogContentProps {
     item: FinanceNotificationDataType;
@@ -153,14 +191,16 @@ export default function FinanceNotificationEditDialogContent({
             ? item.tickerId
             : (filteredTickers.length > 0 ? filteredTickers[0].id : '');
 
-        // Ensure new items have a default mode if not set
+        // Ensure new items have a default mode and session if not set
         const mode = item.mode || FINANCE_NOTIFICATION_MODE.BUY;
+        const session = item.session || SessionUtil.getDefaultSession();
 
         onItemChange({
             ...item,
             exchangeId: exchangeId,
             tickerId: tickerId,
             mode: mode,
+            session: session,
             conditions: item.conditions || JSON.stringify([])
         });
         onStateChange({ ...state, filteredTickers });
@@ -185,6 +225,15 @@ export default function FinanceNotificationEditDialogContent({
                 value={item.tickerId}
                 disabled={loading || !item.exchangeId}
                 onChange={(value) => onItemChange({ ...item, tickerId: value })}
+            />
+            
+            {/* Session Selection */}
+            <BasicSelect
+                label='取引時間'
+                options={SessionUtil.toSelectOptions()}
+                value={item.session || SessionUtil.getDefaultSession()}
+                disabled={loading}
+                onChange={(value) => onItemChange({ ...item, session: value })}
             />
             
             {/* Mode Selection */}
