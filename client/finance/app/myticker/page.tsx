@@ -5,6 +5,7 @@
 import React, { useEffect, useState } from 'react';
 
 import DateUtil from '@common/utils/DateUtil';
+import { AuthDataType } from '@common/interfaces/data/AuthDataType';
 
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';
 import { MY_TICKER_DEAL_TYPE } from '@finance/types/MyTickerType';
@@ -36,6 +37,7 @@ export default function MyTickerPage() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
     const [summary, setSummary] = useState<MyTickerSummaryDataType[]>([]);
+    const [currentUser, setCurrentUser] = useState<AuthDataType | null>(null);
 
     const myTickerFetchService = new MyTickerFetchService();
     const authFetchService = new AuthFetchService();
@@ -92,8 +94,23 @@ export default function MyTickerPage() {
         };
     };
 
+    const getCurrentUser = async (): Promise<AuthDataType> => {
+        if (currentUser) {
+            return currentUser;
+        }
+        
+        try {
+            const user = await authFetchService.getUserByGoogle();
+            setCurrentUser(user);
+            return user;
+        } catch (error) {
+            console.error('Failed to get current user:', error);
+            throw new Error('Unable to get user information. Please make sure you are logged in.');
+        }
+    };
+
     const fetchData = async (): Promise<MyTickerDataType[]> => {
-        const user = await authFetchService.getUserByGoogle();
+        const user = await getCurrentUser();
         const result = await myTickerFetchService.get();
         const userTransactions = result.filter(item => item.userId === user.id);
         
@@ -105,7 +122,7 @@ export default function MyTickerPage() {
     };
 
     const fixItem = async (item: MyTickerDataType, isNew: boolean): Promise<MyTickerDataType> => {
-        const user = await authFetchService.getUserByGoogle();
+        const user = await getCurrentUser();
         item.userId = user.id;
 
         const now = Date.now();
@@ -119,16 +136,20 @@ export default function MyTickerPage() {
         return item;
     };
 
+    const refreshSummary = async (): Promise<void> => {
+        const user = await getCurrentUser();
+        const allTransactions = await myTickerFetchService.get();
+        const userTransactions = allTransactions.filter(t => t.userId === user.id);
+        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
+        setSummary(newSummary);
+    };
+
     const onCreate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, true);
         const result = await myTickerFetchService.create(fixedItem);
         
         // Refresh summary after creating new transaction
-        const user = await authFetchService.getUserByGoogle();
-        const allTransactions = await myTickerFetchService.get();
-        const userTransactions = allTransactions.filter(t => t.userId === user.id);
-        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
-        setSummary(newSummary);
+        await refreshSummary();
         
         return result;
     };
@@ -138,11 +159,7 @@ export default function MyTickerPage() {
         const result = await myTickerFetchService.update(fixedItem);
         
         // Refresh summary after updating transaction
-        const user = await authFetchService.getUserByGoogle();
-        const allTransactions = await myTickerFetchService.get();
-        const userTransactions = allTransactions.filter(t => t.userId === user.id);
-        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
-        setSummary(newSummary);
+        await refreshSummary();
         
         return result;
     };
@@ -151,11 +168,7 @@ export default function MyTickerPage() {
         await myTickerFetchService.delete(id);
         
         // Refresh summary after deleting transaction
-        const user = await authFetchService.getUserByGoogle();
-        const allTransactions = await myTickerFetchService.get();
-        const userTransactions = allTransactions.filter(t => t.userId === user.id);
-        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
-        setSummary(newSummary);
+        await refreshSummary();
     };
 
     const validateItem = (item: MyTickerDataType): string | null => {
@@ -168,12 +181,20 @@ export default function MyTickerPage() {
 
     useEffect(() => {
         (async () => {
-            const [exchangeData, tickerData] = await Promise.all([
-                exchangeFetchService.get(),
-                tickerFetchService.get()
-            ]);
-            setExchanges(exchangeData);
-            setTickers(tickerData);
+            try {
+                // Initialize user information first
+                await getCurrentUser();
+                
+                const [exchangeData, tickerData] = await Promise.all([
+                    exchangeFetchService.get(),
+                    tickerFetchService.get()
+                ]);
+                setExchanges(exchangeData);
+                setTickers(tickerData);
+            } catch (error) {
+                console.error('Failed to initialize component:', error);
+                // You might want to show an error message to the user here
+            }
         })();
     }, []);
 
