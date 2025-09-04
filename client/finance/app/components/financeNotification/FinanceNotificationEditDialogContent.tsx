@@ -8,7 +8,7 @@ import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, 
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import BasicNumberField from '@client-common/components/inputs/TextFields/BasicNumberField';
+import CurrencyNumberField from '@client-common/components/inputs/TextFields/CurrencyNumberField';
 import ControlledCheckbox from '@client-common/components/inputs/checkbox/ControlledCheckbox';
 import BasicRadioGroup from '@client-common/components/inputs/RadioGroups/BasicRadioGroup';
 
@@ -268,11 +268,12 @@ export default function FinanceNotificationEditDialogContent({
             </div>
             
             {needsConditionValue && (
-                <BasicNumberField
+                <CurrencyNumberField
                     label='目標価格'
                     value={item.conditionValue}
                     disabled={loading}
                     onChange={(value) => onItemChange({ ...item, conditionValue: Number(value.target.value) })}
+                    onValueChange={(value) => onItemChange({ ...item, conditionValue: value })}
                 />
             )}
         </>
