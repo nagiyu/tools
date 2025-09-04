@@ -175,7 +175,7 @@ export default class DynamoDBUtil {
 
     const command = new DeleteItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id, DataType: dataType }, { removeUndefinedValues: true })
+      Key: marshall({ ID: id, DataType: dataType })
     });
 
     try {
