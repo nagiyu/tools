@@ -17,8 +17,11 @@ import Auth from '@/app/components/Auth';
 import ExchangeFetchService from '@/services/exchange/ExchangeFetchService.client';
 import MyTickerEditDialogContent from '@/app/components/myticker/MyTickerEditDialogContent';
 import MyTickerFetchService from '@/services/myticker/MyTickerFetchService.client';
+import MyTickerSummary from '@/app/components/myticker/MyTickerSummary';
+import MyTickerSummaryUtil from '@/utils/MyTickerSummaryUtil';
 import TickerFetchService from '@/services/ticker/TickerFetchService.client';
 import { ExchangeDataType } from '@/interfaces/data/ExchangeDataType';
+import { MyTickerSummaryDataType } from '@/interfaces/data/MyTickerSummaryDataType';
 import { TickerDataType } from '@/interfaces/data/TickerDataType';
 
 interface MyTickerTableType extends MyTickerDataType {
@@ -32,6 +35,7 @@ export interface StateType extends Record<string, unknown> {
 export default function MyTickerPage() {
     const [exchanges, setExchanges] = useState<ExchangeDataType[]>([]);
     const [tickers, setTickers] = useState<TickerDataType[]>([]);
+    const [summary, setSummary] = useState<MyTickerSummaryDataType[]>([]);
 
     const myTickerFetchService = new MyTickerFetchService();
     const authFetchService = new AuthFetchService();
@@ -91,7 +95,13 @@ export default function MyTickerPage() {
     const fetchData = async (): Promise<MyTickerDataType[]> => {
         const user = await authFetchService.getUserByGoogle();
         const result = await myTickerFetchService.get();
-        return result.filter(item => item.userId === user.id);
+        const userTransactions = result.filter(item => item.userId === user.id);
+        
+        // Update summary when data is fetched
+        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
+        setSummary(newSummary);
+        
+        return userTransactions;
     };
 
     const fixItem = async (item: MyTickerDataType, isNew: boolean): Promise<MyTickerDataType> => {
@@ -111,16 +121,41 @@ export default function MyTickerPage() {
 
     const onCreate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, true);
-        return await myTickerFetchService.create(fixedItem);
+        const result = await myTickerFetchService.create(fixedItem);
+        
+        // Refresh summary after creating new transaction
+        const user = await authFetchService.getUserByGoogle();
+        const allTransactions = await myTickerFetchService.get();
+        const userTransactions = allTransactions.filter(t => t.userId === user.id);
+        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
+        setSummary(newSummary);
+        
+        return result;
     };
 
     const onUpdate = async (item: MyTickerDataType): Promise<MyTickerDataType> => {
         const fixedItem = await fixItem(item, false);
-        return await myTickerFetchService.update(fixedItem);
+        const result = await myTickerFetchService.update(fixedItem);
+        
+        // Refresh summary after updating transaction
+        const user = await authFetchService.getUserByGoogle();
+        const allTransactions = await myTickerFetchService.get();
+        const userTransactions = allTransactions.filter(t => t.userId === user.id);
+        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
+        setSummary(newSummary);
+        
+        return result;
     };
 
     const onDelete = async (id: string): Promise<void> => {
         await myTickerFetchService.delete(id);
+        
+        // Refresh summary after deleting transaction
+        const user = await authFetchService.getUserByGoogle();
+        const allTransactions = await myTickerFetchService.get();
+        const userTransactions = allTransactions.filter(t => t.userId === user.id);
+        const newSummary = MyTickerSummaryUtil.calculateSummary(userTransactions, exchanges, tickers);
+        setSummary(newSummary);
     };
 
     const validateItem = (item: MyTickerDataType): string | null => {
@@ -145,31 +180,34 @@ export default function MyTickerPage() {
     return (
         <Auth
             userContent={
-                <AdminManagement<MyTickerDataType, StateType>
-                    columns={columns}
-                    fetchData={fetchData}
-                    itemName='My Ticker'
-                    defaultItem={defaultItem}
-                    defaultState={defaultState}
-                    generateState={generateState}
-                    validateItem={validateItem}
-                    onCreate={onCreate}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
-                >
-                    {(item, state, onItemChange, onStateChange) => {
-                        return (
-                            <MyTickerEditDialogContent
-                                item={item}
-                                state={state}
-                                onItemChange={onItemChange}
-                                onStateChange={onStateChange}
-                                exchanges={exchanges}
-                                tickers={tickers}
-                            />
-                        );
-                    }}
-                </AdminManagement>
+                <div>
+                    <MyTickerSummary summary={summary} />
+                    <AdminManagement<MyTickerDataType, StateType>
+                        columns={columns}
+                        fetchData={fetchData}
+                        itemName='My Ticker'
+                        defaultItem={defaultItem}
+                        defaultState={defaultState}
+                        generateState={generateState}
+                        validateItem={validateItem}
+                        onCreate={onCreate}
+                        onUpdate={onUpdate}
+                        onDelete={onDelete}
+                    >
+                        {(item, state, onItemChange, onStateChange) => {
+                            return (
+                                <MyTickerEditDialogContent
+                                    item={item}
+                                    state={state}
+                                    onItemChange={onItemChange}
+                                    onStateChange={onStateChange}
+                                    exchanges={exchanges}
+                                    tickers={tickers}
+                                />
+                            );
+                        }}
+                    </AdminManagement>
+                </div>
             }
         />
     )
