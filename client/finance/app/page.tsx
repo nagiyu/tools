@@ -114,7 +114,7 @@ export default function Home() {
   const [tickerOptions, setTickerOptions] = useState<SelectOptionType[]>([]);
   const [exchange, setExchange] = useState('');
   const [ticker, setTicker] = useState('');
-  const [timeframe, setTimeframe] = useState<string>(TimeFrameUtil.getDefaultTimeFrame());
+  const [timeframe, setTimeframe] = useState<TimeFrame>(TimeFrameUtil.getDefaultTimeFrame());
   const [session, setSession] = useState<string>(SessionUtil.getDefaultSession());
 
   const exchangeFetchService = new ExchangeFetchService();
@@ -168,7 +168,11 @@ export default function Home() {
           </DirectionStack>
           <Graph exchange={getExchangeKey(exchange)} ticker={getTickerKey(ticker)} timeframe={timeframe} session={session} />
           <DirectionStack>
-            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => setTimeframe(value)} />
+            <BasicSelect label='時間軸' options={TimeFrameUtil.toSelectOptions()} value={timeframe} onChange={(value) => {
+              if (TimeFrameUtil.isValidTimeFrame(value)) {
+                setTimeframe(value);
+              }
+            }} />
             <BasicSelect label='取引時間' options={SessionUtil.toSelectOptions()} value={session} onChange={(value) => setSession(value)} />
           </DirectionStack>
         </BasicStack>
