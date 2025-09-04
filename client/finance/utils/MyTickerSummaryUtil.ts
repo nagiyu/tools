@@ -17,7 +17,7 @@ export default class MyTickerSummaryUtil {
     const tickerGroups = new Map<string, MyTickerDataType[]>();
     
     transactions.forEach(transaction => {
-      const key = `${transaction.exchangeId}-${transaction.tickerId}`;
+      const key = `${transaction.exchangeId}|${transaction.tickerId}`;
       if (!tickerGroups.has(key)) {
         tickerGroups.set(key, []);
       }
@@ -27,7 +27,7 @@ export default class MyTickerSummaryUtil {
     const summary: MyTickerSummaryDataType[] = [];
 
     tickerGroups.forEach((tickerTransactions, key) => {
-      const [exchangeId, tickerId] = key.split('-');
+      const [exchangeId, tickerId] = key.split('|');
       
       // Calculate current holdings
       let totalQuantity = 0;
