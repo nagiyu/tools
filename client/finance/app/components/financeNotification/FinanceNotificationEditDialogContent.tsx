@@ -209,26 +209,30 @@ export default function FinanceNotificationEditDialogContent({
             />
 
             {/* Notification Frequency Selection */}
-            <BasicRadioGroup
+            <BasicSelect
                 label="通知頻度"
-                name="notificationFrequency" 
-                value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
                 options={[
                     { 
                         label: '1分ごと', 
                         value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-                        description: '価格条件は1分ごと、パターン条件は取引開始時のみ通知'
+                    },
+                    { 
+                        label: '10分ごと', 
+                        value: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
+                    },
+                    { 
+                        label: '1時間ごと', 
+                        value: FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
                     },
                     { 
                         label: '取引開始時のみ', 
                         value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
-                        description: 'すべての条件で取引開始時にのみ通知'
                     }
                 ]}
-                row={false}
+                value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
                 disabled={loading}
-                onChange={(e) => {
-                    const newFrequency = e.target.value as FinanceNotificationFrequencyType;
+                onChange={(value) => {
+                    const newFrequency = value as FinanceNotificationFrequencyType;
                     onItemChange({
                         ...item,
                         frequency: newFrequency
