@@ -96,7 +96,7 @@ export default class DynamoDBUtil {
 
     const command = new PutItemCommand({
       TableName: tableName,
-      Item: marshall(item)
+      Item: marshall(item, { removeUndefinedValues: true })
     });
 
     try {
@@ -136,7 +136,7 @@ export default class DynamoDBUtil {
     if (setEntries.length > 0) {
       updateExpr += 'SET ' + setEntries.map(([k]) => `#${k} = :${k}`).join(', ');
       Object.assign(exprAttrNames, Object.fromEntries(setEntries.map(([k]) => [`#${k}`, k])));
-      Object.assign(exprAttrValues, Object.fromEntries(setEntries.map(([k, v]) => [`:${k}`, marshall({ [k]: v })[k]])));
+      Object.assign(exprAttrValues, Object.fromEntries(setEntries.map(([k, v]) => [`:${k}`, marshall({ [k]: v }, { removeUndefinedValues: true })[k]])));
     }
     if (removeEntries.length > 0) {
       if (updateExpr) updateExpr += ' ';
@@ -151,7 +151,7 @@ export default class DynamoDBUtil {
 
     const command = new UpdateItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id, DataType: dataType }),
+      Key: marshall({ ID: id, DataType: dataType }, { removeUndefinedValues: true }),
       UpdateExpression: updateExpr,
       ExpressionAttributeNames: Object.keys(exprAttrNames).length > 0 ? exprAttrNames : undefined,
       ExpressionAttributeValues: Object.keys(exprAttrValues).length > 0 ? exprAttrValues : undefined
@@ -175,7 +175,7 @@ export default class DynamoDBUtil {
 
     const command = new DeleteItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id, DataType: dataType })
+      Key: marshall({ ID: id, DataType: dataType }, { removeUndefinedValues: true })
     });
 
     try {
