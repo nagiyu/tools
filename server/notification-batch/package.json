@@ -1,0 +1,7 @@
+{
+  "name": "notification-batch",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.152",
+    "esbuild": "^0.25.9"
+  }
+}
