@@ -151,7 +151,7 @@ export default class DynamoDBUtil {
 
     const command = new UpdateItemCommand({
       TableName: tableName,
-      Key: marshall({ ID: id, DataType: dataType }, { removeUndefinedValues: true }),
+      Key: marshall({ ID: id, DataType: dataType }),
       UpdateExpression: updateExpr,
       ExpressionAttributeNames: Object.keys(exprAttrNames).length > 0 ? exprAttrNames : undefined,
       ExpressionAttributeValues: Object.keys(exprAttrValues).length > 0 ? exprAttrValues : undefined
