@@ -8,6 +8,7 @@ export type { TimeFrame } from '@mathieuc/tradingview';
 export interface GetStockPriceDataOptions {
   count?: number;      // 取得件数（デフォルト: 30）
   timeframe?: TimeFrame;  // タイムフレーム（デフォルト: '1'）
+  session?: string;    // セッション（デフォルト: 'regular', 'extended' for pre/after-market）
 }
 
 export default class FinanceUtil {
@@ -27,6 +28,7 @@ export default class FinanceUtil {
     const market = `${exchange}:${ticker}`;
     const count = options?.count ?? 30;
     const timeframe: TimeFrame = options?.timeframe ?? '1';
+    const session = options?.session ?? 'regular';
 
     const result = await new Promise((resolve, reject) => {
       const client = new TradingView.Client();
@@ -34,6 +36,7 @@ export default class FinanceUtil {
 
       chart.setMarket(market, {
         timeframe: timeframe,
+        session: session,
       });
 
       chart.onError((...err) => { // Listen for errors (can avoid crash)
