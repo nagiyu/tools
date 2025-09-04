@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Box } from '@mui/material';
+import { Button } from '@mui/material';
 
 import BasicNumberField from './BasicNumberField';
+import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import CurrencyUtil from '@common/utils/CurrencyUtil';
 
 type CurrencyNumberFieldProps = {
@@ -32,7 +33,7 @@ export default function CurrencyNumberField({
     };
 
     return (
-        <Box>
+        <div>
             <BasicNumberField
                 label={label}
                 value={value}
@@ -41,25 +42,27 @@ export default function CurrencyNumberField({
                 onChange={onChange}
             />
             {!readonly && !disabled && (
-                <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={handleUsdToJpy}
-                        sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
-                    >
-                        USD→円
-                    </Button>
-                    <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={handleJpyToUsd}
-                        sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
-                    >
-                        円→USD
-                    </Button>
-                </Box>
+                <div style={{ marginTop: 8 }}>
+                    <DirectionStack spacing={1} justifyContent="flex-start">
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={handleUsdToJpy}
+                            sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
+                        >
+                            USD→円
+                        </Button>
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={handleJpyToUsd}
+                            sx={{ fontSize: '0.75rem', minWidth: 'auto', px: 1 }}
+                        >
+                            円→USD
+                        </Button>
+                    </DirectionStack>
+                </div>
             )}
-        </Box>
+        </div>
     );
 }
