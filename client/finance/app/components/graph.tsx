@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 
 import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
 import { useResponsiveGraphItems } from '@client-common/hooks/useResponsiveGraphItems';
+import { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
 
 type GraphProps = {
     exchange: string;
@@ -25,7 +26,7 @@ export default function Graph({ exchange, ticker, timeframe, session }: GraphPro
                 return;
             }
 
-            const options: any = { count: itemCount, timeframe };
+            const options: GetStockPriceDataOptions = { count: itemCount, timeframe };
             if (session) {
                 options.session = session;
             }
