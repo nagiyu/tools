@@ -208,37 +208,39 @@ export default function FinanceNotificationEditDialogContent({
                 }}
             />
 
-            {/* Notification Frequency Selection */}
-            <BasicSelect
-                label="通知頻度"
-                options={[
-                    { 
-                        label: '1分ごと', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
-                    },
-                    { 
-                        label: '10分ごと', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
-                    },
-                    { 
-                        label: '1時間ごと', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
-                    },
-                    { 
-                        label: '取引開始時のみ', 
-                        value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
-                    }
-                ]}
-                value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
-                disabled={loading}
-                onChange={(value) => {
-                    const newFrequency = value as FinanceNotificationFrequencyType;
-                    onItemChange({
-                        ...item,
-                        frequency: newFrequency
-                    });
-                }}
-            />
+            {/* Notification Frequency Selection - only show when price conditions are selected */}
+            {needsConditionValue && (
+                <BasicSelect
+                    label="通知頻度"
+                    options={[
+                        { 
+                            label: '1分ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+                        },
+                        { 
+                            label: '10分ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
+                        },
+                        { 
+                            label: '1時間ごと', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
+                        },
+                        { 
+                            label: '取引開始時のみ', 
+                            value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
+                        }
+                    ]}
+                    value={item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL}
+                    disabled={loading}
+                    onChange={(value) => {
+                        const newFrequency = value as FinanceNotificationFrequencyType;
+                        onItemChange({
+                            ...item,
+                            frequency: newFrequency
+                        });
+                    }}
+                />
+            )}
 
             {/* New mode-based condition selection */}
             <div style={{ marginTop: '16px' }}>
