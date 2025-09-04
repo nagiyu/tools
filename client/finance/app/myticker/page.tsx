@@ -198,6 +198,13 @@ export default function MyTickerPage() {
         })();
     }, []);
 
+    // Recalculate summary when exchanges or tickers data is updated
+    useEffect(() => {
+        if (exchanges.length > 0 && tickers.length > 0 && currentUser) {
+            refreshSummary();
+        }
+    }, [exchanges, tickers]);
+
     return (
         <Auth
             userContent={

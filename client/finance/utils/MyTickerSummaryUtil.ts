@@ -65,6 +65,9 @@ export default class MyTickerSummaryUtil {
               const purchase = purchaseStack[0];
               const soldFromThisPurchase = Math.min(sellQuantity, purchase.quantity);
               
+              // Proportionally reduce the price when selling partial quantity
+              const pricePerShare = purchase.price / purchase.quantity;
+              purchase.price -= soldFromThisPurchase * pricePerShare;
               purchase.quantity -= soldFromThisPurchase;
               sellQuantity -= soldFromThisPurchase;
               
@@ -77,7 +80,7 @@ export default class MyTickerSummaryUtil {
 
         // Calculate remaining holdings and total cost
         remainingQuantity = purchaseStack.reduce((sum, purchase) => sum + purchase.quantity, 0);
-        totalPurchaseCost = purchaseStack.reduce((sum, purchase) => sum + (purchase.quantity * purchase.price), 0);
+        totalPurchaseCost = purchaseStack.reduce((sum, purchase) => sum + purchase.price, 0);
 
         if (remainingQuantity > 0) {
           const exchange = exchanges.find(ex => ex.id === exchangeId);
