@@ -6,12 +6,12 @@ import React, { useEffect, useState } from 'react';
 
 import CandleStick, { CandleStickData } from '@client-common/components/echarts/CandleStick';
 import { useResponsiveGraphItems } from '@client-common/hooks/useResponsiveGraphItems';
-import { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
+import { GetStockPriceDataOptions, TimeFrame } from '@finance/utils/FinanceUtil';
 
 type GraphProps = {
     exchange: string;
     ticker: string;
-    timeframe: string;
+    timeframe: TimeFrame;
     session?: string;
 };
 
