@@ -41,9 +41,15 @@ export default class DateUtil {
 
   /**
    * 日本時間でDateオブジェクトを作成
+   * @param year 年
+   * @param month 月（1-indexed: 1=January, 12=December）
+   * @param day 日
+   * @param hour 時
+   * @param minute 分
+   * @param second 秒
    */
   static createJSTDate(year?: number, month?: number, day?: number, hour?: number, minute?: number, second?: number): Date {
-    const dateString = `${year || dayjs().year()}-${(month || 0) + 1}-${day || 1} ${hour || 0}:${minute || 0}:${second || 0}`;
+    const dateString = `${year || dayjs().year()}-${month || 1}-${day || 1} ${hour || 0}:${minute || 0}:${second || 0}`;
     const jstDate = dayjs.tz(dateString, this.JST_TIMEZONE);
     return jstDate.toDate();
   }
