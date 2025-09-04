@@ -1,6 +1,7 @@
 import React from 'react';
-import { TextField, Button, Box } from '@mui/material';
+import { Button, Box } from '@mui/material';
 
+import BasicNumberField from './BasicNumberField';
 import CurrencyUtil from '@common/utils/CurrencyUtil';
 
 type CurrencyNumberFieldProps = {
@@ -32,18 +33,12 @@ export default function CurrencyNumberField({
 
     return (
         <Box>
-            <TextField
+            <BasicNumberField
                 label={label}
                 value={value}
-                type='number'
+                readonly={readonly}
                 disabled={disabled}
-                slotProps={{
-                    input: {
-                        readOnly: readonly,
-                    }
-                }}
                 onChange={onChange}
-                fullWidth
             />
             {!readonly && !disabled && (
                 <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
