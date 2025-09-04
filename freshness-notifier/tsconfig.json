@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@freshness-notifier/*": [
+        "./*"
+      ],
+      "@common/*": [
+        "../common/*"
+      ]
+    },
+    "esModuleInterop": true
+  }
+}
