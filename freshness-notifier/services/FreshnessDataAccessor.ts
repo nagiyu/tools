@@ -1,21 +1,8 @@
-import DataAccessorBase from '@common/services/DataAccessorBase';
-import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+import FreshnessNotifierDataAccessor from './FreshnessNotifierDataAccessor';
 import { FreshnessRecordType } from '../interfaces/record/FreshnessRecordType';
 
-export default class FreshnessDataAccessor extends DataAccessorBase<FreshnessRecordType> {
+export default class FreshnessDataAccessor extends FreshnessNotifierDataAccessor<FreshnessRecordType> {
   public constructor() {
-    super(FreshnessDataAccessor.getFreshnessNotifierTableName(), 'Freshness');
-  }
-
-  private static getFreshnessNotifierTableName(): string {
-    switch (EnvironmentalUtil.GetProcessEnv()) {
-      case 'local':
-      case 'development':
-        return 'DevFreshnessNotifier';
-      case 'production':
-        return 'FreshnessNotifier';
-      default:
-        return 'DevFreshnessNotifier';
-    }
+    super('Freshness');
   }
 }
