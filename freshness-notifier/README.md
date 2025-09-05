@@ -10,6 +10,8 @@ The Freshness Notifier service provides CRUD operations for:
 
 ## Architecture
 
+The implementation follows a clean separation of concerns with composition over inheritance and dedicated data access components:
+
 ### Data Types
 - `FreshnessDataType`: Represents a freshness item with name, expiry date, and notification settings
 - `SettingDataType`: Represents notification settings for a specific terminal
@@ -19,24 +21,29 @@ The Freshness Notifier service provides CRUD operations for:
 - `SettingRecordType`: DynamoDB record format for settings
 - `FreshnessNotifierRecordTypeBase`: Base interface for all record types
 
-### Services
-- `FreshnessNotifierService`: Base service with generic CRUD operations and data conversion utilities
-- `FreshnessService`: Concrete service for managing freshness items
-- `SettingService`: Concrete service for managing settings with additional terminal-specific methods
-- `FreshnessNotifierDataAccessor`: Data access layer handling DynamoDB operations
+### Core Components
+- `FreshnessDataService`: Handles Freshness CRUD operations, extends `CRUDServiceBase`
+- `FreshnessDataAccessor`: Dedicated data accessor for Freshness operations
+- `SettingDataService`: Handles Setting CRUD operations, extends `CRUDServiceBase`
+- `SettingDataAccessor`: Dedicated data accessor for Setting operations
+- `FreshnessNotifierService`: Orchestrates both DataServices using composition
+
+### Architecture Benefits
+- Each data type has its own dedicated DataAccessor extending `DataAccessorBase`
+- Better separation of concerns between data access and business logic
+- Improved maintainability with focused responsibilities
+- Follows composition over inheritance principles
 
 ## Usage
 
 ```typescript
-import FreshnessService from './services/FreshnessService';
-import SettingService from './services/SettingService';
+import FreshnessNotifierService from './services/FreshnessNotifierService';
 
-// Create services
-const freshnessService = new FreshnessService();
-const settingService = new SettingService();
+// Create service
+const service = new FreshnessNotifierService();
 
 // Create a freshness item
-await freshnessService.create({
+await service.createFreshness({
   id: 'unique-id',
   name: 'Milk',
   expiryDate: '2024-01-15',
@@ -46,10 +53,13 @@ await freshnessService.create({
 });
 
 // Get all freshness items
-const items = await freshnessService.get();
+const items = await service.getFreshness();
+
+// Get freshness item by ID
+const item = await service.getFreshnessById('unique-id');
 
 // Create notification settings
-await settingService.create({
+await service.createSetting({
   id: 'setting-id',
   terminalId: 'terminal-123',
   subscriptionEndpoint: 'https://...',
@@ -62,7 +72,10 @@ await settingService.create({
 });
 
 // Get settings by terminal ID
-const setting = await settingService.getByTerminalId('terminal-123');
+const setting = await service.getSettingByTerminalId('terminal-123');
+
+// Get all settings
+const settings = await service.getSettings();
 ```
 
 ## Database Tables
