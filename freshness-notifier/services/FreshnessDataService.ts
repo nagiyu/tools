@@ -1,12 +1,12 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
-import FreshnessNotifierDataAccessor from './FreshnessNotifierDataAccessor';
+import FreshnessDataAccessor from './FreshnessDataAccessor';
 import { FreshnessDataType } from '../interfaces/data/FreshnessDataType';
 import { FreshnessRecordType } from '../interfaces/record/FreshnessRecordType';
 
 export default class FreshnessDataService extends CRUDServiceBase<FreshnessDataType, FreshnessRecordType> {
   public constructor() {
     super(
-      new FreshnessNotifierDataAccessor<FreshnessRecordType>('Freshness'),
+      new FreshnessDataAccessor(),
       FreshnessDataService.dataToRecord,
       FreshnessDataService.recordToData
     );
