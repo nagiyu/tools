@@ -1,12 +1,10 @@
-import FreshnessService from './services/FreshnessService';
-import SettingService from './services/SettingService';
+import FreshnessNotifierService from './services/FreshnessNotifierService';
 import { FreshnessDataType } from './interfaces/data/FreshnessDataType';
 import { SettingDataType } from './interfaces/data/SettingDataType';
 
 // Example demonstrating the freshness notifier services
 export class FreshnessNotifierExample {
-  private readonly freshnessService = new FreshnessService();
-  private readonly settingService = new SettingService();
+  private readonly freshnessNotifierService = new FreshnessNotifierService();
 
   // Example method to create a freshness item
   public async createFreshnessItem(name: string, expiryDate: string, notificationEnabled: boolean = true): Promise<void> {
@@ -19,7 +17,7 @@ export class FreshnessNotifierExample {
       update: Date.now(),
     };
 
-    await this.freshnessService.create(freshnessItem);
+    await this.freshnessNotifierService.createFreshness(freshnessItem);
   }
 
   // Example method to create a setting item
@@ -43,16 +41,16 @@ export class FreshnessNotifierExample {
       update: Date.now(),
     };
 
-    await this.settingService.create(settingItem);
+    await this.freshnessNotifierService.createSetting(settingItem);
   }
 
   // Example method to get all freshness items
   public async getAllFreshnessItems(): Promise<FreshnessDataType[]> {
-    return await this.freshnessService.get();
+    return await this.freshnessNotifierService.getFreshness();
   }
 
   // Example method to get setting by terminal ID
   public async getSettingByTerminalId(terminalId: string): Promise<SettingDataType | null> {
-    return await this.settingService.getByTerminalId(terminalId);
+    return await this.freshnessNotifierService.getSettingByTerminalId(terminalId);
   }
 }

@@ -1,74 +1,60 @@
-import CRUDServiceBase from '@common/services/CRUDServiceBase';
-import FreshnessNotifierDataAccessor from './FreshnessNotifierDataAccessor';
+import FreshnessDataService from './FreshnessDataService';
+import SettingDataService from './SettingDataService';
 import { FreshnessDataType } from '../interfaces/data/FreshnessDataType';
 import { SettingDataType } from '../interfaces/data/SettingDataType';
-import { FreshnessRecordType } from '../interfaces/record/FreshnessRecordType';
-import { SettingRecordType } from '../interfaces/record/SettingRecordType';
-import { FreshnessNotifierRecordTypeBase } from '../interfaces/record/FreshnessNotifierRecordTypeBase';
 
-export default class FreshnessNotifierService<
-  DataType extends FreshnessDataType | SettingDataType,
-  RecordType extends FreshnessNotifierRecordTypeBase
-> extends CRUDServiceBase<DataType, RecordType> {
-  public constructor(
-    dataAccessor: FreshnessNotifierDataAccessor<RecordType>,
-    dataToRecord: (data: DataType) => RecordType,
-    recordToData: (record: RecordType) => DataType
-  ) {
-    super(dataAccessor, dataToRecord, recordToData);
+export default class FreshnessNotifierService {
+  private readonly freshnessDataService: FreshnessDataService;
+  private readonly settingDataService: SettingDataService;
+
+  public constructor() {
+    this.freshnessDataService = new FreshnessDataService();
+    this.settingDataService = new SettingDataService();
   }
 
-  // Static helper methods for Freshness data conversion
-  protected static freshnessDataToRecord(data: FreshnessDataType): FreshnessRecordType {
-    return {
-      ID: data.id,
-      DataType: 'Freshness',
-      Name: data.name,
-      ExpiryDate: data.expiryDate,
-      NotificationEnabled: data.notificationEnabled,
-      Create: data.create,
-      Update: data.update,
-    };
+  // Freshness-related operations
+  public async createFreshness(data: FreshnessDataType): Promise<void> {
+    return await this.freshnessDataService.create(data);
   }
 
-  protected static freshnessRecordToData(record: FreshnessRecordType): FreshnessDataType {
-    return {
-      id: record.ID,
-      name: record.Name,
-      expiryDate: record.ExpiryDate,
-      notificationEnabled: record.NotificationEnabled,
-      create: record.Create,
-      update: record.Update,
-    };
+  public async getFreshness(): Promise<FreshnessDataType[]> {
+    return await this.freshnessDataService.get();
   }
 
-  // Static helper methods for Setting data conversion
-  protected static settingDataToRecord(data: SettingDataType): SettingRecordType {
-    return {
-      ID: data.id,
-      DataType: 'Setting',
-      TerminalId: data.terminalId,
-      SubscriptionEndpoint: data.subscriptionEndpoint,
-      SubscriptionKeysP256dh: data.subscriptionKeysP256dh,
-      SubscriptionKeysAuth: data.subscriptionKeysAuth,
-      NotificationEnabled: data.notificationEnabled,
-      NotificationTime: data.notificationTime,
-      Create: data.create,
-      Update: data.update,
-    };
+  public async getFreshnessById(id: string): Promise<FreshnessDataType | null> {
+    return await this.freshnessDataService.getById(id);
   }
 
-  protected static settingRecordToData(record: SettingRecordType): SettingDataType {
-    return {
-      id: record.ID,
-      terminalId: record.TerminalId,
-      subscriptionEndpoint: record.SubscriptionEndpoint,
-      subscriptionKeysP256dh: record.SubscriptionKeysP256dh,
-      subscriptionKeysAuth: record.SubscriptionKeysAuth,
-      notificationEnabled: record.NotificationEnabled,
-      notificationTime: record.NotificationTime,
-      create: record.Create,
-      update: record.Update,
-    };
+  public async updateFreshness(data: FreshnessDataType): Promise<void> {
+    return await this.freshnessDataService.update(data);
+  }
+
+  public async deleteFreshness(id: string): Promise<void> {
+    return await this.freshnessDataService.delete(id);
+  }
+
+  // Setting-related operations
+  public async createSetting(data: SettingDataType): Promise<void> {
+    return await this.settingDataService.create(data);
+  }
+
+  public async getSettings(): Promise<SettingDataType[]> {
+    return await this.settingDataService.get();
+  }
+
+  public async getSettingById(id: string): Promise<SettingDataType | null> {
+    return await this.settingDataService.getById(id);
+  }
+
+  public async getSettingByTerminalId(terminalId: string): Promise<SettingDataType | null> {
+    return await this.settingDataService.getByTerminalId(terminalId);
+  }
+
+  public async updateSetting(data: SettingDataType): Promise<void> {
+    return await this.settingDataService.update(data);
+  }
+
+  public async deleteSetting(id: string): Promise<void> {
+    return await this.settingDataService.delete(id);
   }
 }
