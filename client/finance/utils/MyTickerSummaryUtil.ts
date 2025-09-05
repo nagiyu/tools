@@ -56,7 +56,7 @@ export default class MyTickerSummaryUtil {
           if (transaction.deal === MY_TICKER_DEAL_TYPE.PURCHASE) {
             purchaseStack.push({
               quantity: transaction.quantity,
-              price: transaction.price * transaction.quantity // Convert price per share to total cost
+              price: transaction.price // transaction.price is already the total cost
             });
           } else if (transaction.deal === MY_TICKER_DEAL_TYPE.SELL) {
             let sellQuantity = transaction.quantity;
