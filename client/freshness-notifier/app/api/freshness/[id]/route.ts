@@ -7,10 +7,11 @@ const service = new FreshnessNotifierService();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const freshness = await service.getFreshnessById(params.id);
+    const { id } = await params;
+    const freshness = await service.getFreshnessById(id);
     if (!freshness) {
       return APIUtil.ReturnNotFound('Freshness item not found');
     }
@@ -23,11 +24,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const existingFreshness = await service.getFreshnessById(params.id);
+    const existingFreshness = await service.getFreshnessById(id);
     
     if (!existingFreshness) {
       return APIUtil.ReturnNotFound('Freshness item not found');
@@ -51,16 +53,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const existingFreshness = await service.getFreshnessById(params.id);
+    const { id } = await params;
+    const existingFreshness = await service.getFreshnessById(id);
     
     if (!existingFreshness) {
       return APIUtil.ReturnNotFound('Freshness item not found');
     }
 
-    await service.deleteFreshness(params.id);
+    await service.deleteFreshness(id);
     return APIUtil.ReturnSuccess();
   } catch (error) {
     console.error('Error deleting freshness item:', error);

@@ -7,10 +7,11 @@ const service = new FreshnessNotifierService();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const setting = await service.getSettingById(params.id);
+    const { id } = await params;
+    const setting = await service.getSettingById(id);
     if (!setting) {
       return APIUtil.ReturnNotFound('Setting not found');
     }
@@ -23,11 +24,12 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const existingSetting = await service.getSettingById(params.id);
+    const existingSetting = await service.getSettingById(id);
     
     if (!existingSetting) {
       return APIUtil.ReturnNotFound('Setting not found');
@@ -54,16 +56,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const existingSetting = await service.getSettingById(params.id);
+    const { id } = await params;
+    const existingSetting = await service.getSettingById(id);
     
     if (!existingSetting) {
       return APIUtil.ReturnNotFound('Setting not found');
     }
 
-    await service.deleteSetting(params.id);
+    await service.deleteSetting(id);
     return APIUtil.ReturnSuccess();
   } catch (error) {
     console.error('Error deleting setting:', error);

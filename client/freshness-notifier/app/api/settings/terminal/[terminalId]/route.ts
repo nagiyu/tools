@@ -6,10 +6,11 @@ const service = new FreshnessNotifierService();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { terminalId: string } }
+  { params }: { params: Promise<{ terminalId: string }> }
 ) {
   try {
-    const setting = await service.getSettingByTerminalId(params.terminalId);
+    const { terminalId } = await params;
+    const setting = await service.getSettingByTerminalId(terminalId);
     if (!setting) {
       return APIUtil.ReturnNotFound('Setting not found for terminal');
     }
