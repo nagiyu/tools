@@ -1,7 +1,7 @@
-import FreshnessDataService from './FreshnessDataService';
-import SettingDataService from './SettingDataService';
-import { FreshnessDataType } from '../interfaces/data/FreshnessDataType';
-import { SettingDataType } from '../interfaces/data/SettingDataType';
+import FreshnessDataService from '@freshness-notifier/services/FreshnessDataService';
+import SettingDataService from '@freshness-notifier/services/SettingDataService';
+import { FreshnessDataType } from '@freshness-notifier/interfaces/data/FreshnessDataType';
+import { SettingDataType } from '@freshness-notifier/interfaces/data/SettingDataType';
 
 export default class FreshnessNotifierService {
   private readonly freshnessDataService: FreshnessDataService;

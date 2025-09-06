@@ -1,7 +1,7 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
-import SettingDataAccessor from './SettingDataAccessor';
-import { SettingDataType } from '../interfaces/data/SettingDataType';
-import { SettingRecordType } from '../interfaces/record/SettingRecordType';
+import SettingDataAccessor from '@freshness-notifier/services/SettingDataAccessor';
+import { SettingDataType } from '@freshness-notifier/interfaces/data/SettingDataType';
+import { SettingRecordType } from '@freshness-notifier/interfaces/record/SettingRecordType';
 
 export default class SettingDataService extends CRUDServiceBase<SettingDataType, SettingRecordType> {
   public constructor() {

@@ -1,6 +1,6 @@
 import DataAccessorBase from '@common/services/DataAccessorBase';
 import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
-import { FreshnessNotifierRecordTypeBase } from '../interfaces/record/FreshnessNotifierRecordTypeBase';
+import { FreshnessNotifierRecordTypeBase } from '@freshness-notifier/interfaces/record/FreshnessNotifierRecordTypeBase';
 
 export default class FreshnessNotifierDataAccessor<T extends FreshnessNotifierRecordTypeBase> extends DataAccessorBase<T> {
   public constructor(dataType: 'Freshness' | 'Setting') {

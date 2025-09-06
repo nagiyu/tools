@@ -1,6 +1,6 @@
-import FreshnessNotifierService from './services/FreshnessNotifierService';
-import { FreshnessDataType } from './interfaces/data/FreshnessDataType';
-import { SettingDataType } from './interfaces/data/SettingDataType';
+import FreshnessNotifierService from '@freshness-notifier/services/FreshnessNotifierService';
+import { FreshnessDataType } from '@freshness-notifier/interfaces/data/FreshnessDataType';
+import { SettingDataType } from '@freshness-notifier/interfaces/data/SettingDataType';
 
 // Example demonstrating the FreshnessNotifierService with dedicated DataServices architecture
 export class FreshnessNotifierExample {

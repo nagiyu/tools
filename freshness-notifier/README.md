@@ -37,7 +37,7 @@ The implementation follows a clean separation of concerns with composition over 
 ## Usage
 
 ```typescript
-import FreshnessNotifierService from './services/FreshnessNotifierService';
+import FreshnessNotifierService from '@freshness-notifier/services/FreshnessNotifierService';
 
 // Create service
 const service = new FreshnessNotifierService();

@@ -1,7 +1,7 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
-import FreshnessDataAccessor from './FreshnessDataAccessor';
-import { FreshnessDataType } from '../interfaces/data/FreshnessDataType';
-import { FreshnessRecordType } from '../interfaces/record/FreshnessRecordType';
+import FreshnessDataAccessor from '@freshness-notifier/services/FreshnessDataAccessor';
+import { FreshnessDataType } from '@freshness-notifier/interfaces/data/FreshnessDataType';
+import { FreshnessRecordType } from '@freshness-notifier/interfaces/record/FreshnessRecordType';
 
 export default class FreshnessDataService extends CRUDServiceBase<FreshnessDataType, FreshnessRecordType> {
   public constructor() {

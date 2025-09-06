@@ -1,4 +1,4 @@
-import { FreshnessNotifierRecordTypeBase } from './FreshnessNotifierRecordTypeBase';
+import { FreshnessNotifierRecordTypeBase } from '@freshness-notifier/interfaces/record/FreshnessNotifierRecordTypeBase';
 
 export interface SettingRecordType extends FreshnessNotifierRecordTypeBase {
   DataType: 'Setting';
