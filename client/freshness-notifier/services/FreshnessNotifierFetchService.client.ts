@@ -25,7 +25,7 @@ export default class FreshnessNotifierFetchService extends FetchServiceBase<Fres
     }
   }
 
-  public async get(): Promise<FreshnessDataType[]> {
+  public override async get(): Promise<FreshnessDataType[]> {
     try {
       const response = await fetch(this.endpoint, {
         method: 'GET'
@@ -40,7 +40,7 @@ export default class FreshnessNotifierFetchService extends FetchServiceBase<Fres
     }
   }
 
-  public async create(data: Omit<FreshnessDataType, 'id' | 'create' | 'update'>): Promise<FreshnessDataType> {
+  public override async create(data: Omit<FreshnessDataType, 'id' | 'create' | 'update'>): Promise<FreshnessDataType> {
     try {
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -59,7 +59,7 @@ export default class FreshnessNotifierFetchService extends FetchServiceBase<Fres
     }
   }
 
-  public async update(data: FreshnessDataType): Promise<FreshnessDataType> {
+  public override async update(data: FreshnessDataType): Promise<FreshnessDataType> {
     try {
       const response = await fetch(`${this.endpoint}/${data.id}`, {
         method: 'PUT',
@@ -78,7 +78,7 @@ export default class FreshnessNotifierFetchService extends FetchServiceBase<Fres
     }
   }
 
-  public async delete(id: string): Promise<void> {
+  public override async delete(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.endpoint}/${id}`, {
         method: 'DELETE'

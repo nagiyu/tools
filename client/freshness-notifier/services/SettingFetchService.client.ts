@@ -44,7 +44,7 @@ export default class SettingFetchService extends FetchServiceBase<SettingDataTyp
     }
   }
 
-  public async get(): Promise<SettingDataType[]> {
+  public override async get(): Promise<SettingDataType[]> {
     try {
       const response = await fetch(this.endpoint, {
         method: 'GET'
@@ -59,7 +59,7 @@ export default class SettingFetchService extends FetchServiceBase<SettingDataTyp
     }
   }
 
-  public async create(data: Omit<SettingDataType, 'id' | 'create' | 'update'>): Promise<SettingDataType> {
+  public override async create(data: Omit<SettingDataType, 'id' | 'create' | 'update'>): Promise<SettingDataType> {
     try {
       const response = await fetch(this.endpoint, {
         method: 'POST',
@@ -78,7 +78,7 @@ export default class SettingFetchService extends FetchServiceBase<SettingDataTyp
     }
   }
 
-  public async update(data: SettingDataType): Promise<SettingDataType> {
+  public override async update(data: SettingDataType): Promise<SettingDataType> {
     try {
       const response = await fetch(`${this.endpoint}/${data.id}`, {
         method: 'PUT',
@@ -97,7 +97,7 @@ export default class SettingFetchService extends FetchServiceBase<SettingDataTyp
     }
   }
 
-  public async delete(id: string): Promise<void> {
+  public override async delete(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.endpoint}/${id}`, {
         method: 'DELETE'
