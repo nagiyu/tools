@@ -17,8 +17,7 @@ export default abstract class FetchServiceBase<T extends DataTypeBase> {
       });
 
       this.validateResponse(response);
-      const result = await response.json();
-      return result.data || result;
+      return await response.json();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       ErrorUtil.throwError(`Error getting data from ${this.endpoint}: ${errorMessage}`);
@@ -36,8 +35,7 @@ export default abstract class FetchServiceBase<T extends DataTypeBase> {
       }
 
       this.validateResponse(response);
-      const result = await response.json();
-      return result.data || result;
+      return await response.json();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       ErrorUtil.throwError(`Error getting data by ID from ${this.endpoint}: ${errorMessage}`);
@@ -55,8 +53,7 @@ export default abstract class FetchServiceBase<T extends DataTypeBase> {
       });
 
       this.validateResponse(response);
-      const result = await response.json();
-      return result.data || result;
+      return await response.json();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       ErrorUtil.throwError(`Error creating data at ${this.endpoint}: ${errorMessage}`);
@@ -74,8 +71,7 @@ export default abstract class FetchServiceBase<T extends DataTypeBase> {
       });
 
       this.validateResponse(response);
-      const result = await response.json();
-      return result.data || result;
+      return await response.json();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       ErrorUtil.throwError(`Error updating data at ${this.endpoint}: ${errorMessage}`);
