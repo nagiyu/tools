@@ -4,6 +4,16 @@ import { GreaterThanConditionChecker } from './GreaterThanConditionChecker';
 import { LessThanConditionChecker } from './LessThanConditionChecker';
 import { ThreeRedSoldiersConditionChecker } from './ThreeRedSoldiersConditionChecker';
 import { TwoTakuriLinesConditionChecker } from './TwoTakuriLinesConditionChecker';
+import { ThreeRiverEveningStarConditionChecker } from './ThreeRiverEveningStarConditionChecker';
+import { SwallowReturnConditionChecker } from './SwallowReturnConditionChecker';
+import { FireworksConditionChecker } from './FireworksConditionChecker';
+import { OkajiThreeCrowsConditionChecker } from './OkajiThreeCrowsConditionChecker';
+import { FallingStonesConditionChecker } from './FallingStonesConditionChecker';
+import { BullishHaramiCrossConditionChecker } from './BullishHaramiCrossConditionChecker';
+import { BearishHaramiCrossConditionChecker } from './BearishHaramiCrossConditionChecker';
+import { HawkReversalConditionChecker } from './HawkReversalConditionChecker';
+import { ThreeDarkStarsConditionChecker } from './ThreeDarkStarsConditionChecker';
+import { ShootingStarConditionChecker } from './ShootingStarConditionChecker';
 
 export interface ConditionCheckerProviderOptions {
   fallbackHandler?: (conditionType: FinanceNotificationConditionType, params: ConditionCheckParams) => Promise<Condition>;
@@ -25,6 +35,16 @@ export class ConditionCheckerProvider {
       new LessThanConditionChecker(),
       new ThreeRedSoldiersConditionChecker(),
       new TwoTakuriLinesConditionChecker(),
+      new ThreeRiverEveningStarConditionChecker(),
+      new SwallowReturnConditionChecker(),
+      new FireworksConditionChecker(),
+      new OkajiThreeCrowsConditionChecker(),
+      new FallingStonesConditionChecker(),
+      new BullishHaramiCrossConditionChecker(),
+      new BearishHaramiCrossConditionChecker(),
+      new HawkReversalConditionChecker(),
+      new ThreeDarkStarsConditionChecker(),
+      new ShootingStarConditionChecker(),
     ];
 
     for (const checker of checkerInstances) {
