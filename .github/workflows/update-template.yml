@@ -61,10 +61,14 @@ jobs:
         run: |
           git reset -- .github/workflows/apply-template.yml
           git clean -f .github/workflows/apply-template.yml
+          git reset -- .github/workflows/build.yml
+          git clean -f .github/workflows/build.yml
           git reset -- .github/workflows/deploy.yml
           git clean -f .github/workflows/deploy.yml
           git reset -- .github/workflows/update-template.yml
           git clean -f .github/workflows/update-template.yml
+          git reset -- docs/freshness-notifier
+          git clean -f docs/freshness-notifier
           git reset -- freshness-notifier
           git clean -f freshness-notifier
           git reset -- client/freshness-notifier
