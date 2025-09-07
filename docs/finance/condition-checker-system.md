@@ -80,6 +80,36 @@ Detects the "Three Red Soldiers" candlestick pattern - three consecutive bullish
 #### TwoTakuriLinesConditionChecker
 Detects the "Two Takuri Lines" pattern - two candles with long lower shadows and small bodies, indicating potential bullish reversal.
 
+#### ThreeRiverEveningStarConditionChecker
+Detects the "Three River Evening Star" pattern - a bearish reversal pattern with a long bearish candle, small bullish candle with gap up, and bullish candle.
+
+#### SwallowReturnConditionChecker
+Detects the "Swallow Return" pattern - a bullish reversal pattern where two gap-up bearish candles are followed by a bullish candle.
+
+#### FireworksConditionChecker
+Detects the "Fireworks" pattern - a bearish reversal pattern characterized by a candle with long upper shadow, short body, and minimal lower shadow.
+
+#### OkajiThreeCrowsConditionChecker
+Detects the "Okaji Three Crows" pattern - three consecutive bearish candles with no gaps between them, indicating strong bearish momentum.
+
+#### FallingStonesConditionChecker
+Detects the "Falling Stones" pattern - a descending wedge bearish pattern starting with a large bullish candle followed by small candles with lower lows.
+
+#### BullishHaramiCrossConditionChecker
+Detects the "Bullish Harami Cross" pattern - a bullish reversal pattern where a small bullish candle is contained within a large bullish candle.
+
+#### BearishHaramiCrossConditionChecker
+Detects the "Bearish Harami Cross" pattern - a bearish reversal pattern where a small bearish candle is contained within a large bearish candle.
+
+#### HawkReversalConditionChecker
+Detects the "Hawk Reversal" pattern - a bearish engulfing pattern where the second candle completely engulfs the first candle's body.
+
+#### ThreeDarkStarsConditionChecker
+Detects the "Three Dark Stars" pattern - three consecutive bearish candles with small bodies, indicating bearish continuation.
+
+#### ShootingStarConditionChecker
+Detects the "Shooting Star" pattern - a bearish reversal pattern with long upper shadow, short bearish body, and small lower shadow.
+
 ## Creating New Condition Checkers
 
 To add a new condition checker:
