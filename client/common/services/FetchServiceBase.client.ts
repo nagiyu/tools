@@ -10,49 +10,88 @@ export default abstract class FetchServiceBase<T extends DataTypeBase> {
   }
 
   public async get(): Promise<T[]> {
-    const response = await fetch(this.endpoint, {
-      method: 'GET'
-    });
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'GET'
+      });
 
-    this.validateResponse(response);
+      this.validateResponse(response);
+      const result = await response.json();
+      return result.data || result;
+    } catch (error) {
+      console.error(`Error getting data from ${this.endpoint}:`, error);
+      throw error;
+    }
+  }
 
-    return await response.json();
+  public async getById(id: string): Promise<T | null> {
+    try {
+      const response = await fetch(`${this.endpoint}/${id}`, {
+        method: 'GET'
+      });
+
+      if (response.status === 404) {
+        return null;
+      }
+
+      this.validateResponse(response);
+      const result = await response.json();
+      return result.data || result;
+    } catch (error) {
+      console.error(`Error getting data by ID from ${this.endpoint}:`, error);
+      throw error;
+    }
   }
 
   public async create(data: T): Promise<T> {
-    const response = await fetch(this.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
 
-    this.validateResponse(response);
-
-    return await response.json();
+      this.validateResponse(response);
+      const result = await response.json();
+      return result.data || result;
+    } catch (error) {
+      console.error(`Error creating data at ${this.endpoint}:`, error);
+      throw error;
+    }
   }
 
   public async update(data: T): Promise<T> {
-    const response = await fetch(`${this.endpoint}/${data.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
+    try {
+      const response = await fetch(`${this.endpoint}/${data.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
 
-    this.validateResponse(response);
-
-    return await response.json();
+      this.validateResponse(response);
+      const result = await response.json();
+      return result.data || result;
+    } catch (error) {
+      console.error(`Error updating data at ${this.endpoint}:`, error);
+      throw error;
+    }
   }
 
   public async delete(id: string): Promise<void> {
-    const response = await fetch(`${this.endpoint}/${id}`, {
-      method: 'DELETE'
-    });
+    try {
+      const response = await fetch(`${this.endpoint}/${id}`, {
+        method: 'DELETE'
+      });
 
-    this.validateResponse(response);
+      this.validateResponse(response);
+    } catch (error) {
+      console.error(`Error deleting data at ${this.endpoint}:`, error);
+      throw error;
+    }
   }
 
   protected validateResponse(response: Response): void {
