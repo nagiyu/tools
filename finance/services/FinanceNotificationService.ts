@@ -15,15 +15,18 @@ import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNot
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
-
-interface Condition {
-  met: boolean;
-  message: string;
-}
+import { ConditionCheckerProvider, Condition, ConditionCheckParams } from '@finance/services/conditionChecker';
 
 export default class FinanceNotificationService extends CRUDServiceBase<FinanceNotificationDataType, FinanceNotificationRecordType> {
+  private conditionCheckerProvider: ConditionCheckerProvider;
+
   public constructor() {
     super(new FinanceNotificationDataAccessor(), FinanceNotificationService.dataToRecord, FinanceNotificationService.recordToData);
+    
+    // Initialize the condition checker provider with fallback to legacy methods
+    this.conditionCheckerProvider = new ConditionCheckerProvider({
+      fallbackHandler: this.legacyConditionCheck.bind(this)
+    });
   }
 
   public async notification(endpoint: string): Promise<void> {
@@ -338,19 +341,26 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   }
 
   private async checkCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number, session?: string): Promise<Condition> {
+    const params: ConditionCheckParams = {
+      target,
+      exchangeKey,
+      tickerKey,
+      conditionValue,
+      session
+    };
+
+    return await this.conditionCheckerProvider.checkCondition(conditionType, params);
+  }
+
+  /**
+   * Legacy condition checking method used as fallback for patterns not yet migrated to new checker system
+   */
+  private async legacyConditionCheck(conditionType: FinanceNotificationConditionType, params: ConditionCheckParams): Promise<Condition> {
+    const { target, exchangeKey, tickerKey, conditionValue, session } = params;
+
     switch (conditionType) {
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN:
-        return await this.checkPriceCondition(conditionType, target, exchangeKey, tickerKey, conditionValue, session);
-
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS:
-        return await this.checkThreeRedSoldiers(target, exchangeKey, tickerKey, session);
-
       case FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR:
         return await this.checkThreeRiverEveningStar(target, exchangeKey, tickerKey, session);
-
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES:
-        return await this.checkTwoTakuriLines(target, exchangeKey, tickerKey, session);
 
       case FINANCE_NOTIFICATION_CONDITION_TYPE.SWALLOW_RETURN:
         return await this.checkSwallowReturn(target, exchangeKey, tickerKey, session);
@@ -384,79 +394,6 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     }
 
     return { met: false, message: '' };
-  }
-
-  private async checkPriceCondition(conditionType: FinanceNotificationConditionType, target: string, exchangeKey: string, tickerKey: string, conditionValue: number, session?: string): Promise<Condition> {
-    const currentPrice = await FinanceUtil.getCurrentStockPrice(exchangeKey, tickerKey, session);
-
-    if (currentPrice === null) {
-      return { met: false, message: `No stock data available for ${target}` };
-    }
-
-    console.log(`Current price for ${target}: ${currentPrice}, condition: ${conditionType} ${conditionValue}`);
-
-    switch (conditionType) {
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN:
-        if (this.checkGreaterThan(currentPrice, conditionValue)) {
-          return { met: true, message: `${target} price ${currentPrice} is above your target of ${conditionValue}` };
-        }
-        break;
-
-      case FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN:
-        if (this.checkLessThan(currentPrice, conditionValue)) {
-          return { met: true, message: `${target} price ${currentPrice} is below your target of ${conditionValue}` };
-        }
-        break;
-    }
-
-    return { met: false, message: '' };
-  }
-
-  private async checkThreeRedSoldiers(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
-    try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
-
-      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
-        return { met: false, message: `Insufficient data for ${target}` };
-      }
-
-      // Get the last 3 candles (most recent data)
-      const candles = stockData.slice(-3);
-      
-      // Check if all 3 candles are bullish (close > open)
-      const allBullish = candles.every(candle => candle.data[1] > candle.data[0]); // close > open
-
-      if (!allBullish) {
-        return { met: false, message: '' };
-      }
-
-      // Check if 2nd and 3rd candles start within the range of the previous candle
-      const firstCandle = candles[0];
-      const secondCandle = candles[1];
-      const thirdCandle = candles[2];
-
-      const firstLow = firstCandle.data[2];
-      const firstHigh = firstCandle.data[3];
-      const secondOpen = secondCandle.data[0];
-      const secondLow = secondCandle.data[2];
-      const secondHigh = secondCandle.data[3];
-      const thirdOpen = thirdCandle.data[0];
-
-      // Second candle should start within first candle's range
-      const secondStartsInRange = secondOpen >= firstLow && secondOpen <= firstHigh;
-      
-      // Third candle should start within second candle's range
-      const thirdStartsInRange = thirdOpen >= secondLow && thirdOpen <= secondHigh;
-
-      if (secondStartsInRange && thirdStartsInRange) {
-        return { met: true, message: `${target} shows Three Red Soldiers pattern - strong bullish signal detected` };
-      }
-
-      return { met: false, message: '' };
-    } catch (error) {
-      console.error('Error checking Three Red Soldiers pattern:', error);
-      return { met: false, message: `Error checking pattern for ${target}` };
-    }
   }
 
   private async checkThreeRiverEveningStar(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
@@ -495,64 +432,6 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       return { met: false, message: '' };
     } catch (error) {
       console.error('Error checking Three River Evening Star pattern:', error);
-      return { met: false, message: `Error checking pattern for ${target}` };
-    }
-  }
-
-  private checkGreaterThan(currentPrice: number, conditionValue: number): boolean {
-    return currentPrice > conditionValue;
-  }
-
-  private checkLessThan(currentPrice: number, conditionValue: number): boolean {
-    return currentPrice < conditionValue;
-  }
-
-  private async checkTwoTakuriLines(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
-    try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
-
-      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
-        return { met: false, message: `Insufficient data for ${target}` };
-      }
-
-      const candles = stockData.slice(-3);
-      const [firstCandle, secondCandle, thirdCandle] = candles;
-
-      // First two candles should be bearish with long lower shadows
-      const firstIsBearish = firstCandle.data[1] < firstCandle.data[0]; // close < open
-      const secondIsBearish = secondCandle.data[1] < secondCandle.data[0]; // close < open
-      
-      // Check for significant lower shadows
-      const firstBodyBottom = Math.min(firstCandle.data[0], firstCandle.data[1]);
-      const firstLowerShadow = firstBodyBottom - firstCandle.data[2];
-      const firstBodySize = Math.abs(firstCandle.data[1] - firstCandle.data[0]);
-      const firstHasLongLowerShadow = firstLowerShadow > firstBodySize;
-
-      const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
-      const secondLowerShadow = secondBodyBottom - secondCandle.data[2];
-      const secondBodySize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
-      const secondHasLongLowerShadow = secondLowerShadow > secondBodySize;
-
-      // Lows should be similar (within 2% tolerance)
-      const lowTolerance = Math.abs(firstCandle.data[2] - secondCandle.data[2]) / firstCandle.data[2];
-      const similarLows = lowTolerance < 0.02;
-
-      // Third candle should be a doji-like with similar low
-      const thirdBodySize = Math.abs(thirdCandle.data[1] - thirdCandle.data[0]);
-      const thirdRange = thirdCandle.data[3] - thirdCandle.data[2];
-      const thirdIsDoji = thirdBodySize < thirdRange * 0.1; // body is less than 10% of range
-      
-      const thirdLowTolerance = Math.abs(firstCandle.data[2] - thirdCandle.data[2]) / firstCandle.data[2];
-      const thirdSimilarLow = thirdLowTolerance < 0.02;
-
-      if (firstIsBearish && secondIsBearish && firstHasLongLowerShadow && secondHasLongLowerShadow && 
-          similarLows && thirdIsDoji && thirdSimilarLow) {
-        return { met: true, message: `${target} shows Two Takuri Lines pattern - potential bullish reversal signal detected` };
-      }
-
-      return { met: false, message: '' };
-    } catch (error) {
-      console.error('Error checking Two Takuri Lines pattern:', error);
       return { met: false, message: `Error checking pattern for ${target}` };
     }
   }
