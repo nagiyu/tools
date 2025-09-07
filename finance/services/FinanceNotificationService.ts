@@ -367,6 +367,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       case FINANCE_NOTIFICATION_CONDITION_TYPE.BULLISH_HARAMI_CROSS:
         return await this.checkBullishHaramiCross(target, exchangeKey, tickerKey, session);
 
+      case FINANCE_NOTIFICATION_CONDITION_TYPE.BEARISH_HARAMI_CROSS:
+        return await this.checkBearishHaramiCross(target, exchangeKey, tickerKey, session);
+
       case FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL:
         return await this.checkHawkReversal(target, exchangeKey, tickerKey, session);
 
@@ -697,38 +700,84 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
   private async checkBullishHaramiCross(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 3, session });
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 2, session });
 
-      if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 2) {
         return { met: false, message: `Insufficient data for ${target}` };
       }
 
-      const candles = stockData.slice(-3);
-      const [firstCandle, secondCandle, thirdCandle] = candles;
+      const candles = stockData.slice(-2);
+      const [firstCandle, secondCandle] = candles;
 
-      // Second candle should have a large body
+      // First candle should be a large bullish candle (大陽線)
+      const firstIsBullish = firstCandle.data[1] > firstCandle.data[0]; // close > open
+      const firstBodySize = Math.abs(firstCandle.data[1] - firstCandle.data[0]);
+      const firstRange = firstCandle.data[3] - firstCandle.data[2];
+      const firstIsLarge = firstBodySize > firstRange * 0.6; // body is more than 60% of the range
+
+      // Second candle should be a smaller bullish candle (陽線) contained within first candle's body
+      const secondIsBullish = secondCandle.data[1] > secondCandle.data[0]; // close > open
+      const firstBodyTop = Math.max(firstCandle.data[0], firstCandle.data[1]);
+      const firstBodyBottom = Math.min(firstCandle.data[0], firstCandle.data[1]);
       const secondBodyTop = Math.max(secondCandle.data[0], secondCandle.data[1]);
       const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
+      
+      // Second candle's body should be completely contained within first candle's body
+      const secondContained = secondBodyTop <= firstBodyTop && secondBodyBottom >= firstBodyBottom;
+      
+      // Second candle should be smaller than first candle
       const secondBodySize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
-      const secondRange = secondCandle.data[3] - secondCandle.data[2];
-      const secondHasLargeBody = secondBodySize > secondRange * 0.6;
+      const secondIsSmaller = secondBodySize < firstBodySize;
 
-      // First and third candles should be contained within second candle's body
-      const firstHigh = Math.max(firstCandle.data[0], firstCandle.data[1]);
-      const firstLow = Math.min(firstCandle.data[0], firstCandle.data[1]);
-      const firstContained = firstHigh <= secondBodyTop && firstLow >= secondBodyBottom;
-
-      const thirdHigh = Math.max(thirdCandle.data[0], thirdCandle.data[1]);
-      const thirdLow = Math.min(thirdCandle.data[0], thirdCandle.data[1]);
-      const thirdContained = thirdHigh <= secondBodyTop && thirdLow >= secondBodyBottom;
-
-      if (secondHasLargeBody && firstContained && thirdContained) {
-        return { met: true, message: `${target} shows Bullish Harami Cross pattern - potential reversal signal detected` };
+      if (firstIsBullish && firstIsLarge && secondIsBullish && secondContained && secondIsSmaller) {
+        return { met: true, message: `${target} shows Bullish Harami pattern - bullish reversal signal detected` };
       }
 
       return { met: false, message: '' };
     } catch (error) {
-      console.error('Error checking Bullish Harami Cross pattern:', error);
+      console.error('Error checking Bullish Harami pattern:', error);
+      return { met: false, message: `Error checking pattern for ${target}` };
+    }
+  }
+
+  private async checkBearishHaramiCross(target: string, exchangeKey: string, tickerKey: string, session?: string): Promise<Condition> {
+    try {
+      const stockData = await FinanceUtil.getStockPriceData(exchangeKey, tickerKey, { count: 2, session });
+
+      if (!stockData || !Array.isArray(stockData) || stockData.length < 2) {
+        return { met: false, message: `Insufficient data for ${target}` };
+      }
+
+      const candles = stockData.slice(-2);
+      const [firstCandle, secondCandle] = candles;
+
+      // First candle should be a large bearish candle (大陰線)
+      const firstIsBearish = firstCandle.data[1] < firstCandle.data[0]; // close < open
+      const firstBodySize = Math.abs(firstCandle.data[1] - firstCandle.data[0]);
+      const firstRange = firstCandle.data[3] - firstCandle.data[2];
+      const firstIsLarge = firstBodySize > firstRange * 0.6; // body is more than 60% of the range
+
+      // Second candle should be a smaller bearish candle (陰線) contained within first candle's body
+      const secondIsBearish = secondCandle.data[1] < secondCandle.data[0]; // close < open
+      const firstBodyTop = Math.max(firstCandle.data[0], firstCandle.data[1]);
+      const firstBodyBottom = Math.min(firstCandle.data[0], firstCandle.data[1]);
+      const secondBodyTop = Math.max(secondCandle.data[0], secondCandle.data[1]);
+      const secondBodyBottom = Math.min(secondCandle.data[0], secondCandle.data[1]);
+      
+      // Second candle's body should be completely contained within first candle's body
+      const secondContained = secondBodyTop <= firstBodyTop && secondBodyBottom >= firstBodyBottom;
+      
+      // Second candle should be smaller than first candle
+      const secondBodySize = Math.abs(secondCandle.data[1] - secondCandle.data[0]);
+      const secondIsSmaller = secondBodySize < firstBodySize;
+
+      if (firstIsBearish && firstIsLarge && secondIsBearish && secondContained && secondIsSmaller) {
+        return { met: true, message: `${target} shows Bearish Harami pattern - bearish reversal signal detected` };
+      }
+
+      return { met: false, message: '' };
+    } catch (error) {
+      console.error('Error checking Bearish Harami pattern:', error);
       return { met: false, message: `Error checking pattern for ${target}` };
     }
   }
