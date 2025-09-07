@@ -3,7 +3,7 @@ name: Update Template
 on:
   push:
     branches:
-      - master
+      - develop
   workflow_dispatch:
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
-          repository: "{{ TEMPLATE_REPOSITORY }}"
+          repository: "nagiyu/nagiyu-aws-serverless-template"
           token: ${{ env.GITHUB_PERSONAL_ACCESS_TOKEN }}
 
       - name: Configure git user
@@ -51,11 +51,11 @@ jobs:
 
       - name: Setup git remote
         run: |
-          git remote add source {{ SOURCE_REPOSITORY_URL }}
+          git remote add source https://github.com/nagiyu/tools.git
           git fetch source
 
       - name: Merge Source
-        run: git merge -X theirs --no-commit --no-ff source/{{ SOURCE_BRANCH }} --allow-unrelated-histories || true
+        run: git merge -X theirs --no-commit --no-ff source/develop --allow-unrelated-histories || true
 
       - name: Reset specific files
         run: |
@@ -67,8 +67,10 @@ jobs:
           git clean -f .github/workflows/deploy.yml
           git reset -- .github/workflows/update-template.yml
           git clean -f .github/workflows/update-template.yml
-          git reset -- {{ EXCLUDE_PATHS }}
-          git clean -f {{ EXCLUDE_PATHS }}
+          git reset -- tools
+          git clean -f tools
+          git reset -- client/tools
+          git clean -f client/tools
           git reset -- README.md
           git restore README.md
 
@@ -115,6 +117,6 @@ jobs:
           gh pr create \
             --title "[Draft] Update Template" \
             --body "This is an automated draft PR to template." \
-            --base "{{ TARGET_BRANCH }}" \
+            --base "master" \
             --head ${{ env.BRANCH_NAME }} \
             --draft || trueue
