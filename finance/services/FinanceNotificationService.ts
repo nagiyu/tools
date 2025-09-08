@@ -47,32 +47,53 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         // Parse conditions with frequency settings
         const conditionsWithFrequency = this.parseConditions(notification);
 
-        // Check each condition individually based on its frequency settings
+        // Check conditions in parallel for improved performance
         let conditionMet = false;
         let conditionMessage = '';
 
-        for (const conditionWithFreq of conditionsWithFrequency) {
-          // Check if this specific condition should be checked based on timing
+        // Filter conditions that should be checked based on timing
+        const conditionsToCheck = conditionsWithFrequency.filter(conditionWithFreq => {
           if (!this.shouldCheckCondition(conditionWithFreq, exchange, notification)) {
             console.log(`Condition ${conditionWithFreq.type} skipped due to frequency constraint: ${conditionWithFreq.frequency}`);
-            continue;
+            return false;
           }
+          return true;
+        });
 
-          // Check if condition is met
-          const condition = await this.checkCondition(
-            conditionWithFreq.type, 
-            `${exchangeKey}:${tickerKey}`, 
-            exchangeKey, 
-            tickerKey, 
-            notification.conditionValue, 
-            notification.session
-          );
+        // If there are conditions to check, run them in parallel
+        if (conditionsToCheck.length > 0) {
+          // Start all condition checks in parallel
+          const conditionPromises = conditionsToCheck.map(async (conditionWithFreq) => {
+            try {
+              const condition = await this.checkCondition(
+                conditionWithFreq.type, 
+                `${exchangeKey}:${tickerKey}`, 
+                exchangeKey, 
+                tickerKey, 
+                notification.conditionValue, 
+                notification.session
+              );
+              return { condition, conditionWithFreq, success: true };
+            } catch (error) {
+              // Log error but don't fail the entire check
+              console.error(`Error checking condition ${conditionWithFreq.type}:`, error);
+              return { condition: { met: false, message: '' }, conditionWithFreq, success: false };
+            }
+          });
+
+          // Wait for all conditions to complete and find the first met condition
+          const results = await Promise.allSettled(conditionPromises);
           
-          if (condition.met) {
-            conditionMet = true;
-            conditionMessage = condition.message;
-            console.log(`Condition ${conditionWithFreq.type} met with frequency ${conditionWithFreq.frequency}`);
-            break; // If any condition is met, trigger notification
+          for (const result of results) {
+            if (result.status === 'fulfilled') {
+              const { condition, conditionWithFreq } = result.value;
+              if (condition.met) {
+                conditionMet = true;
+                conditionMessage = condition.message;
+                console.log(`Condition ${conditionWithFreq.type} met with frequency ${conditionWithFreq.frequency}`);
+                break; // Take the first met condition
+              }
+            }
           }
         }
 
