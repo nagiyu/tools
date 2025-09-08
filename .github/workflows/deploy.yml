@@ -56,7 +56,7 @@ jobs:
 
       - name: Rewrite sw.js endpoint from secrets
         run: |
-          sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/freshness-notifier/public/sw.js
+          sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/tools/public/sw.js
 
       - name: Deploy
         run: |
@@ -68,7 +68,7 @@ jobs:
             --build-arg PROJECT_AWS_SECRET_ACCESS_KEY=${{ env.PROJECT_AWS_SECRET_ACCESS_KEY }} \
             --build-arg PROJECT_AWS_REGION=${{ env.PROJECT_AWS_REGION }} \
             --build-arg NEXTAUTH_URL=${{ env.PROJECT_CLIENT_BASE_URL }} \
-            -f client/freshness-notifier/Dockerfile \
+            -f client/tools/Dockerfile \
             -t ${{ env.PROJECT_CLIENT_PROJECT_NAME }} .
           docker tag ${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
           docker push ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
