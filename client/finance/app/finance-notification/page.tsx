@@ -59,15 +59,6 @@ export default function FinanceNotificationPage() {
             }
         },
         {
-            id: 'conditionType',
-            label: 'Conditions',
-            // We'll need to modify this later when we can access the full row
-        },
-        {
-            id: 'conditionValue',
-            label: 'Target Price'
-        },
-        {
             id: 'action',
             label: 'Action'
         }
