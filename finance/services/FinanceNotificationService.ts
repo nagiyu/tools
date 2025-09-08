@@ -10,7 +10,7 @@ import ExchangeService from '@finance/services/ExchangeService';
 import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import FinanceUtil from '@finance/utils/FinanceUtil';
 import TickerService from '@finance/services/TickerService';
-import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, DAILY_CONDITION_TYPES, MINUTE_LEVEL_CONDITION_TYPES, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/types/FinanceNotificationType';
+import { FinanceNotificationConditionType, FINANCE_NOTIFICATION_CONDITION_TYPE, DAILY_CONDITION_TYPES, MINUTE_LEVEL_CONDITION_TYPES, FINANCE_NOTIFICATION_FREQUENCY, FinanceNotificationConditionWithFrequency } from '@finance/types/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
@@ -44,53 +44,36 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
         console.log(`Checking condition for ${exchangeKey}:${tickerKey}`);
 
-        // Determine condition types for timing validation
-        let conditionTypes: FinanceNotificationConditionType[] = [];
-        
-        if (notification.mode && notification.conditions) {
-          try {
-            conditionTypes = JSON.parse(notification.conditions) as FinanceNotificationConditionType[];
-          } catch (error) {
-            console.error('Error parsing conditions JSON:', error);
-            conditionTypes = [notification.conditionType];
-          }
-        } else {
-          conditionTypes = [notification.conditionType];
-        }
+        // Parse conditions with frequency settings
+        const conditionsWithFrequency = this.parseConditions(notification);
 
-        // Check timing constraints before checking conditions
-        if (!this.shouldSendNotification(notification, exchange, conditionTypes)) {
-          continue;
-        }
-
-        // Check if condition is met - handle both legacy and new formats
+        // Check each condition individually based on its frequency settings
         let conditionMet = false;
         let conditionMessage = '';
 
-        if (notification.mode && notification.conditions) {
-          // New multi-condition format
-          try {
-            const conditions: string[] = JSON.parse(notification.conditions);
-            for (const conditionType of conditions) {
-              const condition = await this.checkCondition(conditionType as FinanceNotificationConditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
-              if (condition.met) {
-                conditionMet = true;
-                conditionMessage = condition.message;
-                break; // If any condition is met, trigger notification
-              }
-            }
-          } catch (error) {
-            console.error('Error parsing conditions JSON:', error);
-            // Fall back to legacy format
-            const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
-            conditionMet = condition.met;
-            conditionMessage = condition.message;
+        for (const conditionWithFreq of conditionsWithFrequency) {
+          // Check if this specific condition should be checked based on timing
+          if (!this.shouldCheckCondition(conditionWithFreq, exchange, notification)) {
+            console.log(`Condition ${conditionWithFreq.type} skipped due to frequency constraint: ${conditionWithFreq.frequency}`);
+            continue;
           }
-        } else {
-          // Legacy single condition format
-          const condition = await this.checkCondition(notification.conditionType, `${exchangeKey}:${tickerKey}`, exchangeKey, tickerKey, notification.conditionValue, notification.session);
-          conditionMet = condition.met;
-          conditionMessage = condition.message;
+
+          // Check if condition is met
+          const condition = await this.checkCondition(
+            conditionWithFreq.type, 
+            `${exchangeKey}:${tickerKey}`, 
+            exchangeKey, 
+            tickerKey, 
+            notification.conditionValue, 
+            notification.session
+          );
+          
+          if (condition.met) {
+            conditionMet = true;
+            conditionMessage = condition.message;
+            console.log(`Condition ${conditionWithFreq.type} met with frequency ${conditionWithFreq.frequency}`);
+            break; // If any condition is met, trigger notification
+          }
         }
 
         if (!conditionMet) {
@@ -112,10 +95,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
         // Update first notification flag if this is the first notification for pattern conditions
         if (!notification.firstNotificationSent) {
-          const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
-          const isMinuteLevel = (notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL) === FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+          const conditionsWithFreq = this.parseConditions(notification);
+          const hasDailyCondition = conditionsWithFreq.some(c => this.isDailyCondition(c.type));
           
-          if (hasDailyCondition && isMinuteLevel) {
+          if (hasDailyCondition) {
             console.log(`Marking first notification as sent for ${notification.id}`);
             await this.update({
               ...notification,
@@ -252,6 +235,92 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
    */
   private isDailyCondition(conditionType: FinanceNotificationConditionType): boolean {
     return DAILY_CONDITION_TYPES.includes(conditionType as any);
+  }
+
+  /**
+   * Parse conditions from notification data, handling both legacy and new formats
+   */
+  private parseConditions(notification: FinanceNotificationDataType): FinanceNotificationConditionWithFrequency[] {
+    if (notification.mode && notification.conditions) {
+      try {
+        const conditions = JSON.parse(notification.conditions);
+        
+        // Check if it's the new format (array of objects with type and frequency)
+        if (Array.isArray(conditions) && conditions.length > 0 && typeof conditions[0] === 'object' && conditions[0].type) {
+          return conditions as FinanceNotificationConditionWithFrequency[];
+        }
+        
+        // Legacy format (array of strings) - convert to new format
+        if (Array.isArray(conditions)) {
+          const globalFrequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+          return conditions.map((conditionType: string) => ({
+            type: conditionType as FinanceNotificationConditionType,
+            frequency: globalFrequency
+          }));
+        }
+      } catch (error) {
+        console.error('Error parsing conditions JSON:', error);
+      }
+    }
+    
+    // Fallback to legacy single condition format
+    const globalFrequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
+    return [{
+      type: notification.conditionType,
+      frequency: globalFrequency
+    }];
+  }
+
+  /**
+   * Check if a specific condition should be checked based on its frequency setting
+   */
+  private shouldCheckCondition(
+    conditionWithFrequency: FinanceNotificationConditionWithFrequency,
+    exchange: ExchangeDataType,
+    notification: FinanceNotificationDataType
+  ): boolean {
+    const currentTime = DateUtil.getNowJSTAsDate();
+    
+    // First check if we're within exchange hours
+    if (!this.isWithinExchangeHours(exchange, currentTime)) {
+      return false;
+    }
+
+    const { type: conditionType, frequency } = conditionWithFrequency;
+    const hasDailyCondition = this.isDailyCondition(conditionType);
+    
+    switch (frequency) {
+      case FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY:
+        // Only send at exchange start
+        return this.isExchangeStartTime(exchange, currentTime);
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL:
+        // Every minute for price conditions, special logic for pattern conditions
+        if (hasDailyCondition) {
+          // Pattern conditions: first time OR exchange start time
+          if (!notification.firstNotificationSent) {
+            // First notification - allow during exchange hours
+            return true;
+          } else {
+            // Subsequent notifications only at exchange start
+            return this.isExchangeStartTime(exchange, currentTime);
+          }
+        }
+        // Price conditions: always allow during exchange hours
+        return true;
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL:
+        // Every 10 minutes (only at first batch processing of each 10-minute window)
+        return this.isTenMinuteInterval(currentTime);
+        
+      case FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL:
+        // Every hour (only when minute is 0)
+        return this.isHourlyInterval(currentTime);
+        
+      default:
+        console.log(`Unknown frequency: ${frequency}`);
+        return false;
+    }
   }
 
   /**

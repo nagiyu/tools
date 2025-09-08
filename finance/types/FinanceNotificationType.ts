@@ -85,3 +85,9 @@ export const MINUTE_LEVEL_CONDITION_TYPES = [
   FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN,
   FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN,
 ] as const;
+
+// New type for condition with frequency configuration
+export interface FinanceNotificationConditionWithFrequency {
+  type: FinanceNotificationConditionType;
+  frequency: FinanceNotificationFrequencyType;
+}
