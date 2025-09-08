@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -74,7 +75,9 @@ export default async function CommonLayout({
                         </DirectionStack>
                     }
                     center={
-                        <div>{title}</div>
+                        <Link href="/">
+                            <div>{title}</div>
+                        </Link>
                     }
                     right={
                         <DirectionStack>
@@ -84,7 +87,9 @@ export default async function CommonLayout({
                         </DirectionStack>
                     }
                 />
-                {children}
+                <div style={{ padding: '10px' }}>
+                    {children}
+                </div>
             </body>
         </html>
     )
