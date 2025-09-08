@@ -139,3 +139,4 @@ Finance Module
 - [Server Documentation](./server/README.md) - Lambda functions and API endpoints
 - [Client Documentation](./client/README.md) - Next.js application and UI components
 - [Common Module](../common/README.md) - Shared utilities and services
+- **[条件ごとの通知頻度設定機能](./per-condition-frequency.md)** - 新機能: 条件別通知頻度設定
