@@ -54,9 +54,9 @@ jobs:
             PROJECT, DevTools
           parse-json-secrets: true
 
-      - name: Rewrite sw.js endpoint from secrets
-        run: |
-          sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/freshness-notifier/public/sw.js
+      # - name: Rewrite sw.js endpoint from secrets
+      #   run: |
+      #     sed -i 's|http://localhost:3000|${{ env.PROJECT_CLIENT_BASE_URL }}|g' client/freshness-notifier/public/sw.js
 
       - name: Deploy
         run: |
