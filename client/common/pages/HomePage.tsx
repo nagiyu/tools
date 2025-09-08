@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useMediaQuery, useTheme } from '@mui/material';
 
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import SquareButton from '@client-common/components/inputs/buttons/SquareButton';
+import ResponsiveUtil, { useResponsiveLayout } from '@client-common/utils/ResponsiveUtil';
 
 export interface HomePageButton {
     label: string;
@@ -22,17 +22,9 @@ export default function HomePage({
     buttons
 }: HomePageProps) {
     const router = useRouter();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-    // モバイルなら3つずつ、PCなら4つずつグループ化
-    const groupSize = isMobile ? 3 : 4;
-    const buttonSize = isMobile ? '30vw' : '20vw';
+    const { groupSize, buttonSize } = useResponsiveLayout();
     
-    const grouped: HomePageButton[][] = Array.from(
-        { length: Math.ceil(buttons.length / groupSize) },
-        (_, i) => buttons.slice(i * groupSize, i * groupSize + groupSize)
-    );
+    const grouped: HomePageButton[][] = ResponsiveUtil.groupArray(buttons, groupSize);
 
     return (
         <BasicStack>
