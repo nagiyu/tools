@@ -22,7 +22,7 @@
       "@/*": ["./*"],
       "@common/*": ["../../common/*"],
       "@client-common/*": ["../common/*"],
-      "@tools/*": ["../../tools/*"]
+      "@sample/*": ["../sample/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
