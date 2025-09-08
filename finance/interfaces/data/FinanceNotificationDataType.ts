@@ -13,11 +13,11 @@ export interface FinanceNotificationDataType extends DataTypeBase {
   conditionValue: number;
   // New multi-condition support
   mode?: FinanceNotificationModeType;
-  conditions?: string; // JSON-stringified array of conditions
+  conditions?: string; // JSON-stringified array of conditions (legacy: string[], new: {type: string, frequency: string}[])
   timeFrame: FinanceNotificationTimeFrameType;
   // Session type for price data (regular/extended)
   session?: string;
-  // Notification frequency control
+  // Notification frequency control (legacy - for backward compatibility)
   frequency?: FinanceNotificationFrequencyType;
   // First notification flag for pattern conditions
   firstNotificationSent?: boolean;
