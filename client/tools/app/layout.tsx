@@ -14,6 +14,10 @@ const menuItems: MenuItemData[] = [
   {
     title: 'Home',
     url: '/',
+  },
+  {
+    title: 'Convert Transfer',
+    url: '/convert-transfer'
   }
 ];
 
