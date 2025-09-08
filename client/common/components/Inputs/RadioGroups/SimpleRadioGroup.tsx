@@ -21,22 +21,6 @@ export interface SimpleRadioGroupProps {
   disabled?: boolean;
 }
 
-export interface SimpleRadioGroupOption {
-  label: string;
-  value: string;
-  disabled?: boolean;
-}
-
-export interface SimpleRadioGroupProps {
-  options: SimpleRadioGroupOption[];
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void;
-  name?: string;
-  label?: string;
-  row?: boolean;
-  disabled?: boolean;
-}
-
 export default function SimpleRadioGroup({
   options,
   value,
