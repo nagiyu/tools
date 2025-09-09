@@ -73,8 +73,6 @@ export default async function CommonLayout({
     // Get AdSense config dynamically if enabled
     const adsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig(enableAutoAds) : null;
 
-    console.log('AdSense Config:', adsenseConfig);
-
     return (
         <html lang='ja'>
             <head>
@@ -111,6 +109,7 @@ export default async function CommonLayout({
                     }
                 />
                 <div style={{ padding: '10px' }}>
+                    {JSON.stringify(adsenseConfig)}
                     {children}
                 </div>
             </body>
