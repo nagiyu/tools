@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import SquareButton from '@client-common/components/inputs/buttons/SquareButton';
-import { useMobileDetection } from '@client-common/utils/ResponsiveUtil';
+import { ResponsiveUtil } from '@client-common/utils/ResponsiveUtil';
 
 export interface HomePageButton {
     label: string;
@@ -22,7 +22,7 @@ export default function HomePage({
     buttons
 }: HomePageProps) {
     const router = useRouter();
-    const isMobile = useMobileDetection();
+    const isMobile = ResponsiveUtil.useMobileDetection();
 
     // モバイルなら3つずつ、PCなら4つずつグループ化
     const groupSize = isMobile ? 3 : 4;
