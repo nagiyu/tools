@@ -16,7 +16,7 @@ interface SquareButtonProps {
 export default function SquareButton({
     label,
     icon,
-    size = '20vw',
+    size = '30vw',
     disabled = false,
     loading = false,
     onClick
