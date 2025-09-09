@@ -1,0 +1,1 @@
+export { GET } from '@client-common/routes/adsense/publisher-id/route';

@@ -36,7 +36,9 @@ export default function RootLayout({
     <CommonLayout
       title='Tools'
       menuItems={menuItems}
-      // adsenseConfig={adsenseConfig} // Uncomment to enable Google Adsense
+      enableAdSense={true}
+      enableAutoAds={true}
+      // adsenseConfig={adsenseConfig} // Use this to override the dynamic config if needed
     >
       {children}
     </CommonLayout>
