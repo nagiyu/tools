@@ -43,10 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 Google Adsense が設定されると、以下の処理が自動的に行われます：
 
-1. **Publisher ID の取得**: AWS Secrets Manager から「GoogleAdSense」シークレットの「PublisherID」キーを取得します（キャッシュ機能付き）
-2. **AdSense スクリプトの読み込み**: Google AdSense の JavaScript ライブラリ（adsbygoogle.js）がページの `<head>` セクションに読み込まれます
-3. **自動広告の有効化**: `enableAutoAds` が `true` の場合、ページレベルの自動広告スクリプトが追加で読み込まれます
-4. **エラーハンドリング**: Secrets Manager への接続に失敗した場合、AdSense は読み込まれず、警告がログに出力されます
+1. **環境チェック**: ProcessEnv が 'local' の場合、AdSense は無効化されます（デバッグ環境での広告表示を防止）
+2. **Publisher ID の取得**: AWS Secrets Manager から「GoogleAdSense」シークレットの「PublisherID」キーを取得します（キャッシュ機能付き）
+3. **AdSense スクリプトの読み込み**: Google AdSense の JavaScript ライブラリ（adsbygoogle.js）がページの `<head>` セクションに読み込まれます
+4. **自動広告の有効化**: `enableAutoAds` が `true` の場合、ページレベルの自動広告スクリプトが追加で読み込まれます
+5. **エラーハンドリング**: Secrets Manager への接続に失敗した場合、AdSense は読み込まれず、警告がログに出力されます
 
 ## 技術的な詳細
 
@@ -82,7 +83,8 @@ AdSense が有効な場合、以下のスクリプトがページに追加され
 - AWS Secrets Manager に「GoogleAdSense」シークレットが正しく設定されていることを確認してください
 - Publisher ID は Google AdSense アカウントから取得した正しいパブリッシャーID（ca-pub-xxxxxxxxxx 形式）を使用してください
 - 自動広告を有効にする場合は、Google AdSense の管理画面でも適切に設定されていることを確認してください
-- テスト環境では実際の広告が表示されない場合があります
+- **ローカル環境（ProcessEnv が 'local'）では AdSense は自動的に無効化されます**
+- 開発環境（ProcessEnv が 'development'）および本番環境（ProcessEnv が 'production'）では通常通り AdSense が動作します
 - AWS Secrets Manager へのアクセス権限が適切に設定されていることを確認してください
 - Secrets Manager からの取得に失敗した場合、AdSense は読み込まれませんが、アプリケーションの動作には影響しません
 - Publisher ID の取得にはキャッシュ機能が使用されるため、初回取得後はパフォーマンスが向上します
