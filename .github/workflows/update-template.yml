@@ -61,6 +61,8 @@ jobs:
         run: |
           git reset -- .github/workflows
           git clean -f .github/workflows
+          git reset -- docs/tools
+          git clean -f docs/tools
           git reset -- tools
           git clean -f tools
           git reset -- client/tools
