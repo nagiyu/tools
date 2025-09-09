@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import ConvertTransferService from '@tools/services/ConvertTransferService';
 
 import LoadingContent from '@client-common/components/content/LoadingContent';
+import LoadingPage from '@client-common/pages/LoadingPage';
 import SimpleTab from '@client-common/components/navigations/Tabs/SimpleTab';
 
 import AfterTabContent from '@/app/components/convert-transfer/AfterTabContent';
@@ -75,7 +76,7 @@ function ConvertTransferContent() {
 
 export default function ConvertTransferPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingPage />}>
             <ConvertTransferContent />
         </Suspense>
     );

@@ -3,6 +3,8 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
+import LoadingPage from '@client-common/pages/LoadingPage';
+
 interface SharedData {
   title?: string;
   text?: string;
@@ -201,7 +203,7 @@ function ShareContent() {
 
 export default function SharePage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoadingPage />}>
       <ShareContent />
     </Suspense>
   );
