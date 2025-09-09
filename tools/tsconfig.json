@@ -1,16 +1,11 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "paths": {
       "@tools*": [
         "./*"
       ],
       "@common/*": [
         "../common/*"
-      ],
-      "@client-common/*": [
-        "../client/common/*"
       ]
     }
   }

@@ -11,6 +11,5 @@ module.exports = {
   moduleNameMapper: {
     "^@tools/(.*)$": "<rootDir>/$1",
     "^@common/(.*)$": "<rootDir>/../common/$1",
-    "^@client-common/(.*)$": "<rootDir>/../client/common/$1",
   }
 };
