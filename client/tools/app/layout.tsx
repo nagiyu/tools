@@ -31,7 +31,6 @@ export default function RootLayout({
       title='Tools'
       menuItems={menuItems}
       enableAdSense={true}
-      enableAutoAds={true}
     >
       {children}
     </CommonLayout>
