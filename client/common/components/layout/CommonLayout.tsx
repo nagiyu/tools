@@ -13,12 +13,6 @@ import SignInButton from '@client-common/components/inputs/Buttons/SignInButton'
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
 import AdSenseUtil from '@client-common/utils/AdSenseUtil.server';
 
-export interface AdsenseConfig {
-    publisherId: string;
-    enableAutoAds?: boolean;
-    adSlot?: string;
-}
-
 interface CommonLayoutProps {
     title: string;
     menuItems?: MenuItemData[];
@@ -30,7 +24,6 @@ interface CommonLayoutProps {
     enableNotification?: boolean;
 
     // Google Adsense
-    adsenseConfig?: AdsenseConfig;
     enableAdSense?: boolean;
     enableAutoAds?: boolean;
 
@@ -56,7 +49,6 @@ export default async function CommonLayout({
     menuItems = [],
     enableAuthentication = false,
     enableNotification = false,
-    adsenseConfig,
     enableAdSense = false,
     enableAutoAds = true,
     children
@@ -78,26 +70,25 @@ export default async function CommonLayout({
     }
 
     // Get AdSense config dynamically if enabled
-    const dynamicAdsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig(enableAutoAds) : null;
-    const finalAdsenseConfig = adsenseConfig || dynamicAdsenseConfig;
+    const adsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig(enableAutoAds) : null;
 
     return (
         <html lang='ja'>
             <head>
                 <link rel='manifest' href='/manifest.webmanifest' />
-                {finalAdsenseConfig && (
+                {adsenseConfig && (
                     <>
                         <script
                             async
-                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${finalAdsenseConfig.publisherId}`}
+                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseConfig.publisherId}`}
                             crossOrigin="anonymous"
                         ></script>
-                        {finalAdsenseConfig.enableAutoAds && (
+                        {adsenseConfig.enableAutoAds && (
                             <script
                                 dangerouslySetInnerHTML={{
                                     __html: `
                                         (adsbygoogle = window.adsbygoogle || []).push({
-                                            google_ad_client: "${finalAdsenseConfig.publisherId}",
+                                            google_ad_client: "${adsenseConfig.publisherId}",
                                             enable_page_level_ads: true
                                         });
                                     `

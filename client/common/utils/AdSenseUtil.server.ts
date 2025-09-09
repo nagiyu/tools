@@ -1,5 +1,9 @@
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
-import { AdsenseConfig } from '@client-common/components/layout/CommonLayout';
+
+export interface AdsenseConfig {
+    publisherId: string;
+    enableAutoAds?: boolean;
+}
 
 export default class AdSenseUtil {
   /**
