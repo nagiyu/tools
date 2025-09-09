@@ -12,6 +12,12 @@ import SessionUtil from '@client-common/utils/SessionUtil.server';
 import SignInButton from '@client-common/components/inputs/Buttons/SignInButton';
 import SignoutButton from '@client-common/components/inputs/Buttons/SignOutButton';
 
+export interface AdsenseConfig {
+    publisherId: string;
+    enableAutoAds?: boolean;
+    adSlot?: string;
+}
+
 interface CommonLayoutProps {
     title: string;
     menuItems?: MenuItemData[];
@@ -21,6 +27,9 @@ interface CommonLayoutProps {
 
     // Notification
     enableNotification?: boolean;
+
+    // Google Adsense
+    adsenseConfig?: AdsenseConfig;
 
     children: React.ReactNode;
 }
@@ -44,6 +53,7 @@ export default async function CommonLayout({
     menuItems = [],
     enableAuthentication = false,
     enableNotification = false,
+    adsenseConfig,
     children
 }: CommonLayoutProps) {
     const authenticatedContent = async (): Promise<React.ReactNode> => {
@@ -66,6 +76,27 @@ export default async function CommonLayout({
         <html lang='ja'>
             <head>
                 <link rel='manifest' href='/manifest.webmanifest' />
+                {adsenseConfig && (
+                    <>
+                        <script
+                            async
+                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseConfig.publisherId}`}
+                            crossOrigin="anonymous"
+                        ></script>
+                        {adsenseConfig.enableAutoAds && (
+                            <script
+                                dangerouslySetInnerHTML={{
+                                    __html: `
+                                        (adsbygoogle = window.adsbygoogle || []).push({
+                                            google_ad_client: "${adsenseConfig.publisherId}",
+                                            enable_page_level_ads: true
+                                        });
+                                    `
+                                }}
+                            />
+                        )}
+                    </>
+                )}
             </head>
             <body className={`${geistSans.variable} ${geistMono.variable}`}>
                 <BasicAppBar

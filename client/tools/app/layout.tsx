@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import CommonLayout from '@client-common/components/layout/CommonLayout';
+import CommonLayout, { AdsenseConfig } from '@client-common/components/layout/CommonLayout';
 import { MenuItemData } from '@client-common/components/navigations/Menus/LinkMenu';
 
 import "./globals.css";
@@ -21,6 +21,12 @@ const menuItems: MenuItemData[] = [
   }
 ];
 
+// Google Adsense configuration example (uncomment and configure to enable)
+// const adsenseConfig: AdsenseConfig = {
+//   publisherId: 'ca-pub-xxxxxxxxxx',
+//   enableAutoAds: true,
+// };
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +36,7 @@ export default function RootLayout({
     <CommonLayout
       title='Tools'
       menuItems={menuItems}
+      // adsenseConfig={adsenseConfig} // Uncomment to enable Google Adsense
     >
       {children}
     </CommonLayout>
