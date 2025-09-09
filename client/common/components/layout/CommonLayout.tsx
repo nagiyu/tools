@@ -109,7 +109,6 @@ export default async function CommonLayout({
                     }
                 />
                 <div style={{ padding: '10px' }}>
-                    {JSON.stringify(adsenseConfig)}
                     {children}
                 </div>
             </body>
