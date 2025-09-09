@@ -82,7 +82,7 @@ export default async function CommonLayout({
                         <Script
                             id="adsense"
                             strategy="afterInteractive"
-                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseConfig.publisherId}`}
+                            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${adsenseConfig.publisherId}`}
                             crossOrigin="anonymous"
                         ></Script>
                     </>
