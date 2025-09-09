@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 
 import { Geist, Geist_Mono } from 'next/font/google';
 
@@ -78,23 +79,11 @@ export default async function CommonLayout({
                 <link rel='manifest' href='/manifest.webmanifest' />
                 {adsenseConfig && (
                     <>
-                        <script
-                            async
+                        <Script
+                            strategy="afterInteractive"
                             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseConfig.publisherId}`}
                             crossOrigin="anonymous"
-                        ></script>
-                        {adsenseConfig.enableAutoAds && (
-                            <script
-                                dangerouslySetInnerHTML={{
-                                    __html: `
-                                        (adsbygoogle = window.adsbygoogle || []).push({
-                                            google_ad_client: "${adsenseConfig.publisherId}",
-                                            enable_page_level_ads: true
-                                        });
-                                    `
-                                }}
-                            />
-                        )}
+                        ></Script>
                     </>
                 )}
             </head>
