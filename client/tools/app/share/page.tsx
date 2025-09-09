@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 interface SharedData {
@@ -9,7 +9,7 @@ interface SharedData {
   url?: string;
 }
 
-export default function SharePage() {
+function ShareContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [sharedData, setSharedData] = useState<SharedData>({});
@@ -196,5 +196,13 @@ export default function SharePage() {
         <p>このページは共有機能により開かれました</p>
       </div>
     </div>
+  );
+}
+
+export default function SharePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ShareContent />
+    </Suspense>
   );
 }

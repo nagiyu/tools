@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 import ConvertTransferService from '@tools/services/ConvertTransferService';
@@ -11,7 +11,7 @@ import SimpleTab from '@client-common/components/navigations/Tabs/SimpleTab';
 import AfterTabContent from '@/app/components/convert-transfer/AfterTabContent';
 import BeforeTabContent from '@/app/components/convert-transfer/BeforeTabContent';
 
-export default function ConvertTransferPage() {
+function ConvertTransferContent() {
     const searchParams = useSearchParams();
     const [tabIndex, setTabIndex] = useState(0);
     const [before, setBefore] = useState('');
@@ -70,5 +70,13 @@ export default function ConvertTransferPage() {
                 />
             )}
         </LoadingContent>
+    );
+}
+
+export default function ConvertTransferPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ConvertTransferContent />
+        </Suspense>
     );
 }
