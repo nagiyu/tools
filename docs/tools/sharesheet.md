@@ -46,24 +46,48 @@ Tools アプリは Web Share Target API を使用して、スマートフォン�
 }
 ```
 
+### Next.js 対応
+
+共有ページとConvert Transferページは、Next.jsのstatic generation対応のため以下の構造を採用：
+
+- `useSearchParams()`を使用するコンポーネントをSuspenseバウンダリーでラップ
+- ローディング状態には`LoadingPage`コンポーネント（Material-UI使用）を表示
+- これによりコンパイル時エラーを回避し、適切なSSR/SSG対応を実現
+
 ### 実装ファイル
 
 #### 1. マニフェスト設定
-- **ファイル**: `app/manifest.ts`
+- **ファイル**: `client/tools/app/manifest.ts`
 - **役割**: PWA マニフェストに `share_target` 設定を追加
 
 #### 2. 共有ハンドラページ
-- **ファイル**: `app/share/page.tsx`
+- **ファイル**: `client/tools/app/share/page.tsx`
 - **役割**: 共有されたデータを受け取り、ユーザーに表示・処理オプションを提供
+- **構造**: Suspenseバウンダリーでラップされた`ShareContent`コンポーネント
+- **ローディング**: `@client-common/pages/LoadingPage`コンポーネントを使用
 
 #### 3. Convert Transfer ツール連携
-- **ファイル**: `app/convert-transfer/page.tsx`
+- **ファイル**: `client/tools/app/convert-transfer/page.tsx`  
 - **役割**: 共有されたURL/テキストを変換処理で利用
+- **構造**: Suspenseバウンダリーでラップされた`ConvertTransferContent`コンポーネント
+- **ローディング**: `@client-common/pages/LoadingPage`コンポーネントを使用
 
 ### データフロー
 
 ```
-他のアプリ → 共有ボタン → Tools選択 → /share ページ → Convert Transfer ツール
+他のアプリ → 共有ボタン → Tools選択 → /share ページ（Suspense境界） → Convert Transfer ツール（Suspense境界）
+```
+
+### コンポーネント構造
+
+```
+SharePage
+├── Suspense (fallback: LoadingPage)
+└── ShareContent (useSearchParams使用)
+
+ConvertTransferPage  
+├── Suspense (fallback: LoadingPage)
+└── ConvertTransferContent (useSearchParams使用)
 ```
 
 ## ブラウザ対応
