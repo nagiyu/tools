@@ -13,7 +13,7 @@ export default class AdSenseUtil {
    */
   public static async getAdSenseConfig(enableAutoAds: boolean = true): Promise<AdsenseConfig | null> {
     try {
-      const publisherId = await SecretsManagerUtil.getSecretValue('GoogleAdSense', 'PublisherID');
+      const publisherId = await SecretsManagerUtil.getSecretValue('GoogleAdSense', 'PUBLISHER_ID');
       
       return {
         publisherId,
