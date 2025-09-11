@@ -22,6 +22,7 @@ export const FINANCE_NOTIFICATION_CONDITION_TYPE = {
   HAWK_REVERSAL: 'HawkReversal',
   THREE_DARK_STARS: 'ThreeDarkStars',
   SHOOTING_STAR: 'ShootingStar',
+  SANSEN_AKENOMYOJO: 'SansenAkenomyojo', // 三川明けの明星
 } as const;
 
 export type FinanceNotificationConditionType = typeof FINANCE_NOTIFICATION_CONDITION_TYPE[keyof typeof FINANCE_NOTIFICATION_CONDITION_TYPE];
