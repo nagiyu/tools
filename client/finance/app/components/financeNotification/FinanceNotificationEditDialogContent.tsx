@@ -33,7 +33,7 @@ interface FinanceNotificationEditDialogContentProps {
 // Condition labels for the notification system
 const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN]: '指定価格を上回る',
-    [FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN]: '指定価格を下回る', 
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN]: '指定価格を下回る',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RED_SOLDIERS]: 'Three Red Soldiers (赤三兵)',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_RIVER_EVENING_STAR]: 'Three River Evening Star (三川明けの明星)',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.TWO_TAKURI_LINES]: '二本たくり線',
@@ -46,6 +46,7 @@ const conditionLabels: Record<FinanceNotificationConditionType, string> = {
     [FINANCE_NOTIFICATION_CONDITION_TYPE.HAWK_REVERSAL]: '鷹かえし',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.THREE_DARK_STARS]: '陰の三つ星',
     [FINANCE_NOTIFICATION_CONDITION_TYPE.SHOOTING_STAR]: '流れ星',
+    [FINANCE_NOTIFICATION_CONDITION_TYPE.SANSEN_AKENOMYOJO]: '三川明けの明星',
 };
 
 // Condition descriptions - function to provide context-aware descriptions
@@ -110,12 +111,12 @@ export default function FinanceNotificationEditDialogContent({
         if (item.conditions) {
             try {
                 const conditions = JSON.parse(item.conditions);
-                
+
                 // Check if it's the new format (array of objects with type and frequency)
                 if (Array.isArray(conditions) && conditions.length > 0 && typeof conditions[0] === 'object' && conditions[0].type) {
                     return conditions as FinanceNotificationConditionWithFrequency[];
                 }
-                
+
                 // Legacy format (array of strings) - convert to new format
                 if (Array.isArray(conditions)) {
                     const defaultFrequency = item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
@@ -140,10 +141,10 @@ export default function FinanceNotificationEditDialogContent({
     // Helper function to update condition frequency
     const updateConditionFrequency = (conditionType: FinanceNotificationConditionType, frequency: FinanceNotificationFrequencyType) => {
         const conditionsWithFreq = getSelectedConditionsWithFrequency();
-        const updatedConditions = conditionsWithFreq.map(c => 
+        const updatedConditions = conditionsWithFreq.map(c =>
             c.type === conditionType ? { ...c, frequency } : c
         );
-        
+
         onItemChange({
             ...item,
             conditions: JSON.stringify(updatedConditions)
@@ -153,7 +154,7 @@ export default function FinanceNotificationEditDialogContent({
     // Helper function to update selected conditions with mutual exclusivity for price conditions
     const updateConditions = (conditionType: FinanceNotificationConditionType, checked: boolean) => {
         let conditionsWithFreq = getSelectedConditionsWithFrequency();
-        
+
         if (checked) {
             // If selecting a price condition, remove the other price condition first
             if (conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN) {
@@ -161,7 +162,7 @@ export default function FinanceNotificationEditDialogContent({
             } else if (conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN) {
                 conditionsWithFreq = conditionsWithFreq.filter(c => c.type !== FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN);
             }
-            
+
             if (!conditionsWithFreq.some(c => c.type === conditionType)) {
                 // Add new condition with default frequency
                 const defaultFrequency = item.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
@@ -173,7 +174,7 @@ export default function FinanceNotificationEditDialogContent({
         } else {
             conditionsWithFreq = conditionsWithFreq.filter(c => c.type !== conditionType);
         }
-        
+
         onItemChange({
             ...item,
             conditions: JSON.stringify(conditionsWithFreq)
@@ -230,14 +231,14 @@ export default function FinanceNotificationEditDialogContent({
                 disabled={loading || !item.exchangeId}
                 onChange={(value) => onItemChange({ ...item, tickerId: value })}
             />
-            
+
             {/* Session Selection */}
             <SessionSelect
                 value={item.session || SessionUtil.getDefaultSession()}
                 disabled={loading}
                 onChange={(value) => onItemChange({ ...item, session: value })}
             />
-            
+
             {/* Mode Selection */}
             <BasicRadioGroup
                 label="通知モード"
@@ -264,16 +265,16 @@ export default function FinanceNotificationEditDialogContent({
                 <h3 style={{ marginBottom: '16px', fontSize: '1.25rem', fontWeight: 500 }}>
                     {item.mode === FINANCE_NOTIFICATION_MODE.BUY ? '買い条件' : '売り条件'}
                 </h3>
-                
+
                 {(item.mode === FINANCE_NOTIFICATION_MODE.BUY ? BUY_CONDITIONS : SELL_CONDITIONS).map((conditionType) => {
                     // Check if this is a price condition that should be disabled due to mutual exclusivity
                     const isPriceCondition = conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || conditionType === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN;
-                    const isOtherPriceConditionSelected = isPriceCondition && selectedConditions.some(c => 
+                    const isOtherPriceConditionSelected = isPriceCondition && selectedConditions.some(c =>
                         c !== conditionType && (c === FINANCE_NOTIFICATION_CONDITION_TYPE.GREATER_THAN || c === FINANCE_NOTIFICATION_CONDITION_TYPE.LESS_THAN)
                     );
                     const isCurrentlySelected = selectedConditions.includes(conditionType);
                     const isDisabled = loading || (isPriceCondition && isOtherPriceConditionSelected && !isCurrentlySelected);
-                    
+
                     // Get current frequency for this condition
                     const conditionsWithFreq = getSelectedConditionsWithFrequency();
                     const currentCondition = conditionsWithFreq.find(c => c.type === conditionType);
@@ -290,27 +291,27 @@ export default function FinanceNotificationEditDialogContent({
                             <p style={{ marginLeft: '32px', marginTop: '4px', fontSize: '0.875rem', color: '#666' }}>
                                 {getConditionDescription(conditionType, item.mode)}
                             </p>
-                            
+
                             {/* Frequency selection for each condition */}
                             {isCurrentlySelected && (
                                 <div style={{ marginLeft: '32px', marginTop: '12px' }}>
                                     <BasicSelect
                                         label="通知頻度"
                                         options={[
-                                            { 
-                                                label: '1分ごと', 
+                                            {
+                                                label: '1分ごと',
                                                 value: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
                                             },
-                                            { 
-                                                label: '10分ごと', 
+                                            {
+                                                label: '10分ごと',
                                                 value: FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL,
                                             },
-                                            { 
-                                                label: '1時間ごと', 
+                                            {
+                                                label: '1時間ごと',
                                                 value: FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL,
                                             },
-                                            { 
-                                                label: '取引開始時のみ', 
+                                            {
+                                                label: '取引開始時のみ',
                                                 value: FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY,
                                             }
                                         ]}
@@ -327,7 +328,7 @@ export default function FinanceNotificationEditDialogContent({
                     );
                 })}
             </div>
-            
+
             {needsConditionValue && (
                 <CurrencyNumberField
                     label='目標価格'
