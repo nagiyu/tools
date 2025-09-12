@@ -17,6 +17,7 @@ function ConvertTransferContent() {
     const [tabIndex, setTabIndex] = useState(0);
     const [before, setBefore] = useState('');
     const [after, setAfter] = useState('');
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
     useEffect(() => {
         // Handle shared data from share sheet
@@ -33,9 +34,18 @@ function ConvertTransferContent() {
     const service = new ConvertTransferService();
 
     const handleConvert = () => {
-        const result = service.convert(before);
+        const result = service.convert(before, selectedDate || undefined);
         setAfter(result);
         setTabIndex(1);
+    };
+
+    const handleDateChange = (date: Date | null) => {
+        setSelectedDate(date);
+        // Re-convert if we already have converted text
+        if (after) {
+            const result = service.convert(before, date || undefined);
+            setAfter(result);
+        }
     };
 
     const tabs = (runWithLoading: <T>(func: () => Promise<T>) => Promise<T>) => [
@@ -55,6 +65,8 @@ function ConvertTransferContent() {
             content: (
                 <AfterTabContent
                     value={after}
+                    selectedDate={selectedDate}
+                    onDateChange={handleDateChange}
                     runWithLoading={runWithLoading}
                 />
             )
