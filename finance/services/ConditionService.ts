@@ -37,11 +37,23 @@ export default class ConditionService {
   };
 
   /**
-   * Gets the list of available conditions.
-   * @returns List of condition keys
+   * Gets the list of buy conditions.
+   * @returns List of buy condition keys
    */
-  public getConditionList(): string[] {
-    return Object.keys(this.conditionMap);
+  public getBuyConditionList(): string[] {
+    return Object.entries(this.conditionMap)
+      .filter(([, value]) => value.info.isBuyCondition)
+      .map(([key]) => key);
+  }
+
+  /**
+   * Gets the list of sell conditions.
+   * @returns List of sell condition keys
+   */
+  public getSellConditionList(): string[] {
+    return Object.entries(this.conditionMap)
+      .filter(([, value]) => value.info.isSellCondition)
+      .map(([key]) => key);
   }
 
   /**

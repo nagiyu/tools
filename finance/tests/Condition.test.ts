@@ -28,14 +28,20 @@ describe('ConditionTest', () => {
   describe('三川明けの明星', () => {
     const conditionKey = 'SansenAkenomyojo';
 
-    it('Contains in Condition List', () => {
-      const conditionList = service.getConditionList();
+    it('Contains in Buy Condition List', () => {
+      const conditionList = service.getBuyConditionList();
       expect(conditionList).toContain(conditionKey);
+    });
+
+    it('Not Contains in Sell Condition List', () => {
+      const conditionList = service.getSellConditionList();
+      expect(conditionList).not.toContain(conditionKey);
     });
 
     it('Get Condition Info', () => {
       const info = service.getConditionInfo(conditionKey);
       expect(info.name).toBe('三川明けの明星');
+      expect(info.description).not.toBe('');
       expect(info.isBuyCondition).toBe(true);
       expect(info.isSellCondition).toBe(false);
     });
