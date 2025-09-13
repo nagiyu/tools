@@ -1,4 +1,4 @@
-import DataAccessorBase from '@common/services/DataAccessorBase';
+import DataAccessorBase from '@common/services/DataAccessorBase.old';
 
 import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 import { FinanceRecordDataType } from '@finance/types/FinanceRecordDataType';

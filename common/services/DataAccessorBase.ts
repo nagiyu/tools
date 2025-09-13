@@ -34,7 +34,7 @@ export default abstract class DataAccessorBase<T extends RecordTypeBase> {
     return await this.DynamoDBService.create({ ...creates, DataType: this.dataType });
   }
 
-  public async update(id: string, updates: Partial<T>): Promise<T> {
+  public async update(id: string, updates: Partial<T>): Promise<T | null> {
     return await this.DynamoDBService.update(id, this.dataType, updates);
   }
 

@@ -1,4 +1,4 @@
-import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import CRUDServiceBase from '@common/services/CRUDServiceBase.old';
 import DateUtil from '@common/utils/DateUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import NotificationUtil from '@common/utils/NotificationUtil';
@@ -22,7 +22,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
   public constructor() {
     super(new FinanceNotificationDataAccessor(), FinanceNotificationService.dataToRecord, FinanceNotificationService.recordToData);
-    
+
     // Initialize the condition checker provider with fallback to legacy methods
     this.conditionCheckerProvider = new ConditionCheckerProvider({
       fallbackHandler: this.legacyConditionCheck.bind(this)
@@ -66,11 +66,11 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           const conditionPromises = conditionsToCheck.map(async (conditionWithFreq) => {
             try {
               const condition = await this.checkCondition(
-                conditionWithFreq.type, 
-                `${exchangeKey}:${tickerKey}`, 
-                exchangeKey, 
-                tickerKey, 
-                notification.conditionValue, 
+                conditionWithFreq.type,
+                `${exchangeKey}:${tickerKey}`,
+                exchangeKey,
+                tickerKey,
+                notification.conditionValue,
                 notification.session
               );
               return { condition, conditionWithFreq, success: true };
@@ -83,7 +83,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
           // Wait for all conditions to complete and find the first met condition
           const results = await Promise.allSettled(conditionPromises);
-          
+
           for (const result of results) {
             if (result.status === 'fulfilled') {
               const { condition, conditionWithFreq } = result.value;
@@ -118,7 +118,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         if (!notification.firstNotificationSent) {
           const conditionsWithFreq = this.parseConditions(notification);
           const hasDailyCondition = conditionsWithFreq.some(c => this.isDailyCondition(c.type));
-          
+
           if (hasDailyCondition) {
             console.log(`Marking first notification as sent for ${notification.id}`);
             await this.update({
@@ -228,10 +228,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   private isWithinExchangeHours(exchange: ExchangeDataType, currentTime: Date = DateUtil.getNowJSTAsDate()): boolean {
     const currentJSTTime = TimeUtil.getJSTTime(currentTime);
     const currentTotalMinutes = currentJSTTime.hour * 60 + currentJSTTime.minute;
-    
+
     const startTotalMinutes = exchange.start.hour * 60 + exchange.start.minute;
     const endTotalMinutes = exchange.end.hour * 60 + exchange.end.minute;
-    
+
     // Check if exchange operates across midnight (e.g., 23:00 to 01:00)
     if (startTotalMinutes > endTotalMinutes) {
       // Exchange crosses midnight - check both ranges
@@ -247,7 +247,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
    */
   private isExchangeStartTime(exchange: ExchangeDataType, currentTime: Date = DateUtil.getNowJSTAsDate()): boolean {
     const currentJSTTime = TimeUtil.getJSTTime(currentTime);
-    
+
     return currentJSTTime.hour === exchange.start.hour && currentJSTTime.minute === exchange.start.minute;
   }
 
@@ -265,12 +265,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     if (notification.mode && notification.conditions) {
       try {
         const conditions = JSON.parse(notification.conditions);
-        
+
         // Check if it's the new format (array of objects with type and frequency)
         if (Array.isArray(conditions) && conditions.length > 0 && typeof conditions[0] === 'object' && conditions[0].type) {
           return conditions as FinanceNotificationConditionWithFrequency[];
         }
-        
+
         // Legacy format (array of strings) - convert to new format
         if (Array.isArray(conditions)) {
           const globalFrequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
@@ -283,7 +283,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         console.error('Error parsing conditions JSON:', error);
       }
     }
-    
+
     // Fallback to legacy single condition format
     const globalFrequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
     return [{
@@ -301,7 +301,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     notification: FinanceNotificationDataType
   ): boolean {
     const currentTime = DateUtil.getNowJSTAsDate();
-    
+
     // First check if we're within exchange hours
     if (!this.isWithinExchangeHours(exchange, currentTime)) {
       return false;
@@ -309,12 +309,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
     const { type: conditionType, frequency } = conditionWithFrequency;
     const hasDailyCondition = this.isDailyCondition(conditionType);
-    
+
     switch (frequency) {
       case FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY:
         // Only send at exchange start
         return this.isExchangeStartTime(exchange, currentTime);
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL:
         // Every minute for price conditions, special logic for pattern conditions
         if (hasDailyCondition) {
@@ -329,15 +329,15 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         }
         // Price conditions: always allow during exchange hours
         return true;
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL:
         // Every 10 minutes (only at first batch processing of each 10-minute window)
         return this.isTenMinuteInterval(currentTime);
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL:
         // Every hour (only when minute is 0)
         return this.isHourlyInterval(currentTime);
-        
+
       default:
         console.log(`Unknown frequency: ${frequency}`);
         return false;
@@ -348,12 +348,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
    * Check if notification should be sent based on timing rules
    */
   private shouldSendNotification(
-    notification: FinanceNotificationDataType, 
-    exchange: ExchangeDataType, 
+    notification: FinanceNotificationDataType,
+    exchange: ExchangeDataType,
     conditionTypes: FinanceNotificationConditionType[]
   ): boolean {
     const currentTime = DateUtil.getNowJSTAsDate();
-    
+
     // First check if we're within exchange hours
     if (!this.isWithinExchangeHours(exchange, currentTime)) {
       console.log(`Notification ${notification.id} skipped - outside exchange hours`);
@@ -363,7 +363,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     // Check frequency preference
     const frequency = notification.frequency || FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL;
     const hasDailyCondition = conditionTypes.some(type => this.isDailyCondition(type));
-    
+
     switch (frequency) {
       case FINANCE_NOTIFICATION_FREQUENCY.EXCHANGE_START_ONLY:
         // Only send at exchange start
@@ -372,7 +372,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           return false;
         }
         break;
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL:
         // Every minute for price conditions, special logic for pattern conditions
         if (hasDailyCondition) {
@@ -389,7 +389,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         }
         // Price conditions: always allow during exchange hours (no additional restrictions)
         break;
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.TEN_MINUTE_LEVEL:
         // Every 10 minutes (only at first batch processing of each 10-minute window)
         if (!this.isTenMinuteInterval(currentTime)) {
@@ -397,7 +397,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           return false;
         }
         break;
-        
+
       case FINANCE_NOTIFICATION_FREQUENCY.HOURLY_LEVEL:
         // Every hour (only when minute is 0)
         if (!this.isHourlyInterval(currentTime)) {
@@ -405,12 +405,12 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           return false;
         }
         break;
-        
+
       default:
         console.log(`Notification ${notification.id} - unknown frequency: ${frequency}`);
         return false;
     }
-    
+
     return true;
   }
 

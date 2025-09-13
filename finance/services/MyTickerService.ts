@@ -1,4 +1,4 @@
-import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import CRUDServiceBase from '@common/services/CRUDServiceBase.old';
 
 import MyTickerDataAccessor from '@finance/services/MyTickerDataAccessor';
 import { MyTickerDataType } from '@finance/interfaces/data/MyTickerDataType';

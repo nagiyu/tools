@@ -29,7 +29,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
   }
 
@@ -48,7 +48,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
   }
 
@@ -72,7 +72,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
 
       return unmarshall(items[0]) as T;
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
   }
 
@@ -98,7 +98,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
 
     return item;
@@ -108,7 +108,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     id: string,
     dataType: string,
     updates: Partial<T>
-  ): Promise<T> {
+  ): Promise<T | null> {
     const dynamoClient = await this.getDynamoClient();
 
     updates.Update = Date.now();
@@ -136,8 +136,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     }
 
     if (!updateExpr) {
-      // 何も更新しない場合は return
-      return;
+      ErrorUtil.throwError('No fields to update');
     }
 
     const command = new UpdateItemCommand({
@@ -151,7 +150,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
 
     return await this.getById(id);
@@ -168,7 +167,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(error);
+      throw ErrorUtil.throwError(null, error);
     }
   }
 

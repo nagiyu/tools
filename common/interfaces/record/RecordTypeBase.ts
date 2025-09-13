@@ -1,6 +1,6 @@
 export interface RecordTypeBase {
-  ID?: string; // UID, Partition Key
-  DataType?: string; // Sort Key
-  Create?: number;
-  Update?: number;
+  ID?: string | null; // UID, Partition Key
+  DataType?: string | null; // Sort Key
+  Create?: number | null;
+  Update?: number | null;
 }

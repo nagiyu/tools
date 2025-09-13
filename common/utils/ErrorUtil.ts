@@ -8,7 +8,7 @@ export default class ErrorUtil {
    * @param error The error details to include.
    * @throws Throws an Error with the specified message and error details.
    */
-  public static throwError(message?: string, error?: any): never {
+  public static throwError(message?: string | null, error?: any | null): never {
     if (!message && !error) {
       const msg = 'An unknown error occurred';
       console.error(msg);
