@@ -1,5 +1,4 @@
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
-import FinanceUtil from '@finance/utils/FinanceUtil';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 import ErrorUtil from '@common/utils/ErrorUtil';
 
@@ -18,7 +17,7 @@ export default class SansenAkenomyojoCondition extends ConditionBase {
     currentPrice?: number
   ): Promise<boolean> {
     try {
-      const stockData = await FinanceUtil.getStockPriceData(exchangeId, tickerId, { count: 3, session });
+      const stockData = await this.getStockPriceData(exchangeId, tickerId, { count: 3, session });
 
       if (!stockData || !Array.isArray(stockData) || stockData.length < 3) {
         return false;

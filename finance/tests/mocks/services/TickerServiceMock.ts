@@ -8,7 +8,7 @@ export default class TickerServiceMock extends TickerService {
 
   public override async getById(id: string): Promise<TickerDataType | null> {
     return {
-      id: 'MOCK_TICKER',
+      id: id,
       name: TickerServiceMock.MockTickerName,
       key: 'MOCK_TICKER',
       exchange: 'MOCK_EXCHANGE',

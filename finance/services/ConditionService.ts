@@ -1,10 +1,13 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
+
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
+import ExchangeService from '@finance/services/ExchangeService';
+import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
 import SansenAkenomyojoCondition, { SansenAkenomyojoConditionInfo } from '@finance/conditions/SansenAkenomyojoCondition';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
 
-type ConditionConstructor = new (exchangeId: string, tickerId: string) => ConditionBase;
+type ConditionConstructor = new (exchangeService: ExchangeService, tickerService: TickerService) => ConditionBase;
 
 interface ConditionMap {
   [key: string]: {
@@ -26,10 +29,25 @@ export interface ConditionResult {
 }
 
 export default class ConditionService {
+  private exchangeService: ExchangeService;
+  private tickerService: TickerService;
+
+  constructor(
+    exchangeService: ExchangeService = new ExchangeService(),
+    tickerService: TickerService = new TickerService()
+  ) {
+    this.exchangeService = exchangeService;
+    this.tickerService = tickerService;
+  }
+
   /**
    * Condition map
    */
   private conditionMap: ConditionMap = {
+    GreaterThan: {
+      info: GreaterThanConditionInfo,
+      condition: GreaterThanCondition
+    },
     SansenAkenomyojo: {
       info: SansenAkenomyojoConditionInfo,
       condition: SansenAkenomyojoCondition
@@ -103,7 +121,7 @@ export default class ConditionService {
     currentPrice?: number
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
-    const condition = new ConditionClass(exchangeId, tickerId);
+    const condition = new ConditionClass(this.exchangeService, this.tickerService);
     const met = await condition.checkCondition(exchangeId, tickerId, session, currentPrice);
 
     if (!met) {
@@ -115,8 +133,7 @@ export default class ConditionService {
   }
 
   private async getNotificationMessage(conditionName: string, tickerId: string): Promise<string> {
-    const tickerService = new TickerService();
-    const ticker = await tickerService.getById(tickerId);
+    const ticker = await this.tickerService.getById(tickerId);
     if (!ticker) {
       ErrorUtil.throwError(`Ticker with ID ${tickerId} not found`);
     }
