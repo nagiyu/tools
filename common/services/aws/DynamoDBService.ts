@@ -1,18 +1,23 @@
 import { DynamoDBClient, ScanCommand, PutItemCommand, UpdateItemCommand, DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
+import CommonUtil from '@common/utils/CommonUtil';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
-export default class DynamoDBService {
+export default class DynamoDBService<T extends RecordTypeBase> {
   private readonly tableName: string;
 
   constructor(tableName: string) {
     this.tableName = tableName;
   }
 
-  public async getAll<T extends RecordTypeBase>(): Promise<T[]> {
+  public getTableName(): string {
+    return this.tableName;
+  }
+
+  public async getAll(): Promise<T[]> {
     const dynamoClient = await this.getDynamoClient();
 
     const command = new ScanCommand({
@@ -28,9 +33,7 @@ export default class DynamoDBService {
     }
   }
 
-  public async getAllByDataType<T extends RecordTypeBase>(
-    dataTypeValue: string
-  ): Promise<T[]> {
+  public async getAllByDataType(dataTypeValue: string): Promise<T[]> {
     const dynamoClient = await this.getDynamoClient();
 
     const command = new ScanCommand({
@@ -49,9 +52,7 @@ export default class DynamoDBService {
     }
   }
 
-  public async getById<T extends RecordTypeBase>(
-    id: string
-  ): Promise<T | null> {
+  public async getById(id: string): Promise<T | null> {
     const dynamoClient = await this.getDynamoClient();
 
     const command = new ScanCommand({
@@ -75,9 +76,18 @@ export default class DynamoDBService {
     }
   }
 
-  public async create<T extends RecordTypeBase>(
-    item: T
-  ): Promise<void> {
+  public async create(creates: Partial<T>): Promise<T> {
+    if (!creates.DataType) {
+      ErrorUtil.throwError('DataType is required');
+    }
+
+    const item: T = {
+      ...creates,
+      ID: CommonUtil.generateUUID(),
+      Create: Date.now(),
+      Update: Date.now()
+    } as T;
+
     const dynamoClient = await this.getDynamoClient();
 
     const command = new PutItemCommand({
@@ -90,13 +100,15 @@ export default class DynamoDBService {
     } catch (error) {
       throw ErrorUtil.throwError(error);
     }
+
+    return item;
   }
 
-  public async update<T extends RecordTypeBase>(
+  public async update(
     id: string,
     dataType: string,
     updates: Partial<T>
-  ): Promise<void> {
+  ): Promise<T> {
     const dynamoClient = await this.getDynamoClient();
 
     // SET: 値が null/undefined 以外
@@ -139,6 +151,8 @@ export default class DynamoDBService {
     } catch (error) {
       throw ErrorUtil.throwError(error);
     }
+
+    return await this.getById(id);
   }
 
   public async delete(id: string, dataType: string): Promise<void> {

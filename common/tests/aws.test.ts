@@ -1,4 +1,3 @@
-import CommonUtil from '@common/utils/CommonUtil';
 import DynamoDBService from '@common/services/aws/DynamoDBService';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
@@ -18,47 +17,38 @@ interface TestRecordType extends RecordTypeBase {
   OptionalNumberColumn?: number;
 }
 
-const generateTypeARecord = (): TestRecordType => {
+const generateTypeARecord = (): Partial<TestRecordType> => {
   return {
-    ID: CommonUtil.generateUUID(),
     DataType: TEST_RECORD_DATA_TYPE.TYPEA,
     StringColumn: 'stringA',
     NumberColumn: 123,
-    Create: Date.now(),
-    Update: Date.now(),
   };
 }
 
-const generateTypeBRecord = (): TestRecordType => {
+const generateTypeBRecord = (): Partial<TestRecordType> => {
   return {
-    ID: CommonUtil.generateUUID(),
     DataType: TEST_RECORD_DATA_TYPE.TYPEB,
     StringColumn: 'stringB',
     NumberColumn: 456,
     OptionalStringColumn: 'optionalB',
     OptionalNumberColumn: 789,
-    Create: Date.now(),
-    Update: Date.now(),
   };
 };
 
 describe.skip('AWS Tests', () => {
   describe('DynamoDBService', () => {
     const tableName = 'Test';
-    let dynamoDBService: DynamoDBService;
+    let dynamoDBService: DynamoDBService<TestRecordType>;
 
     beforeEach(() => {
       dynamoDBService = new DynamoDBService(tableName);
     });
 
     it('Get All', async () => {
-      const item1 = generateTypeARecord();
-      const item2 = generateTypeBRecord();
+      const item1 = await dynamoDBService.create(generateTypeARecord());
+      const item2 = await dynamoDBService.create(generateTypeBRecord());
 
-      await dynamoDBService.create(item1);
-      await dynamoDBService.create(item2);
-
-      const allItems = await dynamoDBService.getAll<TestRecordType>();
+      const allItems = await dynamoDBService.getAll();
 
       expect(allItems.length).toBeGreaterThanOrEqual(2);
       expect(allItems.find(i => i.ID === item1.ID)).toBeDefined();
@@ -66,14 +56,11 @@ describe.skip('AWS Tests', () => {
     });
 
     it('Get All By DataType', async () => {
-      const item1 = generateTypeARecord();
-      const item2 = generateTypeBRecord();
+      const item1 = await dynamoDBService.create(generateTypeARecord());
+      const item2 = await dynamoDBService.create(generateTypeBRecord());
 
-      await dynamoDBService.create(item1);
-      await dynamoDBService.create(item2);
-
-      const typeAItems = await dynamoDBService.getAllByDataType<TestRecordType>(TEST_RECORD_DATA_TYPE.TYPEA);
-      const typeBItems = await dynamoDBService.getAllByDataType<TestRecordType>(TEST_RECORD_DATA_TYPE.TYPEB);
+      const typeAItems = await dynamoDBService.getAllByDataType(TEST_RECORD_DATA_TYPE.TYPEA);
+      const typeBItems = await dynamoDBService.getAllByDataType(TEST_RECORD_DATA_TYPE.TYPEB);
 
       expect(typeAItems.length).toBeGreaterThanOrEqual(1);
       expect(typeAItems.find(i => i.ID === item1.ID)).toBeDefined();
@@ -85,12 +72,10 @@ describe.skip('AWS Tests', () => {
     });
 
     it('CRUD', async () => {
-      const createItem: TestRecordType = generateTypeARecord();
+      const createItem = await dynamoDBService.create(generateTypeARecord());
       const id = createItem.ID;
 
-      await dynamoDBService.create(createItem);
-
-      const createResult = await dynamoDBService.getById<TestRecordType>(id);
+      const createResult = await dynamoDBService.getById(id);
 
       if (!createResult) {
         ErrorUtil.throwError('Item not found after creation');
@@ -110,9 +95,7 @@ describe.skip('AWS Tests', () => {
         OptionalNumberColumn: 42,
       };
 
-      await dynamoDBService.update<TestRecordType>(id, TEST_RECORD_DATA_TYPE.TYPEA, updateItem);
-
-      const updateResult = await dynamoDBService.getById<TestRecordType>(id);
+      const updateResult = await dynamoDBService.update(id, TEST_RECORD_DATA_TYPE.TYPEA, updateItem);
 
       if (!updateResult) {
         ErrorUtil.throwError('Item not found after update');
@@ -127,16 +110,14 @@ describe.skip('AWS Tests', () => {
 
       await dynamoDBService.delete(id, TEST_RECORD_DATA_TYPE.TYPEA);
 
-      const deleteResult = await dynamoDBService.getById<TestRecordType>(id);
+      const deleteResult = await dynamoDBService.getById(id);
 
       expect(deleteResult).toBeNull();
     });
 
     it('Delete Optional Columns', async () => {
-      const createItem: TestRecordType = generateTypeBRecord();
+      const createItem = await dynamoDBService.create(generateTypeBRecord());
       const id = createItem.ID;
-
-      await dynamoDBService.create(createItem);
 
       const updateItem: Partial<TestRecordType> = {
         StringColumn: 'updated',
@@ -145,9 +126,7 @@ describe.skip('AWS Tests', () => {
         OptionalNumberColumn: null,
       };
 
-      await dynamoDBService.update<TestRecordType>(id, TEST_RECORD_DATA_TYPE.TYPEB, updateItem);
-
-      const updateResult = await dynamoDBService.getById<TestRecordType>(id);
+      const updateResult = await dynamoDBService.update(id, TEST_RECORD_DATA_TYPE.TYPEB, updateItem);
 
       if (!updateResult) {
         ErrorUtil.throwError('Item not found after update');
