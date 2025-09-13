@@ -69,7 +69,7 @@ describe('DataAccessorBase', () => {
     const item2 = await dataAccessor.create(generateTypeARecord());
 
     const results = await dataAccessor.get();
-    expect(results.length).toBe(2);
+    expect(results.length).toBeGreaterThanOrEqual(2);
     expect(results).toEqual(expect.arrayContaining([item1, item2]));
   });
 

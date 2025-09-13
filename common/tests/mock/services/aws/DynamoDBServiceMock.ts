@@ -41,6 +41,8 @@ export default class DynamoDBServiceMock<T extends RecordTypeBase> extends Dynam
     dataType: string,
     updates: Partial<T>
   ): Promise<T> {
+    updates.Update = Date.now();
+
     const index = this.items.findIndex(item => item.ID === id && item.DataType === dataType);
     if (index !== -1) {
       this.items[index] = { ...this.items[index], ...updates };

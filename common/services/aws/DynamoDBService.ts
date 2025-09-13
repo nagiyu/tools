@@ -111,6 +111,8 @@ export default class DynamoDBService<T extends RecordTypeBase> {
   ): Promise<T> {
     const dynamoClient = await this.getDynamoClient();
 
+    updates.Update = Date.now();
+
     // SET: 値が null/undefined 以外
     const setEntries = Object.entries(updates)
       .filter(([k, v]) => !["ID", "DataType"].includes(k) && v !== undefined && v !== null);
