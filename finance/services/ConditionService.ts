@@ -3,6 +3,7 @@ import ErrorUtil from '@common/utils/ErrorUtil';
 import ConditionBase, { ConditionInfo } from '@finance/conditions/ConditionBase';
 import ExchangeService from '@finance/services/ExchangeService';
 import GreaterThanCondition, { GreaterThanConditionInfo } from '@finance/conditions/GreaterThanCondition';
+import LessThanCondition, { LessThanConditionInfo } from '@finance/conditions/LessThanCondition';
 import SansenAkenomyojoCondition, { SansenAkenomyojoConditionInfo } from '@finance/conditions/SansenAkenomyojoCondition';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
@@ -48,10 +49,14 @@ export default class ConditionService {
       info: GreaterThanConditionInfo,
       condition: GreaterThanCondition
     },
+    LessThan: {
+      info: LessThanConditionInfo,
+      condition: LessThanCondition
+    },
     SansenAkenomyojo: {
       info: SansenAkenomyojoConditionInfo,
       condition: SansenAkenomyojoCondition
-    }
+    },
   };
 
   /**

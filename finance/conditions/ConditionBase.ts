@@ -1,8 +1,9 @@
+import ErrorUtil from '@common/utils/ErrorUtil';
+
 import ExchangeService from '@finance/services/ExchangeService';
 import FinanceUtil, { GetStockPriceDataOptions } from '@finance/utils/FinanceUtil';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
-import ErrorUtil from '@common/utils/ErrorUtil';
 
 /**
  * Interface for condition information.
