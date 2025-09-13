@@ -115,7 +115,7 @@ export default class ConditionService {
    * @param exchangeId Exchange ID
    * @param tickerId Ticker ID
    * @param session Exchange session type
-   * @param currentPrice Current price
+   * @param targetPrice Target price (optional)
    * @returns Promise that resolves to true if the condition is met, false otherwise
    */
   public async checkCondition(
@@ -123,11 +123,11 @@ export default class ConditionService {
     exchangeId: string,
     tickerId: string,
     session?: ExchangeSessionType,
-    currentPrice?: number
+    targetPrice?: number
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);
-    const met = await condition.checkCondition(exchangeId, tickerId, session, currentPrice);
+    const met = await condition.checkCondition(exchangeId, tickerId, session, targetPrice);
 
     if (!met) {
       return { met };
