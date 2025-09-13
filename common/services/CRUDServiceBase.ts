@@ -43,6 +43,11 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
     return mappedData;
   }
 
+  public async getById(id: string): Promise<DataType | null> {
+    const items = await this.get();
+    return items.find(item => item.id === id) || null;
+  }
+
   public async create(item: DataType): Promise<void> {
     await this.dataAccessor.create(this.dataToRecord(item));
 
