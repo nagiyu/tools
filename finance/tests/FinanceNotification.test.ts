@@ -46,32 +46,28 @@ describe('FinanceNotificationService', () => {
         }
       ];
 
-      dataAccessor.createRecords([
-        {
-          ID: CommonUtil.generateUUID(),
-          DataType: FINANCE_RECORD_DATA_TYPE.FINANCE_NOTIFICATION,
-          TerminalID: CommonUtil.generateUUID(),
-          SubscriptionEndpoint: 'http://localhost:3000/endpoint',
-          SubscriptionKeysP256dh: 'p256dh',
-          SubscriptionKeysAuth: 'auth',
-          ExchangeID: ExchangeServiceMock.MockExchangeName,
-          TickerID: TickerServiceMock.MockTickerName,
-          ConditionList: [
-            {
-              conditionName: 'GreaterThan',
-              frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL
-            }
-          ],
-          Session: EXCHANGE_SESSION.EXTENDED,
-          TargetPrice: 950,
-          FirstNotificationSent: false,
-          Create: Date.now(),
-          Update: Date.now()
-        }
-      ]);
+      await service.create({
+        terminalId: CommonUtil.generateUUID(),
+        subscriptionEndpoint: 'http://localhost:3000/endpoint',
+        subscriptionKeysP256dh: 'p256dh',
+        subscriptionKeysAuth: 'auth',
+        exchangeId: ExchangeServiceMock.MockExchangeName,
+        tickerId: TickerServiceMock.MockTickerName,
+        conditionList: [
+          {
+            conditionName: 'GreaterThan',
+            frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
+            session: EXCHANGE_SESSION.EXTENDED,
+            targetPrice: 950,
+            firstNotificationSent: false
+          }
+        ]
+      });
 
       await service.notification('http://localhost:3000/endpoint');
+
       const messages = notificationService.getMessages();
+
       expect(messages.length).toBe(1);
     });
   });

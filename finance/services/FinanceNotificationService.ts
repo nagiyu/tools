@@ -10,7 +10,7 @@ import ExchangeService from '@finance/services/ExchangeService';
 import FinanceNotificationDataAccessor from '@finance/services/FinanceNotificationDataAccessor';
 import TickerService from '@finance/services/TickerService';
 import { ExchangeDataType } from '@finance/interfaces/data/ExchangeDataType';
-import { FinanceNotificationConditionWithFrequency } from '@finance/interfaces/FinanceNotificationType';
+import { FinanceNotificationCondition } from '@finance/interfaces/FinanceNotificationType';
 import { FinanceNotificationDataType } from '@finance/interfaces/data/FinanceNotificationDataType';
 import { FinanceNotificationRecordType } from '@finance/interfaces/record/FinanceNotificationRecordType';
 import { FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
@@ -37,12 +37,18 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   }
 
   public override async create(creates: Partial<FinanceNotificationDataType>): Promise<FinanceNotificationDataType> {
-    creates.firstNotificationSent = false;
+    creates.conditionList.map(condition => {
+      condition.firstNotificationSent = false;
+      return condition;
+    });
     return await super.create(creates);
   }
 
   public override async update(id: string, updates: Partial<FinanceNotificationDataType>): Promise<FinanceNotificationDataType> {
-    updates.firstNotificationSent = false;
+    updates.conditionList.map(condition => {
+      condition.firstNotificationSent = false;
+      return condition;
+    });
     return await super.update(id, updates);
   }
 
@@ -71,7 +77,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         const conditionsToCheck = notification.conditionList.filter(condition => {
           if (!this.shouldCheckCondition(condition, exchange)) {
             // For pattern conditions, if it's the first notification, allow it to be checked
-            if (!notification.firstNotificationSent) {
+            if (!condition.firstNotificationSent) {
               return true;
             }
 
@@ -89,17 +95,17 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
         }
 
         // Start all condition checks in parallel
-        const conditionPromises = conditionsToCheck.map(async (conditionWithFreq) => {
+        const conditionPromises = conditionsToCheck.map(async (condition) => {
           try {
             return await this.conditionService.checkCondition(
-              conditionWithFreq.conditionName,
+              condition.conditionName,
               exchange.id,
               ticker.id,
-              notification.session,
-              notification.targetPrice
+              condition.session,
+              condition.targetPrice
             );
           } catch (error) {
-            console.error(`Error checking condition ${conditionWithFreq.conditionName}:`, error);
+            console.error(`Error checking condition ${condition.conditionName}:`, error);
             return { met: false, message: '' };
           }
         });
@@ -130,9 +136,14 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           }
         }
 
-        if (!notification.firstNotificationSent) {
-          await super.update(notification.id, { firstNotificationSent: true });
-        }
+        notification.conditionList.map(condition => {
+          if (!condition.firstNotificationSent) {
+            condition.firstNotificationSent = true;
+          }
+          return condition;
+        });
+
+        await super.update(notification.id, { conditionList: notification.conditionList });
       } catch (error) {
         if (error instanceof Error) {
           errors.push(`Error processing notification ${notification.id}: ${error.message}`);
@@ -156,9 +167,6 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       ExchangeID: data.exchangeId,
       TickerID: data.tickerId,
       ConditionList: data.conditionList,
-      Session: data.session,
-      TargetPrice: data.targetPrice,
-      FirstNotificationSent: data.firstNotificationSent,
     };
   }
 
@@ -172,9 +180,6 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       exchangeId: record.ExchangeID,
       tickerId: record.TickerID,
       conditionList: record.ConditionList,
-      session: record.Session,
-      targetPrice: record.TargetPrice,
-      firstNotificationSent: record.FirstNotificationSent,
       create: record.Create,
       update: record.Update,
     };
@@ -184,7 +189,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
    * Check if a specific condition should be checked based on its frequency setting
    */
   private shouldCheckCondition(
-    conditionWithFrequency: FinanceNotificationConditionWithFrequency,
+    conditionWithFrequency: FinanceNotificationCondition,
     exchange: ExchangeDataType
   ): boolean {
     const currentTime = DateUtil.getNowJSTAsDate();
