@@ -22,21 +22,13 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   private readonly notificationService: NotificationServiceType;
 
   public constructor(
-    dataAccessor: FinanceNotificationDataAccessor = new FinanceNotificationDataAccessor(),
-    exchangeService: ExchangeService = new ExchangeService(),
-    tickerService: TickerService = new TickerService(),
+    dataAccessor: FinanceNotificationDataAccessor,
+    exchangeService: ExchangeService,
+    tickerService: TickerService,
     conditionService: ConditionService,
     notificationService: NotificationServiceType
   ) {
     super(dataAccessor);
-
-    if (!conditionService) {
-      ErrorUtil.throwError('ConditionService instance is required');
-    }
-
-    if (!notificationService) {
-      ErrorUtil.throwError('NotificationService instance is required');
-    }
 
     this.exchangeService = exchangeService;
     this.tickerService = tickerService;
