@@ -144,11 +144,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
           }
         }
 
-        notification.conditionList.map(condition => {
+        notification.conditionList.forEach(condition => {
           if (!condition.firstNotificationSent) {
             condition.firstNotificationSent = true;
           }
-          return condition;
         });
 
         await super.update(notification.id, { conditionList: notification.conditionList });
