@@ -1,10 +1,23 @@
 import { ExchangeSessionType } from '@finance/types/ExchangeTypes';
-import { FinanceNotificationFrequencyType } from '@finance/types/FinanceNotificationType';
+import {
+  FinanceNotificationConditionModeType,
+  FinanceNotificationFrequencyType,
+} from '@finance/types/FinanceNotificationType';
 
 /**
  * Condition with frequency configuration
  */
 export interface FinanceNotificationCondition {
+  /**
+   * Unique identifier for the condition
+   */
+  id: string | null;
+
+  /**
+   * Condition mode (Buy/Sell)
+   */
+  mode: FinanceNotificationConditionModeType;
+
   /**
    * Condition name
    */
@@ -18,12 +31,12 @@ export interface FinanceNotificationCondition {
   /**
    * Session type for price data
    */
-  session?: ExchangeSessionType;
+  session: ExchangeSessionType;
 
   /**
    * Target price for conditions that require it (e.g., GreaterThan, LessThan)
    */
-  targetPrice?: number;
+  targetPrice?: number | null;
 
   /**
    * Indicates if the first notification has been sent

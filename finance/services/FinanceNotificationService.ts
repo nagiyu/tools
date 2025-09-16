@@ -37,6 +37,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   }
 
   public override async create(creates: Partial<FinanceNotificationDataType>): Promise<FinanceNotificationDataType> {
+    if (!creates.conditionList) {
+      ErrorUtil.throwError(`Condition list is required`);
+    }
+
     creates.conditionList.map(condition => {
       condition.firstNotificationSent = false;
       return condition;
@@ -45,6 +49,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   }
 
   public override async update(id: string, updates: Partial<FinanceNotificationDataType>): Promise<FinanceNotificationDataType> {
+    if (!updates.conditionList) {
+      ErrorUtil.throwError(`Condition list is required`);
+    }
+
     updates.conditionList.map(condition => {
       condition.firstNotificationSent = false;
       return condition;
@@ -132,7 +140,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
               }
             };
 
-            await this.notificationService.sendPushNotification(endpoint, conditionResult.message, subscription);
+            await this.notificationService.sendPushNotification(endpoint, conditionResult.message || '', subscription);
           }
         }
 

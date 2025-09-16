@@ -28,6 +28,11 @@ export interface ConditionInfo {
    * Indicates if the condition is a sell condition.
    */
   isSellCondition: boolean;
+
+  /**
+   * Indicates if the condition requires a target price.
+   */
+  enableTargetPrice: boolean;
 }
 
 /**
@@ -57,7 +62,7 @@ export default abstract class ConditionBase {
     exchangeId: string,
     tickerId: string,
     session?: ExchangeSessionType,
-    targetPrice?: number
+    targetPrice?: number | null
   ): Promise<boolean>;
 
   /**

@@ -14,8 +14,8 @@ export default class ExchangeService extends CRUDServiceBase<ExchangeDataType, E
     return {
       Name: data.name,
       Key: data.key,
-      Start: TimeUtil.formatTime(data.start),
-      End: TimeUtil.formatTime(data.end),
+      Start: TimeUtil.formatTime(data.start || TimeUtil.parseTime('00:00')),
+      End: TimeUtil.formatTime(data.end || TimeUtil.parseTime('00:00')),
     };
   }
 

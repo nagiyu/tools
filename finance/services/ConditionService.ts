@@ -123,7 +123,7 @@ export default class ConditionService {
     exchangeId: string,
     tickerId: string,
     session?: ExchangeSessionType,
-    targetPrice?: number
+    targetPrice?: number | null
   ): Promise<ConditionResult> {
     const ConditionClass = this.getCondition(conditionName);
     const condition = new ConditionClass(this.exchangeService, this.tickerService);

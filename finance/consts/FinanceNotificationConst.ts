@@ -22,3 +22,8 @@ export const FINANCE_NOTIFICATION_FREQUENCY = {
    */
   HOURLY_LEVEL: 'HourlyLevel',
 } as const;
+
+export const FINANCE_NOTIFICATION_CONDITION_MODE = {
+  BUY: 'Buy',
+  SELL: 'Sell',
+} as const;

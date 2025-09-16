@@ -1,5 +1,6 @@
 import CacheUtil from '@common/utils/CacheUtil';
 import DataAccessorBase from '@common/services/DataAccessorBase';
+import ErrorUtil from '@common/utils/ErrorUtil';
 import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
 import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
@@ -58,6 +59,11 @@ export default abstract class CRUDServiceBase<DataType extends DataTypeBase, Rec
 
   public async update(id: string, updates: Partial<DataType>): Promise<DataType> {
     const data = await this.dataAccessor.update(id, this.dataToRecord(updates));
+
+    if (!data) {
+      ErrorUtil.throwError(`Failed to update item with id: ${id}`);
+    }
+
     const item = this.recordToData(data);
 
     if (this.useCache) {

@@ -5,7 +5,8 @@ export const GreaterThanConditionInfo = {
   name: '指定価格を上回る',
   description: '株価が指定した価格を上回った時に通知します。',
   isBuyCondition: true,
-  isSellCondition: true
+  isSellCondition: true,
+  enableTargetPrice: true,
 };
 
 export default class GreaterThanCondition extends ConditionBase {
@@ -13,9 +14,9 @@ export default class GreaterThanCondition extends ConditionBase {
     exchangeId: string,
     tickerId: string,
     session?: string,
-    targetPrice?: number
+    targetPrice?: number | null
   ): Promise<boolean> {
-    if (targetPrice === undefined) {
+    if (!targetPrice) {
       ErrorUtil.throwError('Target price is required for GreaterThanCondition');
     }
 

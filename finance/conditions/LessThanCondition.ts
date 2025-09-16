@@ -4,7 +4,8 @@ export const LessThanConditionInfo: ConditionInfo = {
   name: '指定価格を下回る',
   description: '株価が指定した価格を下回った時に通知します。',
   isBuyCondition: true,
-  isSellCondition: true
+  isSellCondition: true,
+  enableTargetPrice: true,
 };
 
 export default class LessThanCondition extends ConditionBase {
@@ -12,9 +13,9 @@ export default class LessThanCondition extends ConditionBase {
     exchangeId: string,
     tickerId: string,
     session?: string,
-    targetPrice?: number
+    targetPrice?: number | null
   ): Promise<boolean> {
-    if (targetPrice === undefined) {
+    if (!targetPrice) {
       throw new Error('Target price is required for LessThanCondition');
     }
 

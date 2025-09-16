@@ -15,7 +15,7 @@ import FinanceNotificationService from '@finance/services/FinanceNotificationSer
 import FinanceUtilMock from '@finance/tests/mocks/utils/FinanceUtilMock';
 import TickerServiceMock from '@finance/tests/mocks/services/TickerServiceMock';
 import { EXCHANGE_SESSION } from '@finance/consts/ExchangeConsts';
-import { FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
+import { FINANCE_NOTIFICATION_CONDITION_MODE, FINANCE_NOTIFICATION_FREQUENCY } from '@finance/consts/FinanceNotificationConst';
 import { FINANCE_RECORD_DATA_TYPE } from '@finance/types/FinanceRecordDataType';
 
 describe('FinanceNotificationService', () => {
@@ -55,6 +55,7 @@ describe('FinanceNotificationService', () => {
         tickerId: TickerServiceMock.MockTickerName,
         conditionList: [
           {
+            mode: FINANCE_NOTIFICATION_CONDITION_MODE.BUY,
             conditionName: 'GreaterThan',
             frequency: FINANCE_NOTIFICATION_FREQUENCY.MINUTE_LEVEL,
             session: EXCHANGE_SESSION.EXTENDED,
