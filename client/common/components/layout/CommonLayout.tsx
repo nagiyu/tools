@@ -26,7 +26,6 @@ interface CommonLayoutProps {
 
     // Google Adsense
     enableAdSense?: boolean;
-    enableAutoAds?: boolean;
 
     children: React.ReactNode;
 }
@@ -51,7 +50,6 @@ export default async function CommonLayout({
     enableAuthentication = false,
     enableNotification = false,
     enableAdSense = false,
-    enableAutoAds = true,
     children
 }: CommonLayoutProps) {
     const authenticatedContent = async (): Promise<React.ReactNode> => {
@@ -71,7 +69,7 @@ export default async function CommonLayout({
     }
 
     // Get AdSense config dynamically if enabled
-    const adsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig(enableAutoAds) : null;
+    const adsenseConfig = enableAdSense ? await AdSenseUtil.getAdSenseConfig() : null;
 
     return (
         <html lang='ja'>
