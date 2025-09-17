@@ -29,7 +29,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
   }
 
@@ -48,7 +48,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
       const items = response.Items || [];
       return items.map(item => unmarshall(item) as T);
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
   }
 
@@ -72,7 +72,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
 
       return unmarshall(items[0]) as T;
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
   }
 
@@ -98,7 +98,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
 
     return item;
@@ -150,7 +150,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
 
     return await this.getById(id);
@@ -167,7 +167,7 @@ export default class DynamoDBService<T extends RecordTypeBase> {
     try {
       await dynamoClient.send(command);
     } catch (error) {
-      throw ErrorUtil.throwError(null, error);
+      ErrorUtil.throwError(null, error);
     }
   }
 

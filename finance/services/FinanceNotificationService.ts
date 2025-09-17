@@ -41,9 +41,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       ErrorUtil.throwError(`Condition list is required`);
     }
 
-    creates.conditionList.map(condition => {
+    creates.conditionList.forEach(condition => {
       condition.firstNotificationSent = false;
-      return condition;
     });
     return await super.create(creates);
   }
@@ -53,9 +52,8 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       ErrorUtil.throwError(`Condition list is required`);
     }
 
-    updates.conditionList.map(condition => {
+    updates.conditionList.forEach(condition => {
       condition.firstNotificationSent = false;
-      return condition;
     });
     return await super.update(id, updates);
   }
@@ -126,6 +124,7 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
             const conditionResult: ConditionResult = result.value;
 
             if (!conditionResult.met) {
+              console.log(`Condition not met for notification ${notification.id}, skipping push notification`);
               continue;
             }
 
