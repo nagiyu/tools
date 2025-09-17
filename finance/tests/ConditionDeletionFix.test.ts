@@ -9,7 +9,9 @@ import FinanceNotificationService from '../services/FinanceNotificationService';
 const mockDataAccessor = {
   getById: jest.fn(),
   update: jest.fn(),
-  get: jest.fn()
+  get: jest.fn(),
+  getTableName: jest.fn().mockReturnValue('TestTable'),
+  getDataType: jest.fn().mockReturnValue('TestDataType')
 };
 
 const mockExchangeService = {
