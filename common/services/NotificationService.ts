@@ -3,11 +3,12 @@ import fetch from 'node-fetch';
 import ErrorUtil from '@common/utils/ErrorUtil';
 import { SubscriptionType } from '@common/interfaces/SubscriptionType';
 
-/**
- * @deprecated Use NotificationService instead.
- */
-export default class NotificationUtil {
-  public static async sendPushNotification(endpoint: string, message: string, subscription: SubscriptionType): Promise<void> {
+export interface NotificationServiceType {
+  sendPushNotification(endpoint: string, message: string, subscription: SubscriptionType): Promise<void>;
+}
+
+export default class NotificationService implements NotificationServiceType {
+  public async sendPushNotification(endpoint: string, message: string, subscription: SubscriptionType): Promise<void> {
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
