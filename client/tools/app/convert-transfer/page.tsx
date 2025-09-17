@@ -18,6 +18,7 @@ function ConvertTransferContent() {
     const [before, setBefore] = useState('');
     const [after, setAfter] = useState('');
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [includeDayOfWeek, setIncludeDayOfWeek] = useState(false);
 
     useEffect(() => {
         // Handle shared data from share sheet
@@ -34,7 +35,7 @@ function ConvertTransferContent() {
     const service = new ConvertTransferService();
 
     const handleConvert = () => {
-        const result = service.convert(before, selectedDate || undefined);
+        const result = service.convert(before, selectedDate || undefined, includeDayOfWeek);
         setAfter(result);
         setTabIndex(1);
     };
@@ -43,7 +44,16 @@ function ConvertTransferContent() {
         setSelectedDate(date);
         // Re-convert if we already have converted text
         if (after) {
-            const result = service.convert(before, date || undefined);
+            const result = service.convert(before, date || undefined, includeDayOfWeek);
+            setAfter(result);
+        }
+    };
+
+    const handleDayOfWeekToggle = (include: boolean) => {
+        setIncludeDayOfWeek(include);
+        // Re-convert if we already have converted text
+        if (after) {
+            const result = service.convert(before, selectedDate || undefined, include);
             setAfter(result);
         }
     };
@@ -67,6 +77,8 @@ function ConvertTransferContent() {
                     value={after}
                     selectedDate={selectedDate}
                     onDateChange={handleDateChange}
+                    includeDayOfWeek={includeDayOfWeek}
+                    onDayOfWeekToggle={handleDayOfWeekToggle}
                     runWithLoading={runWithLoading}
                 />
             )
