@@ -1,4 +1,4 @@
-import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import CRUDServiceBase from '@common/services/CRUDServiceBase.old';
 import SettingDataAccessor from '@freshness-notifier/services/SettingDataAccessor';
 import { SettingDataType } from '@freshness-notifier/interfaces/data/SettingDataType';
 import { SettingRecordType } from '@freshness-notifier/interfaces/record/SettingRecordType';
