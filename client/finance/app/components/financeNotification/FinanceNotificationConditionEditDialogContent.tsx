@@ -93,7 +93,7 @@ export default function FinanceNotificationConditionEditDialogContent({
         } else {
             onItemChange({
                 ...item,
-                targetPrice: 0,
+                targetPrice: 1,
             });
         }
     }, [conditionInfo]);
@@ -161,9 +161,11 @@ export default function FinanceNotificationConditionEditDialogContent({
                         })
                     }}
                     onValueChange={(value) => {
+                        // Ensure the target price is not negative
+                        const validValue = Math.max(0, value);
                         onItemChange({
                             ...item,
-                            targetPrice: value
+                            targetPrice: validValue
                         })
                     }}
                 />

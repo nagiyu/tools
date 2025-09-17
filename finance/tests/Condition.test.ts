@@ -63,6 +63,24 @@ describe('ConditionTest', () => {
       expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
     });
+
+    it('Check Condition: targetPrice=0で条件判定が動作する', async () => {
+      FinanceUtilMock.StockPriceDataMock = [
+        {
+          date: '2025-01-01 00:00',
+          data: [1000, 960, 950, 10] // 終値10
+        }
+      ];
+      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 0);
+      expect(result.met).toBe(true);
+      expect(result.message).not.toBe('');
+    });
+
+    it('Check Condition: targetPrice未指定で例外', async () => {
+      await expect(
+        service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED)
+      ).rejects.toThrow('Target price is required for GreaterThanCondition');
+    });
   });
 
   describe('指定価格を下回る', () => {
@@ -112,6 +130,18 @@ describe('ConditionTest', () => {
       ];
       const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 950);
       expect(result.met).toBe(false);
+      expect(result.message).not.toBe('');
+    });
+
+    it('Check Condition: targetPrice=0で条件判定が動作する', async () => {
+      FinanceUtilMock.StockPriceDataMock = [
+        {
+          date: '2025-01-01 00:00',
+          data: [1000, -1, 950, 960] // high価格が-1 (0を下回る)
+        }
+      ];
+      const result = await service.checkCondition(conditionKey, 'MOCK_EXCHANGE', 'MOCK_TICKER', EXCHANGE_SESSION.EXTENDED, 0);
+      expect(result.met).toBe(true);
       expect(result.message).not.toBe('');
     });
 

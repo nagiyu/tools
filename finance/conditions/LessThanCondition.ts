@@ -15,7 +15,7 @@ export default class LessThanCondition extends ConditionBase {
     session?: string,
     targetPrice?: number | null
   ): Promise<boolean> {
-    if (!targetPrice) {
+    if (targetPrice === null || targetPrice === undefined) {
       throw new Error('Target price is required for LessThanCondition');
     }
 
