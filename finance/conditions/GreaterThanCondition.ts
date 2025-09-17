@@ -16,7 +16,7 @@ export default class GreaterThanCondition extends ConditionBase {
     session?: string,
     targetPrice?: number | null
   ): Promise<boolean> {
-    if (!targetPrice) {
+    if (targetPrice === null || targetPrice === undefined) {
       ErrorUtil.throwError('Target price is required for GreaterThanCondition');
     }
 
