@@ -26,9 +26,10 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
     exchangeService: ExchangeService,
     tickerService: TickerService,
     conditionService: ConditionService,
-    notificationService: NotificationServiceType
+    notificationService: NotificationServiceType,
+    useCache: boolean = true
   ) {
-    super(dataAccessor);
+    super(dataAccessor, useCache);
 
     this.exchangeService = exchangeService;
     this.tickerService = tickerService;
@@ -41,6 +42,9 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
       ErrorUtil.throwError(`Condition list is required`);
     }
 
+    // Check for duplicate Exchange and Ticker combination
+    await this.validateUniqueExchangeTicker(creates.exchangeId, creates.tickerId);
+
     creates.conditionList.forEach(condition => {
       condition.firstNotificationSent = false;
     });
@@ -50,6 +54,20 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
   public override async update(id: string, updates: Partial<FinanceNotificationDataType>): Promise<FinanceNotificationDataType> {
     if (!updates.conditionList) {
       ErrorUtil.throwError(`Condition list is required`);
+    }
+
+    // Check for duplicate Exchange and Ticker combination (excluding current record)
+    if (updates.exchangeId || updates.tickerId) {
+      // Get current record to get missing exchange/ticker IDs
+      const currentRecord = await this.getById(id);
+      if (!currentRecord) {
+        ErrorUtil.throwError(`Finance Notification with ID ${id} not found`);
+      }
+
+      const exchangeId = updates.exchangeId || currentRecord.exchangeId;
+      const tickerId = updates.tickerId || currentRecord.tickerId;
+      
+      await this.validateUniqueExchangeTicker(exchangeId, tickerId, id);
     }
 
     updates.conditionList.forEach(condition => {
@@ -173,6 +191,30 @@ export default class FinanceNotificationService extends CRUDServiceBase<FinanceN
 
     if (errors.length > 0) {
       ErrorUtil.throwError(errors.join('; '));
+    }
+  }
+
+  /**
+   * Validate that the Exchange and Ticker combination is unique
+   * @param exchangeId - Exchange ID to validate
+   * @param tickerId - Ticker ID to validate  
+   * @param excludeId - ID to exclude from validation (for updates)
+   */
+  private async validateUniqueExchangeTicker(exchangeId?: string, tickerId?: string, excludeId?: string): Promise<void> {
+    if (!exchangeId || !tickerId) {
+      return; // Skip validation if either exchangeId or tickerId is missing
+    }
+
+    const existingNotifications = await this.get();
+    
+    const duplicateNotification = existingNotifications.find(notification => 
+      notification.id !== excludeId && 
+      notification.exchangeId === exchangeId && 
+      notification.tickerId === tickerId
+    );
+
+    if (duplicateNotification) {
+      ErrorUtil.throwError(`指定された Exchange と Ticker の組み合わせは既に登録されています`);
     }
   }
 
