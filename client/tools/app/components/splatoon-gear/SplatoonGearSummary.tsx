@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Typography, Card, CardContent, Grid } from '@mui/material';
+import { Box, Typography, Card, CardContent } from '@mui/material';
 
 interface GearPower {
   id: string;
@@ -60,41 +60,37 @@ export default function SplatoonGearSummary({ gearPowers }: SplatoonGearSummaryP
       
       <Card>
         <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" color="primary" gutterBottom>
-                  メインギアパワー
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {summary.mainSlots}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  スロット ({summary.mainPoints}ポイント)
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  最大3スロット (30ポイント)
-                </Typography>
-              </Box>
-            </Grid>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3 }}>
+            <Box sx={{ flex: 1, textAlign: 'center' }}>
+              <Typography variant="h6" color="primary" gutterBottom>
+                メインギアパワー
+              </Typography>
+              <Typography variant="h4" fontWeight="bold">
+                {summary.mainSlots}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                スロット ({summary.mainPoints}ポイント)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                最大3スロット (30ポイント)
+              </Typography>
+            </Box>
             
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" color="secondary" gutterBottom>
-                  サブギアパワー
-                </Typography>
-                <Typography variant="h4" fontWeight="bold">
-                  {summary.subSlots}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  スロット ({summary.subPoints}ポイント)
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  最大9スロット (27ポイント)
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+            <Box sx={{ flex: 1, textAlign: 'center' }}>
+              <Typography variant="h6" color="secondary" gutterBottom>
+                サブギアパワー
+              </Typography>
+              <Typography variant="h4" fontWeight="bold">
+                {summary.subSlots}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                スロット ({summary.subPoints}ポイント)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                最大9スロット (27ポイント)
+              </Typography>
+            </Box>
+          </Box>
           
           <Box sx={{ mt: 3, textAlign: 'center', borderTop: 1, borderColor: 'divider', pt: 2 }}>
             <Typography variant="body1">
