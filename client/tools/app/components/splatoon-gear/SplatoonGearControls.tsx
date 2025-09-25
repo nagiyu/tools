@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Chip } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+
 
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
