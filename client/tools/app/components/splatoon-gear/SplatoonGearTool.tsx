@@ -5,6 +5,7 @@ import { Box, Typography } from '@mui/material';
 
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
+import SplatoonGearService, { GearPower } from '@tools/services/SplatoonGearService';
 import SplatoonGearControls from './SplatoonGearControls';
 import SplatoonGearPower from './SplatoonGearPower';
 import SplatoonGearSummary from './SplatoonGearSummary';
@@ -33,20 +34,13 @@ const GEAR_POWERS = [
   'おこたえください'
 ];
 
-interface GearPower {
-  id: string;
-  name: string;
-  value: number;
-}
-
 export default function SplatoonGearTool() {
   const [gearPowers, setGearPowers] = useState<GearPower[]>([]);
   const [nextId, setNextId] = useState(1);
 
-  const TOTAL_GEAR_POWER = 57; // 10*3 + 3*3*3 = 57
+  const service = new SplatoonGearService();
   
-  const currentTotal = gearPowers.reduce((sum, gp) => sum + gp.value, 0);
-  const remaining = TOTAL_GEAR_POWER - currentTotal;
+  const remaining = service.calculateRemainingPower(gearPowers);
 
   const gearPowerOptions: SelectOptionType[] = GEAR_POWERS.map(power => ({
     value: power,
@@ -73,38 +67,18 @@ export default function SplatoonGearTool() {
     ));
   };
 
-  // Validate gear power constraints based on Splatoon3 rules
-  const validateGearPowerValue = (currentValue: number, delta: number): number => {
-    const newValue = currentValue + delta;
-    
-    // Basic bounds check
-    if (newValue < 0) return currentValue;
-    if (newValue > 57) return currentValue;
-    
-    // For each possible combination of main and sub slots, check if it's valid
-    for (let mainSlots = 0; mainSlots <= 3; mainSlots++) {
-      const remainingPoints = newValue - (mainSlots * 10);
-      if (remainingPoints < 0) continue;
-      
-      const subSlots = remainingPoints / 3;
-      if (subSlots === Math.floor(subSlots) && subSlots <= 9) {
-        // Valid combination found
-        return newValue;
-      }
-    }
-    
-    // No valid combination found
-    return currentValue;
-  };
-
   const updateGearPowerValue = (id: string, delta: number) => {
     setGearPowers(gearPowers.map(gp => {
       if (gp.id === id) {
-        const newValue = validateGearPowerValue(gp.value, delta);
+        const newValue = service.validateGearPowerValue(gp.value, delta);
         return { ...gp, value: newValue };
       }
       return gp;
     }));
+  };
+
+  const validateGearPowerValue = (currentValue: number, delta: number): number => {
+    return service.validateGearPowerValue(currentValue, delta);
   };
 
   const resetAll = () => {
