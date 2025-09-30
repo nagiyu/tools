@@ -23,6 +23,7 @@ interface SplatoonGearPowerProps {
   onNameChange: (id: string, name: string) => void;
   onValueChange: (id: string, delta: number) => void;
   onRemove: (id: string) => void;
+  validateValue: (currentValue: number, delta: number) => number;
 }
 
 export default function SplatoonGearPower({
@@ -31,7 +32,8 @@ export default function SplatoonGearPower({
   remainingPower,
   onNameChange,
   onValueChange,
-  onRemove
+  onRemove,
+  validateValue
 }: SplatoonGearPowerProps) {
   const handleNameChange = (value: string) => {
     onNameChange(gearPower.id, value);
@@ -39,6 +41,12 @@ export default function SplatoonGearPower({
 
   const handleValueChange = (delta: number) => {
     onValueChange(gearPower.id, delta);
+  };
+
+  // Check if a specific delta would result in a valid change
+  const canApplyDelta = (delta: number): boolean => {
+    const validatedValue = validateValue(gearPower.value, delta);
+    return validatedValue !== gearPower.value;
   };
 
   return (
@@ -58,13 +66,13 @@ export default function SplatoonGearPower({
             <ContainedButton
               label="-10"
               onClick={() => handleValueChange(-10)}
-              disabled={gearPower.value < 10}
+              disabled={!canApplyDelta(-10)}
             />
             
             <ContainedButton
               label="-3"
               onClick={() => handleValueChange(-3)}
-              disabled={gearPower.value < 3}
+              disabled={!canApplyDelta(-3)}
             />
 
             <div style={{ width: 80 }}>
@@ -77,13 +85,13 @@ export default function SplatoonGearPower({
             <ContainedButton
               label="+3"
               onClick={() => handleValueChange(3)}
-              disabled={remainingPower < 3}
+              disabled={!canApplyDelta(3) || remainingPower < 3}
             />
 
             <ContainedButton
               label="+10"
               onClick={() => handleValueChange(10)}
-              disabled={remainingPower < 10}
+              disabled={!canApplyDelta(10) || remainingPower < 10}
             />
 
             <IconButton 

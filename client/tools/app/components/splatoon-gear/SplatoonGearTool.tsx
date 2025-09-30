@@ -73,10 +73,34 @@ export default function SplatoonGearTool() {
     ));
   };
 
+  // Validate gear power constraints based on Splatoon3 rules
+  const validateGearPowerValue = (currentValue: number, delta: number): number => {
+    const newValue = currentValue + delta;
+    
+    // Basic bounds check
+    if (newValue < 0) return currentValue;
+    if (newValue > 57) return currentValue;
+    
+    // For each possible combination of main and sub slots, check if it's valid
+    for (let mainSlots = 0; mainSlots <= 3; mainSlots++) {
+      const remainingPoints = newValue - (mainSlots * 10);
+      if (remainingPoints < 0) continue;
+      
+      const subSlots = remainingPoints / 3;
+      if (subSlots === Math.floor(subSlots) && subSlots <= 9) {
+        // Valid combination found
+        return newValue;
+      }
+    }
+    
+    // No valid combination found
+    return currentValue;
+  };
+
   const updateGearPowerValue = (id: string, delta: number) => {
     setGearPowers(gearPowers.map(gp => {
       if (gp.id === id) {
-        const newValue = Math.max(0, Math.min(57, gp.value + delta));
+        const newValue = validateGearPowerValue(gp.value, delta);
         return { ...gp, value: newValue };
       }
       return gp;
@@ -117,6 +141,7 @@ export default function SplatoonGearTool() {
             onNameChange={updateGearPowerName}
             onValueChange={updateGearPowerValue}
             onRemove={removeGearPower}
+            validateValue={validateGearPowerValue}
           />
         ))}
       </BasicStack>
