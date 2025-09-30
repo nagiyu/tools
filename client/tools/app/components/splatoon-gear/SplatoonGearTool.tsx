@@ -7,6 +7,7 @@ import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import SplatoonGearControls from './SplatoonGearControls';
 import SplatoonGearPower from './SplatoonGearPower';
+import SplatoonGearSummary from './SplatoonGearSummary';
 
 // Splatoon3 gear powers (common ones)
 const GEAR_POWERS = [
@@ -135,6 +136,8 @@ export default function SplatoonGearTool() {
           </Typography>
         </Box>
       )}
+
+      <SplatoonGearSummary gearPowers={gearPowers} />
     </Box>
   );
 }
