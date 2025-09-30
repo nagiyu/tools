@@ -87,3 +87,13 @@ Splatoon3 のギア構成を検討するためのツールです。合計57の�
 - ゾンビ
 - リベンジ
 - おこたえください
+
+## 技術仕様
+
+- **フロントエンド**: React (Next.js)
+- **UI コンポーネント**: Material-UI
+- **バックエンド**: SplatoonGearService (TypeScript)
+  - ギアパワーポイント計算
+  - ギアパワー値のバリデーション
+  - ギアパワーサマリーの算出
+- **テスト**: Jest with ts-jest
