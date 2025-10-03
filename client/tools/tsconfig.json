@@ -20,8 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@common/*": ["../../common/*"],
-      "@client-common/*": ["../common/*"],
+      "@common/*": ["../../typescript-common/*"],
+      "@client-common/*": ["../../nextjs-common/common/*"],
       "@tools/*": ["../../tools/*"]
     }
   },

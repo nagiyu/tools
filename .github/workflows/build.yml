@@ -15,7 +15,10 @@ jobs:
       name: development
     
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository (with submodules)
+      uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: AWS CLI install
       run: |
@@ -51,14 +54,14 @@ jobs:
         node-version: '20'
         cache: 'npm'
         cache-dependency-path: |
-          common/package-lock.json
+          typescript-common/package-lock.json
           tools/package-lock.json
-          client/common/package-lock.json
+          nextjs-common/common/package-lock.json
           client/tools/package-lock.json
     
-    - name: Install dependencies for common
+    - name: Install dependencies for typescript-common
       run: |
-        cd common
+        cd typescript-common
         npm install
     
     - name: Install dependencies for tools
@@ -66,9 +69,9 @@ jobs:
         cd tools
         npm install
     
-    - name: Install dependencies for client/common
+    - name: Install dependencies for nextjs-common
       run: |
-        cd client/common
+        cd nextjs-common/common
         npm install
     
     - name: Install dependencies and build client/tools
