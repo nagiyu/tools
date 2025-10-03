@@ -5,11 +5,11 @@
       "name": "client-tools"
     },
     {
-      "path": "../common",
+      "path": "../../nextjs-common/common",
       "name": "client-common"
     },
     {
-      "path": "../../common",
+      "path": "../../typescript-common",
       "name": "common"
     },
     {

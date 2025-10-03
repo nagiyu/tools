@@ -15,7 +15,10 @@ jobs:
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'development' }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: AWS CLI install
         run: |
@@ -87,4 +90,3 @@ jobs:
       - name: Update Lambda Function
         run: |
           aws lambda update-function-code --function-name ${{ env.PROJECT_CLIENT_PROJECT_NAME }} --image-uri ${{ env.AWS_SECRETS_REPOSITORY_ID }}.dkr.ecr.${{ env.AWS_SECRETS_REGION }}.amazonaws.com/${{ env.PROJECT_CLIENT_PROJECT_NAME }}:latest
-

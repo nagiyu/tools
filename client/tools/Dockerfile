@@ -11,18 +11,18 @@ ARG NEXTAUTH_URL
 
 WORKDIR /app
 
-COPY common ./common
+COPY typescript-common ./typescript-common
 COPY tools ./tools
-COPY client/common ./client/common
+COPY nextjs-common/common ./nextjs-common/common
 COPY client/tools ./client/tools
 
-WORKDIR /app/common
+WORKDIR /app/typescript-common
 RUN npm install
 
 WORKDIR /app/tools
 RUN npm install
 
-WORKDIR /app/client/common
+WORKDIR /app/nextjs-common/common
 RUN npm install
 
 WORKDIR /app/client/tools
@@ -49,14 +49,14 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 
 ENV AWS_LWA_PORT=3000
 
-WORKDIR /app/common
-COPY --from=builder /app/common .
+WORKDIR /app/typescript-common
+COPY --from=builder /app/typescript-common .
 
 WORKDIR /app/tools
 COPY --from=builder /app/tools .
 
-WORKDIR /app/client/common
-COPY --from=builder /app/client/common .
+WORKDIR /app/nextjs-common/common
+COPY --from=builder /app/nextjs-common/common .
 
 WORKDIR /app/client/tools
 COPY --from=builder /app/client/tools/.next/standalone ./
