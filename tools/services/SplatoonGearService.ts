@@ -19,6 +19,29 @@ export default class SplatoonGearService {
   private readonly MAX_MAIN_SLOTS = 3;
   private readonly MAX_SUB_SLOTS = 9;
 
+  private readonly GEAR_POWERS = [
+    'インク効率アップ(メイン)',
+    'インク効率アップ(サブ)', 
+    'インク回復力アップ',
+    'ヒト移動速度アップ',
+    'イカダッシュ速度アップ',
+    'スペシャル増加量アップ',
+    'スペシャル減少量ダウン',
+    'スペシャル性能アップ',
+    'スーパージャンプ時間短縮',
+    'サブ性能アップ',
+    'メイン性能アップ',
+    'カムバック',
+    'ラストスパート',
+    'イカニンジャ',
+    'サーマルインク',
+    'ステルスジャンプ',
+    'スタートダッシュ',
+    'ゾンビ',
+    'リベンジ',
+    'おこたえください'
+  ];
+
   /**
    * Calculate remaining gear power points
    * @param gearPowers Array of gear powers
@@ -93,5 +116,13 @@ export default class SplatoonGearService {
    */
   public getTotalGearPower(): number {
     return this.TOTAL_GEAR_POWER;
+  }
+
+  /**
+   * Get available gear power names
+   * @returns Array of gear power names
+   */
+  public getGearPowerNames(): string[] {
+    return [...this.GEAR_POWERS];
   }
 }

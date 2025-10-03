@@ -13,6 +13,28 @@ describe('SplatoonGearService', () => {
     });
   });
 
+  describe('getGearPowerNames', () => {
+    it('should return array of 20 gear power names', () => {
+      const names = service.getGearPowerNames();
+      expect(names).toHaveLength(20);
+    });
+
+    it('should include expected gear power names', () => {
+      const names = service.getGearPowerNames();
+      expect(names).toContain('インク効率アップ(メイン)');
+      expect(names).toContain('ヒト移動速度アップ');
+      expect(names).toContain('イカダッシュ速度アップ');
+      expect(names).toContain('スペシャル増加量アップ');
+    });
+
+    it('should return a copy of the array (not the original)', () => {
+      const names1 = service.getGearPowerNames();
+      const names2 = service.getGearPowerNames();
+      expect(names1).not.toBe(names2); // Different references
+      expect(names1).toEqual(names2); // But same content
+    });
+  });
+
   describe('calculateRemainingPower', () => {
     it('should return 57 when no gear powers are present', () => {
       const gearPowers: GearPower[] = [];

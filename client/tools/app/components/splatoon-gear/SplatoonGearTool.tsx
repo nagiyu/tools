@@ -10,30 +10,6 @@ import SplatoonGearControls from './SplatoonGearControls';
 import SplatoonGearPower from './SplatoonGearPower';
 import SplatoonGearSummary from './SplatoonGearSummary';
 
-// Splatoon3 gear powers (common ones)
-const GEAR_POWERS = [
-  'インク効率アップ(メイン)',
-  'インク効率アップ(サブ)', 
-  'インク回復力アップ',
-  'ヒト移動速度アップ',
-  'イカダッシュ速度アップ',
-  'スペシャル増加量アップ',
-  'スペシャル減少量ダウン',
-  'スペシャル性能アップ',
-  'スーパージャンプ時間短縮',
-  'サブ性能アップ',
-  'メイン性能アップ',
-  'カムバック',
-  'ラストスパート',
-  'イカニンジャ',
-  'サーマルインク',
-  'ステルスジャンプ',
-  'スタートダッシュ',
-  'ゾンビ',
-  'リベンジ',
-  'おこたえください'
-];
-
 export default function SplatoonGearTool() {
   const [gearPowers, setGearPowers] = useState<GearPower[]>([]);
   const [nextId, setNextId] = useState(1);
@@ -42,7 +18,8 @@ export default function SplatoonGearTool() {
   
   const remaining = service.calculateRemainingPower(gearPowers);
 
-  const gearPowerOptions: SelectOptionType[] = GEAR_POWERS.map(power => ({
+  const GEAR_POWER_NAMES = service.getGearPowerNames();
+  const gearPowerOptions: SelectOptionType[] = GEAR_POWER_NAMES.map(power => ({
     value: power,
     label: power
   }));
@@ -50,7 +27,7 @@ export default function SplatoonGearTool() {
   const addGearPower = () => {
     const newGearPower: GearPower = {
       id: `gp-${nextId}`,
-      name: GEAR_POWERS[0],
+      name: GEAR_POWER_NAMES[0],
       value: 0
     };
     setGearPowers([...gearPowers, newGearPower]);
