@@ -2,51 +2,15 @@
 
 import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
-
-interface GearPower {
-  id: string;
-  name: string;
-  value: number;
-}
+import SplatoonGearService, { GearPower, GearPowerSummary } from '@tools/services/SplatoonGearService';
 
 interface SplatoonGearSummaryProps {
   gearPowers: GearPower[];
 }
 
-interface GearPowerSummary {
-  mainSlots: number;
-  subSlots: number;
-  mainPoints: number;
-  subPoints: number;
-  totalPoints: number;
-}
-
 export default function SplatoonGearSummary({ gearPowers }: SplatoonGearSummaryProps) {
-  const calculateSummary = (): GearPowerSummary => {
-    let mainPoints = 0;
-    let subPoints = 0;
-
-    gearPowers.forEach(gearPower => {
-      const value = gearPower.value;
-      // Calculate how many main slots (10 points each) and sub slots (3 points each)
-      const mainSlots = Math.floor(value / 10);
-      const remainingPoints = value % 10;
-      const subSlots = Math.floor(remainingPoints / 3);
-      
-      mainPoints += mainSlots * 10;
-      subPoints += subSlots * 3;
-    });
-
-    return {
-      mainSlots: Math.floor(mainPoints / 10),
-      subSlots: Math.floor(subPoints / 3),
-      mainPoints,
-      subPoints,
-      totalPoints: mainPoints + subPoints
-    };
-  };
-
-  const summary = calculateSummary();
+  const service = new SplatoonGearService();
+  const summary: GearPowerSummary = service.calculateSummary(gearPowers);
 
   if (gearPowers.length === 0) {
     return null;

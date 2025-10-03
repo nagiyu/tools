@@ -9,12 +9,7 @@ import BasicNumberField from '@client-common/components/inputs/TextFields/BasicN
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
-
-interface GearPower {
-  id: string;
-  name: string;
-  value: number;
-}
+import { GearPower } from '@tools/services/SplatoonGearService';
 
 interface SplatoonGearPowerProps {
   gearPower: GearPower;
