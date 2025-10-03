@@ -47,15 +47,15 @@ export default function SplatoonGearTool() {
   const updateGearPowerValue = (id: string, delta: number) => {
     setGearPowers(gearPowers.map(gp => {
       if (gp.id === id) {
-        const newValue = service.validateGearPowerValue(gp.value, delta);
+        const newValue = service.validateGearPowerValue(gp.name, gp.value, delta);
         return { ...gp, value: newValue };
       }
       return gp;
     }));
   };
 
-  const validateGearPowerValue = (currentValue: number, delta: number): number => {
-    return service.validateGearPowerValue(currentValue, delta);
+  const validateGearPowerValue = (gearPowerName: string, currentValue: number, delta: number): number => {
+    return service.validateGearPowerValue(gearPowerName, currentValue, delta);
   };
 
   const resetAll = () => {
