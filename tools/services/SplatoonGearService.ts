@@ -4,7 +4,8 @@ export interface GearPower {
   value: number;
 }
 
-export type GearPowerCategory = 'normal' | 'head' | 'clothing' | 'shoes';
+export const GEAR_POWER_CATEGORIES = ['normal', 'head', 'clothing', 'shoes'] as const;
+export type GearPowerCategory = typeof GEAR_POWER_CATEGORIES[number];
 
 export interface GearPowerSummary {
   mainSlots: number;
