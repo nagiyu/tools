@@ -1,16 +1,5 @@
-export interface GearPower {
-  id: string;
-  name: string;
-  value: number;
-}
-
-export interface GearPowerSummary {
-  mainSlots: number;
-  subSlots: number;
-  mainPoints: number;
-  subPoints: number;
-  totalPoints: number;
-}
+import { GEAR_POWER_CATEGORIES } from '../consts/SplatoonGearConsts';
+import { GearPower, GearPowerCategory, GearPowerSummary } from '../types/SplatoonGearTypes';
 
 export default class SplatoonGearService {
   private readonly TOTAL_GEAR_POWER = 57; // 10*3 + 3*3*3 = 57
@@ -18,28 +7,56 @@ export default class SplatoonGearService {
   private readonly SUB_SLOT_POINTS = 3;
   private readonly MAX_MAIN_SLOTS = 3;
   private readonly MAX_SUB_SLOTS = 9;
+  private readonly MAX_EXCLUSIVE_GEAR_VALUE = 10; // Head/Clothing/Shoes exclusive gear powers max value
 
-  private readonly GEAR_POWERS = [
+  // Normal gear powers (can go up to 57)
+  private readonly NORMAL_GEAR_POWERS = [
     'インク効率アップ(メイン)',
-    'インク効率アップ(サブ)', 
+    'インク効率アップ(サブ)',
     'インク回復力アップ',
     'ヒト移動速度アップ',
     'イカダッシュ速度アップ',
     'スペシャル増加量アップ',
     'スペシャル減少量ダウン',
     'スペシャル性能アップ',
+    '復活時間短縮',
     'スーパージャンプ時間短縮',
     'サブ性能アップ',
-    'メイン性能アップ',
-    'カムバック',
-    'ラストスパート',
-    'イカニンジャ',
-    'サーマルインク',
-    'ステルスジャンプ',
+    '相手インク影響軽減',
+    'サブ影響軽減',
+    'アクション強化'
+  ];
+
+  // Head-only gear powers (max 10 points)
+  private readonly HEAD_GEAR_POWERS = [
     'スタートダッシュ',
-    'ゾンビ',
+    'ラストスパート',
+    '逆境強化',
+    'カムバック'
+  ];
+
+  // Clothing-only gear powers (max 10 points)
+  private readonly CLOTHING_GEAR_POWERS = [
+    'イカニンジャ',
     'リベンジ',
-    'おこたえください'
+    'サーマルインク',
+    '復活ペナルティアップ',
+    '追加ギアパワー倍化'
+  ];
+
+  // Shoes-only gear powers (max 10 points)
+  private readonly SHOES_GEAR_POWERS = [
+    'ステルスジャンプ',
+    '対物攻撃力アップ',
+    '受け身術'
+  ];
+
+  // All gear powers combined
+  private readonly GEAR_POWERS = [
+    ...this.NORMAL_GEAR_POWERS,
+    ...this.HEAD_GEAR_POWERS,
+    ...this.CLOTHING_GEAR_POWERS,
+    ...this.SHOES_GEAR_POWERS
   ];
 
   /**
@@ -53,17 +70,54 @@ export default class SplatoonGearService {
   }
 
   /**
+   * Get gear power category
+   * @param gearPowerName Name of the gear power
+   * @returns Category of the gear power
+   */
+  public getGearPowerCategory(gearPowerName: string): GearPowerCategory {
+    if (this.NORMAL_GEAR_POWERS.includes(gearPowerName)) {
+      return 'normal';
+    }
+    if (this.HEAD_GEAR_POWERS.includes(gearPowerName)) {
+      return 'head';
+    }
+    if (this.CLOTHING_GEAR_POWERS.includes(gearPowerName)) {
+      return 'clothing';
+    }
+    if (this.SHOES_GEAR_POWERS.includes(gearPowerName)) {
+      return 'shoes';
+    }
+    return 'normal'; // Default to normal
+  }
+
+  /**
+   * Get maximum value for a gear power based on its category
+   * @param gearPowerName Name of the gear power
+   * @returns Maximum allowed value
+   */
+  public getMaxGearPowerValue(gearPowerName: string): number {
+    const category = this.getGearPowerCategory(gearPowerName);
+    if (category === 'normal') {
+      return this.TOTAL_GEAR_POWER;
+    }
+    // Head, clothing, and shoes exclusive powers are limited to max 10 (1 main slot)
+    return this.MAX_EXCLUSIVE_GEAR_VALUE;
+  }
+
+  /**
    * Validate if a gear power value change is valid based on Splatoon3 rules
+   * @param gearPowerName Name of the gear power
    * @param currentValue Current gear power value
    * @param delta Change amount to apply
    * @returns New valid value (returns currentValue if invalid)
    */
-  public validateGearPowerValue(currentValue: number, delta: number): number {
+  public validateGearPowerValue(gearPowerName: string, currentValue: number, delta: number): number {
     const newValue = currentValue + delta;
+    const maxValue = this.getMaxGearPowerValue(gearPowerName);
     
     // Basic bounds check
     if (newValue < 0) return currentValue;
-    if (newValue > this.TOTAL_GEAR_POWER) return currentValue;
+    if (newValue > maxValue) return currentValue;
     
     // For each possible combination of main and sub slots, check if it's valid
     for (let mainSlots = 0; mainSlots <= this.MAX_MAIN_SLOTS; mainSlots++) {

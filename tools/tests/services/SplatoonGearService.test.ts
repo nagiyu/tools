@@ -1,4 +1,5 @@
-import SplatoonGearService, { GearPower } from '@tools/services/SplatoonGearService';
+import SplatoonGearService from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 
 describe('SplatoonGearService', () => {
   let service: SplatoonGearService;
@@ -14,9 +15,9 @@ describe('SplatoonGearService', () => {
   });
 
   describe('getGearPowerNames', () => {
-    it('should return array of 20 gear power names', () => {
+    it('should return array of 26 gear power names', () => {
       const names = service.getGearPowerNames();
-      expect(names).toHaveLength(20);
+      expect(names).toHaveLength(26);
     });
 
     it('should include expected gear power names', () => {
@@ -32,6 +33,57 @@ describe('SplatoonGearService', () => {
       const names2 = service.getGearPowerNames();
       expect(names1).not.toBe(names2); // Different references
       expect(names1).toEqual(names2); // But same content
+    });
+  });
+
+  describe('getGearPowerCategory', () => {
+    it('should return "normal" for normal gear powers', () => {
+      expect(service.getGearPowerCategory('インク効率アップ(メイン)')).toBe('normal');
+      expect(service.getGearPowerCategory('ヒト移動速度アップ')).toBe('normal');
+      expect(service.getGearPowerCategory('アクション強化')).toBe('normal');
+    });
+
+    it('should return "head" for head-only gear powers', () => {
+      expect(service.getGearPowerCategory('スタートダッシュ')).toBe('head');
+      expect(service.getGearPowerCategory('ラストスパート')).toBe('head');
+      expect(service.getGearPowerCategory('逆境強化')).toBe('head');
+      expect(service.getGearPowerCategory('カムバック')).toBe('head');
+    });
+
+    it('should return "clothing" for clothing-only gear powers', () => {
+      expect(service.getGearPowerCategory('イカニンジャ')).toBe('clothing');
+      expect(service.getGearPowerCategory('リベンジ')).toBe('clothing');
+      expect(service.getGearPowerCategory('サーマルインク')).toBe('clothing');
+      expect(service.getGearPowerCategory('復活ペナルティアップ')).toBe('clothing');
+      expect(service.getGearPowerCategory('追加ギアパワー倍化')).toBe('clothing');
+    });
+
+    it('should return "shoes" for shoes-only gear powers', () => {
+      expect(service.getGearPowerCategory('ステルスジャンプ')).toBe('shoes');
+      expect(service.getGearPowerCategory('対物攻撃力アップ')).toBe('shoes');
+      expect(service.getGearPowerCategory('受け身術')).toBe('shoes');
+    });
+  });
+
+  describe('getMaxGearPowerValue', () => {
+    it('should return 57 for normal gear powers', () => {
+      expect(service.getMaxGearPowerValue('インク効率アップ(メイン)')).toBe(57);
+      expect(service.getMaxGearPowerValue('ヒト移動速度アップ')).toBe(57);
+    });
+
+    it('should return 10 for head-only gear powers', () => {
+      expect(service.getMaxGearPowerValue('スタートダッシュ')).toBe(10);
+      expect(service.getMaxGearPowerValue('カムバック')).toBe(10);
+    });
+
+    it('should return 10 for clothing-only gear powers', () => {
+      expect(service.getMaxGearPowerValue('イカニンジャ')).toBe(10);
+      expect(service.getMaxGearPowerValue('リベンジ')).toBe(10);
+    });
+
+    it('should return 10 for shoes-only gear powers', () => {
+      expect(service.getMaxGearPowerValue('ステルスジャンプ')).toBe(10);
+      expect(service.getMaxGearPowerValue('対物攻撃力アップ')).toBe(10);
     });
   });
 
@@ -78,52 +130,52 @@ describe('SplatoonGearService', () => {
   });
 
   describe('validateGearPowerValue', () => {
-    it('should allow valid increase by 3 (sub slot)', () => {
-      expect(service.validateGearPowerValue(0, 3)).toBe(3);
-      expect(service.validateGearPowerValue(3, 3)).toBe(6);
-      expect(service.validateGearPowerValue(10, 3)).toBe(13);
+    it('should allow valid increase by 3 (sub slot) for normal gear powers', () => {
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 3)).toBe(3);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 3, 3)).toBe(6);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, 3)).toBe(13);
     });
 
-    it('should allow valid increase by 10 (main slot)', () => {
-      expect(service.validateGearPowerValue(0, 10)).toBe(10);
-      expect(service.validateGearPowerValue(10, 10)).toBe(20);
-      expect(service.validateGearPowerValue(20, 10)).toBe(30);
+    it('should allow valid increase by 10 (main slot) for normal gear powers', () => {
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, 10)).toBe(20);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 20, 10)).toBe(30);
     });
 
     it('should allow valid decrease by 3 (sub slot)', () => {
-      expect(service.validateGearPowerValue(3, -3)).toBe(0);
-      expect(service.validateGearPowerValue(13, -3)).toBe(10);
-      expect(service.validateGearPowerValue(27, -3)).toBe(24);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 3, -3)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 13, -3)).toBe(10);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 27, -3)).toBe(24);
     });
 
     it('should allow valid decrease by 10 (main slot)', () => {
-      expect(service.validateGearPowerValue(10, -10)).toBe(0);
-      expect(service.validateGearPowerValue(20, -10)).toBe(10);
-      expect(service.validateGearPowerValue(30, -10)).toBe(20);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, -10)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 20, -10)).toBe(10);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 30, -10)).toBe(20);
     });
 
     it('should reject decrease below 0', () => {
-      expect(service.validateGearPowerValue(0, -3)).toBe(0);
-      expect(service.validateGearPowerValue(3, -10)).toBe(3);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, -3)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 3, -10)).toBe(3);
     });
 
-    it('should reject increase above 57', () => {
-      expect(service.validateGearPowerValue(57, 3)).toBe(57);
-      expect(service.validateGearPowerValue(50, 10)).toBe(50);
+    it('should reject increase above 57 for normal gear powers', () => {
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 57, 3)).toBe(57);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 50, 10)).toBe(50);
     });
 
     it('should reject invalid combinations (not divisible by 3 or 10)', () => {
       // 1 is invalid (cannot be made with 3s and 10s)
-      expect(service.validateGearPowerValue(0, 1)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 1)).toBe(0);
       // 2 is invalid
-      expect(service.validateGearPowerValue(0, 2)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 2)).toBe(0);
       // 4 is invalid
-      expect(service.validateGearPowerValue(0, 4)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 4)).toBe(0);
       // 5 is invalid
-      expect(service.validateGearPowerValue(0, 5)).toBe(0);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, 5)).toBe(0);
     });
 
-    it('should allow all valid combinations up to 57', () => {
+    it('should allow all valid combinations up to 57 for normal gear powers', () => {
       const validValues = [
         0, 3, 6, 9,           // 0 main, 0-3 sub
         10, 13, 16, 19,       // 1 main, 0-3 sub
@@ -151,21 +203,43 @@ describe('SplatoonGearService', () => {
       }
 
       actualValidValues.forEach(value => {
-        expect(service.validateGearPowerValue(0, value)).toBe(value);
+        expect(service.validateGearPowerValue('インク効率アップ(メイン)', 0, value)).toBe(value);
       });
     });
 
     it('should maintain current value for invalid intermediate values', () => {
       // From 10, trying to add 1 should maintain 10 (11 is invalid)
-      expect(service.validateGearPowerValue(10, 1)).toBe(10);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, 1)).toBe(10);
       // From 13, trying to subtract 1 gives 12 which is valid (0 main + 4 sub)
-      expect(service.validateGearPowerValue(13, -1)).toBe(12);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 13, -1)).toBe(12);
       // From 3, trying to subtract 1 gives 2 which is invalid, should maintain 3
-      expect(service.validateGearPowerValue(3, -1)).toBe(3);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 3, -1)).toBe(3);
       // From 10, trying to add 2 gives 12 which is valid (0 main + 4 sub)
-      expect(service.validateGearPowerValue(10, 2)).toBe(12);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, 2)).toBe(12);
       // From 10, trying to subtract 2 gives 8 which is invalid, should maintain 10
-      expect(service.validateGearPowerValue(10, -2)).toBe(10);
+      expect(service.validateGearPowerValue('インク効率アップ(メイン)', 10, -2)).toBe(10);
+    });
+
+    it('should restrict head-only gear powers to max 10', () => {
+      expect(service.validateGearPowerValue('スタートダッシュ', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('スタートダッシュ', 10, 3)).toBe(10);
+      expect(service.validateGearPowerValue('スタートダッシュ', 10, 10)).toBe(10);
+      expect(service.validateGearPowerValue('カムバック', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('カムバック', 10, 3)).toBe(10);
+    });
+
+    it('should restrict clothing-only gear powers to max 10', () => {
+      expect(service.validateGearPowerValue('イカニンジャ', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('イカニンジャ', 10, 3)).toBe(10);
+      expect(service.validateGearPowerValue('リベンジ', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('リベンジ', 10, 3)).toBe(10);
+    });
+
+    it('should restrict shoes-only gear powers to max 10', () => {
+      expect(service.validateGearPowerValue('ステルスジャンプ', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('ステルスジャンプ', 10, 3)).toBe(10);
+      expect(service.validateGearPowerValue('対物攻撃力アップ', 0, 10)).toBe(10);
+      expect(service.validateGearPowerValue('対物攻撃力アップ', 10, 3)).toBe(10);
     });
   });
 

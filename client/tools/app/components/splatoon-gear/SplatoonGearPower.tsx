@@ -9,7 +9,7 @@ import BasicNumberField from '@client-common/components/inputs/TextFields/BasicN
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
-import { GearPower } from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 
 interface SplatoonGearPowerProps {
   gearPower: GearPower;
@@ -18,7 +18,7 @@ interface SplatoonGearPowerProps {
   onNameChange: (id: string, name: string) => void;
   onValueChange: (id: string, delta: number) => void;
   onRemove: (id: string) => void;
-  validateValue: (currentValue: number, delta: number) => number;
+  validateValue: (gearPowerName: string, currentValue: number, delta: number) => number;
 }
 
 export default function SplatoonGearPower({
@@ -40,7 +40,7 @@ export default function SplatoonGearPower({
 
   // Check if a specific delta would result in a valid change
   const canApplyDelta = (delta: number): boolean => {
-    const validatedValue = validateValue(gearPower.value, delta);
+    const validatedValue = validateValue(gearPower.name, gearPower.value, delta);
     return validatedValue !== gearPower.value;
   };
 

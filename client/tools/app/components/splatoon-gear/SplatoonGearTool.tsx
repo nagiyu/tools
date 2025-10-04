@@ -5,7 +5,8 @@ import { Box, Typography } from '@mui/material';
 
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
-import SplatoonGearService, { GearPower } from '@tools/services/SplatoonGearService';
+import SplatoonGearService from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 import SplatoonGearControls from './SplatoonGearControls';
 import SplatoonGearPower from './SplatoonGearPower';
 import SplatoonGearSummary from './SplatoonGearSummary';
@@ -47,15 +48,15 @@ export default function SplatoonGearTool() {
   const updateGearPowerValue = (id: string, delta: number) => {
     setGearPowers(gearPowers.map(gp => {
       if (gp.id === id) {
-        const newValue = service.validateGearPowerValue(gp.value, delta);
+        const newValue = service.validateGearPowerValue(gp.name, gp.value, delta);
         return { ...gp, value: newValue };
       }
       return gp;
     }));
   };
 
-  const validateGearPowerValue = (currentValue: number, delta: number): number => {
-    return service.validateGearPowerValue(currentValue, delta);
+  const validateGearPowerValue = (gearPowerName: string, currentValue: number, delta: number): number => {
+    return service.validateGearPowerValue(gearPowerName, currentValue, delta);
   };
 
   const resetAll = () => {
