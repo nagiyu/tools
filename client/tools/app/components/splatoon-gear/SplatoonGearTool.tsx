@@ -5,7 +5,8 @@ import { Box, Typography } from '@mui/material';
 
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
-import SplatoonGearService, { GearPower } from '@tools/services/SplatoonGearService';
+import SplatoonGearService from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 import SplatoonGearControls from './SplatoonGearControls';
 import SplatoonGearPower from './SplatoonGearPower';
 import SplatoonGearSummary from './SplatoonGearSummary';

@@ -1,4 +1,5 @@
-import SplatoonGearService, { GearPower } from '@tools/services/SplatoonGearService';
+import SplatoonGearService from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 
 describe('SplatoonGearService', () => {
   let service: SplatoonGearService;

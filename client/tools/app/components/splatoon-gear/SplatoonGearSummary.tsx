@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
-import SplatoonGearService, { GearPower, GearPowerSummary } from '@tools/services/SplatoonGearService';
+import SplatoonGearService from '@tools/services/SplatoonGearService';
+import { GearPower, GearPowerSummary } from '@tools/types/SplatoonGearTypes';
 
 interface SplatoonGearSummaryProps {
   gearPowers: GearPower[];

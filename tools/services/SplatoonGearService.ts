@@ -1,19 +1,5 @@
-export interface GearPower {
-  id: string;
-  name: string;
-  value: number;
-}
-
-export const GEAR_POWER_CATEGORIES = ['normal', 'head', 'clothing', 'shoes'] as const;
-export type GearPowerCategory = typeof GEAR_POWER_CATEGORIES[number];
-
-export interface GearPowerSummary {
-  mainSlots: number;
-  subSlots: number;
-  mainPoints: number;
-  subPoints: number;
-  totalPoints: number;
-}
+import { GEAR_POWER_CATEGORIES } from '../consts/SplatoonGearConsts';
+import { GearPower, GearPowerCategory, GearPowerSummary } from '../types/SplatoonGearTypes';
 
 export default class SplatoonGearService {
   private readonly TOTAL_GEAR_POWER = 57; // 10*3 + 3*3*3 = 57

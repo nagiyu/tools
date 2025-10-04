@@ -9,7 +9,7 @@ import BasicNumberField from '@client-common/components/inputs/TextFields/BasicN
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
-import { GearPower } from '@tools/services/SplatoonGearService';
+import { GearPower } from '@tools/types/SplatoonGearTypes';
 
 interface SplatoonGearPowerProps {
   gearPower: GearPower;
