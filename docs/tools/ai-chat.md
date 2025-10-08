@@ -8,55 +8,26 @@ OpenAI を使用した AI チャットツールです。nextjs-common の共通�
 
 ### システム構成
 
-```
-┌─────────────────────────────────────────────────┐
-│              Client (Next.js)                   │
-│                                                 │
-│  ┌──────────────────────────────────────────┐  │
-│  │  AI Chat Page                            │  │
-│  │  (/ai-chat)                              │  │
-│  │                                          │  │
-│  │  ┌────────────────────────────────────┐ │  │
-│  │  │  ChatContainer                     │ │  │
-│  │  │  - メッセージ表示                    │ │  │
-│  │  │  - 自動スクロール                    │ │  │
-│  │  │  - ChatMessage コンポーネント       │ │  │
-│  │  └────────────────────────────────────┘ │  │
-│  │                                          │  │
-│  │  ┌────────────────────────────────────┐ │  │
-│  │  │  入力エリア                          │ │  │
-│  │  │  - TextField (Material-UI)          │ │  │
-│  │  │  - SendButton                        │ │  │
-│  │  └────────────────────────────────────┘ │  │
-│  └──────────────────────────────────────────┘  │
-│                                                 │
-│  ┌──────────────────────────────────────────┐  │
-│  │  State Management                        │  │
-│  │  - useState (messages)                   │  │
-│  │  - useState (inputText)                  │  │
-│  │  - useState (isLoading)                  │  │
-│  └──────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-                        │
-                        │ API Request
-                        ▼
-┌─────────────────────────────────────────────────┐
-│           Next.js API Route                     │
-│           (/api/chat)                           │
-│                                                 │
-│  ┌──────────────────────────────────────────┐  │
-│  │  OpenAIService                           │  │
-│  │  - chat()                                │  │
-│  │  - continueConversation()                │  │
-│  └──────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-                        │
-                        │ OpenAI API
-                        ▼
-┌─────────────────────────────────────────────────┐
-│              OpenAI API                         │
-│              (GPT-4)                            │
-└─────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Client["Client (Next.js)"]
+        subgraph Page["AI Chat Page (/ai-chat)"]
+            ChatContainer["ChatContainer<br/>- メッセージ表示<br/>- 自動スクロール<br/>- ChatMessage コンポーネント"]
+            InputArea["入力エリア<br/>- TextField (Material-UI)<br/>- SendButton"]
+        end
+        State["State Management<br/>- useState (messages)<br/>- useState (inputText)<br/>- useState (isLoading)"]
+    end
+    
+    subgraph API["Next.js API Route (/api/chat)"]
+        OpenAIService["OpenAIService<br/>- chat()<br/>- continueConversation()"]
+    end
+    
+    subgraph OpenAI["OpenAI API"]
+        GPT4["GPT-4"]
+    end
+    
+    Client -->|API Request| API
+    API -->|OpenAI API| OpenAI
 ```
 
 ### ディレクトリ構造
@@ -200,27 +171,28 @@ interface OpenAIChatOptions {
 
 ### メッセージ送信フロー
 
-```
-1. ユーザーがテキスト入力
-   ↓
-2. SendButton をクリック
-   ↓
-3. クライアント側で ChatMessageData を作成
-   ↓
-4. メッセージ一覧に追加（即座に表示）
-   ↓
-5. API Route (/api/chat) にリクエスト送信
-   - 会話履歴を含む
-   ↓
-6. OpenAIService.continueConversation() を実行
-   ↓
-7. OpenAI API からレスポンス取得
-   ↓
-8. レスポンスを ChatMessageData に変換
-   ↓
-9. クライアントに返却
-   ↓
-10. AI メッセージを一覧に追加
+```mermaid
+sequenceDiagram
+    actor User as ユーザー
+    participant UI as AI Chat Page
+    participant State as State Management
+    participant API as API Route (/api/chat)
+    participant OpenAI as OpenAIService
+    participant GPT as OpenAI API
+    
+    User->>UI: テキスト入力
+    User->>UI: SendButton クリック
+    UI->>State: ChatMessageData を作成
+    State->>UI: メッセージ一覧に追加（即座に表示）
+    UI->>API: POST リクエスト送信<br/>(会話履歴を含む)
+    API->>OpenAI: continueConversation() 実行
+    OpenAI->>GPT: Chat Completion リクエスト
+    GPT-->>OpenAI: AI レスポンス
+    OpenAI-->>API: レスポンスを返却
+    API->>API: ChatMessageData に変換
+    API-->>UI: AI メッセージを返却
+    UI->>State: AI メッセージを一覧に追加
+    State->>UI: 画面更新
 ```
 
 ### 状態管理
@@ -351,17 +323,28 @@ interface ErrorResponse {
 - OpenAI API (GPT-4)
 - typescript-common/OpenAIService
 
-**環境変数:**
-```bash
-OPENAI_API_KEY=sk-...
+**シークレット管理:**
+
+OpenAI API キーは AWS Secrets Manager で管理します。
+
+```typescript
+import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+
+// Secrets Manager から OpenAI API キーを取得
+const apiKey = await SecretsManagerUtil.getSecretValue('tools/openai', 'api-key');
 ```
+
+**設定:**
+- **シークレット名**: `tools/openai`
+- **シークレットキー**: `api-key`
 
 ### セキュリティ
 
 #### API キー管理
-- 環境変数で管理
+- AWS Secrets Manager で管理
 - クライアントに露出しない
 - サーバーサイドのみで使用
+- シークレット名: `tools/openai`、キー: `api-key`
 
 #### 入力検証
 - ユーザー入力のサニタイズ
