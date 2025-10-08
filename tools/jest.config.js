@@ -10,6 +10,6 @@ module.exports = {
   },
   moduleNameMapper: {
     "^@tools/(.*)$": "<rootDir>/$1",
-    "^@common/(.*)$": "<rootDir>/../typescript-common/$1",
+    "^@common/(.*)$": "<rootDir>/../typescript-common/common/$1",
   }
 };
