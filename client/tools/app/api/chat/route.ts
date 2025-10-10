@@ -3,16 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAIService from '@common/services/OpenAIService';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
-import { OpenAIChatHistory } from '@common/interfaces/OpenAIMessageType';
+import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
 
 interface ChatRequest {
     conversationHistory: OpenAIChatHistory;
     userMessage: string;
-    options?: {
-        model?: string;
-        temperature?: number;
-        maxTokens?: number;
-    };
+    options?: OpenAIChatOptions;
 }
 
 interface ChatResponse {
