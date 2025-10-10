@@ -325,18 +325,25 @@ interface ErrorResponse {
 
 **シークレット管理:**
 
-OpenAI API キーは AWS Secrets Manager で管理します。
+OpenAI API キーは AWS Secrets Manager で管理します。環境に応じて異なるシークレット名を使用します。
 
 ```typescript
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
+import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+
+// 環境に応じたシークレット名を取得
+const env = EnvironmentalUtil.GetProcessEnv();
+const secretName = env === 'production' ? 'Tools' : 'DevTools';
 
 // Secrets Manager から OpenAI API キーを取得
-const apiKey = await SecretsManagerUtil.getSecretValue('tools/openai', 'api-key');
+const apiKey = await SecretsManagerUtil.getSecretValue(secretName, 'OPENAI_API_KEY');
 ```
 
 **設定:**
-- **シークレット名**: `tools/openai`
-- **シークレットキー**: `api-key`
+- **シークレット名**:
+  - 本番環境 (production): `Tools`
+  - 開発・ローカル環境 (development/local): `DevTools`
+- **シークレットキー**: `OPENAI_API_KEY`
 
 ### セキュリティ
 
@@ -344,7 +351,9 @@ const apiKey = await SecretsManagerUtil.getSecretValue('tools/openai', 'api-key'
 - AWS Secrets Manager で管理
 - クライアントに露出しない
 - サーバーサイドのみで使用
-- シークレット名: `tools/openai`、キー: `api-key`
+- シークレット名: 本番環境 `Tools`、開発・ローカル環境 `DevTools`
+- シークレットキー: `OPENAI_API_KEY`
+- EnvironmentalUtil で環境判別
 
 #### 入力検証
 - ユーザー入力のサニタイズ
