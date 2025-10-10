@@ -402,23 +402,23 @@ const apiKey = await SecretsManagerUtil.getSecretValue(secretName, 'OPENAI_API_K
 ### Phase 1: 基本機能実装 (v1.0)
 
 - [x] アーキテクチャ設計
-- [ ] 基本的な UI 実装
-  - [ ] AI Chat ページ作成
-  - [ ] ChatContainer 統合
-  - [ ] ChatMessage 統合
-  - [ ] 入力エリア実装
-  - [ ] SendButton 統合
-- [ ] OpenAI API 統合
-  - [ ] API Route 作成 (/api/chat)
-  - [ ] OpenAIService 統合
-  - [ ] エラーハンドリング
-- [ ] 状態管理実装
-  - [ ] メッセージ履歴管理
-  - [ ] 会話履歴管理
-  - [ ] ローディング状態管理
-- [ ] 基本的なスタイリング
-  - [ ] Material-UI テーマ適用
-  - [ ] レスポンシブ対応
+- [x] 基本的な UI 実装
+  - [x] AI Chat ページ作成
+  - [x] ChatContainer 統合
+  - [x] ChatMessage 統合
+  - [x] 入力エリア実装
+  - [x] SendButton 統合
+- [x] OpenAI API 統合
+  - [x] API Route 作成 (/api/chat)
+  - [x] OpenAIService 統合
+  - [x] エラーハンドリング
+- [x] 状態管理実装
+  - [x] メッセージ履歴管理
+  - [x] 会話履歴管理
+  - [x] ローディング状態管理
+- [x] 基本的なスタイリング
+  - [x] Material-UI テーマ適用
+  - [x] レスポンシブ対応
 
 ### Phase 2: 機能拡張 (v1.1)
 
