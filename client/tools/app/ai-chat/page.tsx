@@ -13,7 +13,7 @@ import SmartToy from '@client-common/components/data/icon/SmartToy';
 
 import { OpenAIChatHistory } from '@common/interfaces/OpenAIMessageType';
 import ErrorUtil from '@common/utils/ErrorUtil';
-import AIChatService from '@/services/AIChatService';
+import AIChatService from '@/services/AIChatService.client';
 
 export default function AIChatPage() {
     const [messages, setMessages] = useState<ChatMessageData[]>([]);
