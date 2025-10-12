@@ -6,13 +6,13 @@ import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
 import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
 import APIUtil from '@client-common/utils/APIUtil';
 
-interface ChatRequest {
+export interface ChatRequest {
     conversationHistory: OpenAIChatHistory;
     userMessage: string;
     options?: OpenAIChatOptions;
 }
 
-interface ChatResponse {
+export interface ChatResponse {
     message: string;
     updatedHistory: OpenAIChatHistory;
 }

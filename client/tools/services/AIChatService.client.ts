@@ -1,15 +1,5 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
-import { OpenAIChatHistory } from '@common/interfaces/OpenAIMessageType';
-
-interface ChatRequest {
-    conversationHistory: OpenAIChatHistory;
-    userMessage: string;
-}
-
-interface ChatResponse {
-    message: string;
-    updatedHistory: OpenAIChatHistory;
-}
+import { ChatRequest, ChatResponse } from '@/app/api/chat/route';
 
 export default class AIChatService {
     /**
@@ -19,7 +9,7 @@ export default class AIChatService {
      * @returns Promise with AI response and updated history
      */
     public static async sendMessage(
-        conversationHistory: OpenAIChatHistory,
+        conversationHistory: ChatRequest['conversationHistory'],
         userMessage: string
     ): Promise<ChatResponse> {
         try {
