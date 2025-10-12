@@ -53,12 +53,13 @@ client/tools/
 
 ### UI コンポーネント
 
-#### 1. ChatContainer (nextjs-common)
+#### 1. ChatContainer (local override)
 
 チャットメッセージを表示するコンテナコンポーネントです。
 
 **利用するコンポーネント:**
-- `nextjs-common/common/components/data/chat/ChatContainer.tsx`
+- `client/tools/app/components/chat/ChatContainer.tsx`
+- 改行対応のローカル ChatMessage を使用するため、nextjs-common の ChatContainer をローカルでオーバーライド
 
 **Props:**
 ```typescript
@@ -74,12 +75,13 @@ interface ChatContainerProps {
 - メッセージ一覧の表示
 - 空状態の表示
 
-#### 2. ChatMessage (nextjs-common)
+#### 2. ChatMessage (local override)
 
 個々のメッセージを表示するコンポーネントです。
 
 **利用するコンポーネント:**
-- `nextjs-common/common/components/data/chat/ChatMessage.tsx`
+- `client/tools/app/components/chat/ChatMessage.tsx`
+- 改行対応のため、nextjs-common の ChatMessage をローカルでオーバーライド
 
 **Props:**
 ```typescript
@@ -97,6 +99,7 @@ interface ChatMessageData {
 - ユーザー/AI の区別表示
 - アバターアイコン対応
 - タイムスタンプ表示
+- **改行の保持** (`whiteSpace: 'pre-wrap'` による改行表示対応)
 
 #### 3. アバターアイコン (nextjs-common)
 
@@ -269,6 +272,7 @@ interface ErrorResponse {
 - SmartToy アイコン（AI）
 - タイムスタンプ表示
 - Material-UI テーマに準拠
+- **改行の保持** - AI レスポンスの改行が正しく表示される (whiteSpace: pre-wrap による実装)
 
 ### 拡張機能（将来実装）
 
@@ -419,6 +423,7 @@ const apiKey = await SecretsManagerUtil.getSecretValue(secretName, 'OPENAI_API_K
 - [x] 基本的なスタイリング
   - [x] Material-UI テーマ適用
   - [x] レスポンシブ対応
+  - [x] **改行表示対応** (whiteSpace: pre-wrap)
 
 ### Phase 2: 機能拡張 (v1.1)
 

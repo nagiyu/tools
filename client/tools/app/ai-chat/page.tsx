@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 
 import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import DirectionStack from '@client-common/components/Layout/Stacks/DirectionStack';
-import ChatContainer from '@client-common/components/data/chat/ChatContainer';
-import { ChatMessageData } from '@client-common/components/data/chat/ChatMessage';
+import ChatContainer from '@/app/components/chat/ChatContainer';
+import { ChatMessageData } from '@/app/components/chat/ChatMessage';
 import ChatInputField from '@client-common/components/inputs/TextFields/ChatInputField';
 import SendButton from '@client-common/components/inputs/buttons/SendButton';
 import Person from '@client-common/components/data/icon/Person';
