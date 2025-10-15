@@ -97,6 +97,7 @@ interface ChatMessageData {
 - ユーザー/AI の区別表示
 - アバターアイコン対応
 - タイムスタンプ表示
+- 改行の正しい表示（`whiteSpace: 'pre-wrap'` による）
 
 #### 3. アバターアイコン (nextjs-common)
 
@@ -268,6 +269,7 @@ interface ErrorResponse {
 - Person アイコン（ユーザー）
 - SmartToy アイコン（AI）
 - タイムスタンプ表示
+- 改行の正しい表示（AI レスポンス内の改行が適切に反映される）
 - Material-UI テーマに準拠
 
 ### 拡張機能（将来実装）
