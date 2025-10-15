@@ -97,6 +97,7 @@ interface ChatMessageData {
 - ユーザー/AI の区別表示
 - アバターアイコン対応
 - タイムスタンプ表示
+- 改行の自動処理（`\n` を `<br />` タグに変換）
 
 #### 3. アバターアイコン (nextjs-common)
 
