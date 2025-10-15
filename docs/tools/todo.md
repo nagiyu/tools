@@ -94,7 +94,7 @@ server/
 
 ```typescript
 interface ToDoRecord {
-  id: string;                    // PK: UUID
+  id: string;                    // PK: UUID（ToDo固有のID）
   dataType: string;              // SK: "ToDo"
   terminalId: string;            // TerminalID（デバイス識別子）
   title: string;                 // ToDoタイトル
@@ -105,13 +105,13 @@ interface ToDoRecord {
 }
 ```
 
-#### 通知設定レコード
+#### NotificationSettingレコード
 
 ```typescript
 interface NotificationSettingRecord {
-  id: string;                    // PK: TerminalID
+  id: string;                    // PK: TerminalID（通知設定の識別にTerminalIDを使用）
   dataType: string;              // SK: "NotificationSetting"
-  terminalId: string;            // TerminalID（同じ値）
+  terminalId: string;            // TerminalID（idと同じ値）
   enabled: boolean;              // 通知有効/無効
   notificationHour: number;      // 通知時間 (0-23)
   timezone: string;              // タイムゾーン (例: "Asia/Tokyo")
@@ -129,7 +129,7 @@ interface NotificationSettingRecord {
 
 #### DueDate-Index
 - **PK**: dueDate
-- **SK**: terminalId
+- **SK**: id (ToDoのUUID)
 - **用途**: バッチ処理で特定日付のToDoを効率的に取得
 
 ## API 設計
@@ -154,6 +154,7 @@ ToDoリストを取得します。
 
 interface ToDoData {
   id: string;
+  terminalId: string;  // TerminalID（フロントエンドで必要）
   title: string;
   dueDate: string;
   priority: 'Must' | 'Should' | 'Could';
@@ -312,7 +313,7 @@ interface AdminManagementProps<T> {
 
 **使用例（クライアント）:**
 ```typescript
-import IdentifierUtil from '@client-common/utils/IdentifierUtil.client';
+import IdentifierUtil from '@nextjs-common/common/utils/IdentifierUtil.client';
 
 // TerminalIDの取得（存在しない場合は生成）
 const terminalId = IdentifierUtil.getOrCreateTerminalId();
@@ -320,7 +321,7 @@ const terminalId = IdentifierUtil.getOrCreateTerminalId();
 
 **使用例（サーバー）:**
 ```typescript
-import IdentifierUtil from '@common/utils/IdentifierUtil.server';
+import IdentifierUtil from '@typescript-common/common/utils/IdentifierUtil.server';
 
 // TerminalIDの検証
 const isValid = IdentifierUtil.validateTerminalId(terminalId);
@@ -344,10 +345,13 @@ class ToDoDataAccessor extends DataAccessorBase<ToDoRecord> {
 
   // TerminalID別のToDo取得
   async getByTerminalId(terminalId: string): Promise<ToDoRecord[]> {
-    return await DynamoDBUtil.getAllByDataType<ToDoRecord>(
+    // TerminalID-DataType-Index を使用してクエリ
+    return await DynamoDBUtil.queryByGSI<ToDoRecord>(
       this.tableName,
-      this.dataType,
-      { terminalId }
+      'TerminalID-DataType-Index',
+      'terminalId',
+      terminalId,
+      { dataType: this.dataType }
     );
   }
 
@@ -390,6 +394,7 @@ class ToDoService extends CRUDServiceBase<ToDoData, ToDoRecord> {
   protected toData(record: ToDoRecord): ToDoData {
     return {
       id: record.id,
+      terminalId: record.terminalId,  // TerminalIDも含める
       title: record.title,
       dueDate: record.dueDate,
       priority: record.priority,
@@ -502,11 +507,11 @@ self.addEventListener('push', function (event) {
 ```typescript
 // server/batch/todo-notification/index.ts
 import { Handler } from 'aws-lambda';
-import ToDoService from '@common/services/ToDoService';
-import NotificationService from '@common/services/NotificationService';
-import NotificationSettingAccessor from '@common/services/NotificationSettingAccessor';
-import DateUtil from '@common/utils/DateUtil';
-import TimeUtil from '@common/utils/TimeUtil';
+import ToDoService from '@typescript-common/common/services/ToDoService';
+import NotificationService from '@typescript-common/common/services/NotificationService';
+import NotificationSettingAccessor from '@typescript-common/common/services/NotificationSettingAccessor';
+import DateUtil from '@typescript-common/common/utils/DateUtil';
+import TimeUtil from '@typescript-common/common/utils/TimeUtil';
 
 export const handler: Handler = async (event) => {
   try {
@@ -682,7 +687,7 @@ TerminalIDはブラウザのローカルストレージに保存され、デバ�
 
 ```typescript
 // nextjs-common/common/utils/IdentifierUtil.client.ts の使用
-import IdentifierUtil from '@client-common/utils/IdentifierUtil.client';
+import IdentifierUtil from '@nextjs-common/common/utils/IdentifierUtil.client';
 
 // TerminalIDの取得または生成
 const terminalId = IdentifierUtil.getOrCreateTerminalId();
@@ -699,7 +704,7 @@ TerminalIDの形式検証を行います。
 
 ```typescript
 // nextjs-common/common/utils/IdentifierUtil.server.ts の使用
-import IdentifierUtil from '@common/utils/IdentifierUtil.server';
+import IdentifierUtil from '@typescript-common/common/utils/IdentifierUtil.server';
 
 // TerminalIDのバリデーション
 const isValid = IdentifierUtil.validateTerminalId(terminalId);
@@ -805,10 +810,10 @@ const todoColumns: ColumnDefinition<ToDoData>[] = [
 
 ## 環境設定
 
-### テーブル名取得
+### 環境設定
 
 ```typescript
-import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+import EnvironmentalUtil from '@typescript-common/common/utils/EnvironmentalUtil';
 
 function getTableName(): string {
   const env = EnvironmentalUtil.GetProcessEnv();
@@ -828,8 +833,8 @@ function getTableName(): string {
 通知機能に必要なVAPID鍵などはSecrets Managerで管理します。
 
 ```typescript
-import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
-import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+import SecretsManagerUtil from '@typescript-common/common/aws/SecretsManagerUtil';
+import EnvironmentalUtil from '@typescript-common/common/utils/EnvironmentalUtil';
 
 const env = EnvironmentalUtil.GetProcessEnv();
 const secretName = env === 'production' ? 'Tools' : 'DevTools';
