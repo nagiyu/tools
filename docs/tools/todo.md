@@ -8,6 +8,8 @@ TerminalID ベースの ToDo 管理ツールです。ユーザー認証なしで
 
 ### システム構成
 
+#### データ登録系
+
 ```mermaid
 graph TB
     subgraph Client["Client (Next.js)"]
@@ -25,7 +27,6 @@ graph TB
     
     subgraph Services["Backend Services"]
         TodoService["ToDoService<br/>- CRUD操作<br/>- データ変換<br/>- ビジネスロジック"]
-        NotifService["NotificationService<br/>- 通知送信<br/>- プッシュ通知管理"]
     end
     
     subgraph Data["Data Access Layer"]
@@ -35,18 +36,36 @@ graph TB
     
     subgraph AWS["AWS Services"]
         DynamoDB["DynamoDB<br/>- ToDo保存<br/>- 通知設定保存"]
-        EventBridge["EventBridge<br/>- 1時間周期実行"]
-        Lambda["Lambda<br/>- バッチ通知処理"]
     end
     
     Client -->|API Request| API
     API -->|Service Call| Services
     Services -->|Data Access| Data
     Data -->|Query/Update| DynamoDB
+```
+
+#### バッチ処理系
+
+```mermaid
+graph TB
+    subgraph AWS["AWS Services"]
+        EventBridge["EventBridge<br/>- 1時間周期実行"]
+        Lambda["Lambda<br/>- バッチ通知処理"]
+        DynamoDB["DynamoDB<br/>- ToDo取得<br/>- 通知設定取得"]
+    end
+    
+    subgraph Services["Notification Service"]
+        NotifService["NotificationService<br/>- 通知送信<br/>- プッシュ通知管理"]
+    end
+    
+    subgraph Client["Client"]
+        Browser["ブラウザ<br/>- プッシュ通知受信"]
+    end
+    
     EventBridge -->|1時間ごとトリガー| Lambda
-    Lambda -->|ToDo取得| DynamoDB
+    Lambda -->|ToDo・設定取得| DynamoDB
     Lambda -->|通知送信| NotifService
-    NotifService -->|Push Notification| Client
+    NotifService -->|Push Notification| Browser
 ```
 
 ### ディレクトリ構造
@@ -65,20 +84,18 @@ client/tools/
 │       └── todo/
 │           ├── ToDoForm.tsx             # ToDo入力フォーム
 │           └── NotificationSettings.tsx # 通知設定コンポーネント
-└── services/
-    └── ToDoService.ts                   # ToDoビジネスロジック
 
-typescript-common/common/
+tools/
 ├── services/
+│   ├── ToDoService.ts                   # ToDoビジネスロジック
 │   ├── ToDoDataAccessor.ts              # ToDoデータアクセス
 │   └── NotificationSettingAccessor.ts   # 通知設定アクセス
 └── interfaces/
     └── ToDoType.ts                      # ToDoインターフェース
 
 server/
-└── batch/
-    └── todo-notification/
-        └── index.ts                     # バッチ通知Lambda
+└── todo-notification-batch/
+    └── index.ts                         # バッチ通知Lambda
 ```
 
 ## データモデル
@@ -87,49 +104,50 @@ server/
 
 #### テーブル名
 - 本番環境: `Tools`
-- 開発環境: `DevTools`
-- ローカル環境: `LocalTools`
+- 開発環境・ローカル環境: `DevTools`
 
 #### ToDoレコード
 
 ```typescript
-interface ToDoRecord {
-  id: string;                    // PK: UUID（ToDo固有のID）
-  dataType: string;              // SK: "ToDo"
-  terminalId: string;            // TerminalID（デバイス識別子）
-  title: string;                 // ToDoタイトル
-  dueDate: string;               // 期日 (YYYY-MM-DD形式)
-  priority: 'Must' | 'Should' | 'Could';  // 優先度
-  createdAt: string;             // 作成日時 (ISO 8601)
-  updatedAt: string;             // 更新日時 (ISO 8601)
+interface ToDoRecord extends RecordTypeBase {
+  ID: string;                    // PK: UUID（ToDo固有のID）
+  DataType: string;              // SK: "ToDo"
+  TerminalID: string;            // TerminalID（デバイス識別子）
+  Title: string;                 // ToDoタイトル
+  DueDate: string;               // 期日 (YYYY-MM-DD形式)
+  Priority: 'Must' | 'Should' | 'Could';  // 優先度
+  Create: number;                // 作成日時 (Unixタイムスタンプ)
+  Update: number;                // 更新日時 (Unixタイムスタンプ)
 }
 ```
 
 #### NotificationSettingレコード
 
 ```typescript
-interface NotificationSettingRecord {
-  id: string;                    // PK: TerminalID（通知設定の識別にTerminalIDを使用）
-  dataType: string;              // SK: "NotificationSetting"
-  terminalId: string;            // TerminalID（idと同じ値）
-  enabled: boolean;              // 通知有効/無効
-  notificationHour: number;      // 通知時間 (0-23)
-  timezone: string;              // タイムゾーン (例: "Asia/Tokyo")
-  createdAt: string;             // 作成日時 (ISO 8601)
-  updatedAt: string;             // 更新日時 (ISO 8601)
+interface NotificationSettingRecord extends RecordTypeBase {
+  ID: string;                    // PK: TerminalID（通知設定の識別にTerminalIDを使用）
+  DataType: string;              // SK: "NotificationSetting"
+  TerminalID: string;            // TerminalID（IDと同じ値）
+  Enabled: boolean;              // 通知有効/無効
+  NotificationHour: number;      // 通知時間 (0-23)
+  Timezone: string;              // タイムゾーン (例: "Asia/Tokyo")
+  Create: number;                // 作成日時 (Unixタイムスタンプ)
+  Update: number;                // 更新日時 (Unixタイムスタンプ)
 }
 ```
 
 ### GSI (Global Secondary Index)
 
-#### TerminalID-DataType-Index
-- **PK**: terminalId
-- **SK**: dataType
+GSIは必須ではありませんが、今後のパフォーマンス向上のために以下のような設計が考えられます。
+
+#### TerminalID-DataType-Index（任意）
+- **PK**: TerminalID
+- **SK**: DataType
 - **用途**: TerminalIDごとのデータ取得を効率化
 
-#### DueDate-Index
-- **PK**: dueDate
-- **SK**: id (ToDoのUUID)
+#### DueDate-Index（任意）
+- **PK**: DueDate
+- **SK**: ID (ToDoのUUID)
 - **用途**: バッチ処理で特定日付のToDoを効率的に取得
 
 ## API 設計
@@ -329,9 +347,12 @@ const isValid = IdentifierUtil.validateTerminalId(terminalId);
 
 ### バックエンドサービス
 
-#### 1. ToDoDataAccessor (typescript-common)
+#### 1. ToDoDataAccessor (tools)
 
 ToDoのデータアクセスを担当します。
+
+**配置場所:**
+- `tools/services/ToDoDataAccessor.ts`
 
 **基底クラス:**
 - `DataAccessorBase<ToDoRecord>`
@@ -345,26 +366,28 @@ class ToDoDataAccessor extends DataAccessorBase<ToDoRecord> {
 
   // TerminalID別のToDo取得
   async getByTerminalId(terminalId: string): Promise<ToDoRecord[]> {
-    // TerminalID-DataType-Index を使用してクエリ
-    return await DynamoDBUtil.queryByGSI<ToDoRecord>(
-      this.tableName,
-      'TerminalID-DataType-Index',
-      'terminalId',
-      terminalId,
-      { dataType: this.dataType }
-    );
+    // TerminalID-DataType-Index を使用してクエリ（GSI利用時）
+    // または全件取得後フィルター
+    const allRecords = await this.get();
+    return allRecords.filter(record => record.TerminalID === terminalId);
   }
 
   // 期日別のToDo取得（バッチ用）
   async getByDueDate(dueDate: string): Promise<ToDoRecord[]> {
-    // DueDateインデックスを使用
+    // DueDateインデックスを使用（GSI利用時）
+    // または全件取得後フィルター
+    const allRecords = await this.get();
+    return allRecords.filter(record => record.DueDate === dueDate);
   }
 }
 ```
 
-#### 2. ToDoService (typescript-common)
+#### 2. ToDoService (tools)
 
 ToDoのビジネスロジックを担当します。
+
+**配置場所:**
+- `tools/services/ToDoService.ts`
 
 **基底クラス:**
 - `CRUDServiceBase<ToDoData, ToDoRecord>`
@@ -378,28 +401,29 @@ class ToDoService extends CRUDServiceBase<ToDoData, ToDoRecord> {
 
   // Data → Record 変換
   protected toRecord(data: ToDoData, terminalId: string): ToDoRecord {
+    const now = Date.now();
     return {
-      id: data.id || generateUUID(),
-      dataType: 'ToDo',
-      terminalId,
-      title: data.title,
-      dueDate: data.dueDate,
-      priority: data.priority,
-      createdAt: data.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      ID: data.id || generateUUID(),
+      DataType: 'ToDo',
+      TerminalID: terminalId,
+      Title: data.title,
+      DueDate: data.dueDate,
+      Priority: data.priority,
+      Create: data.createdAt ? new Date(data.createdAt).getTime() : now,
+      Update: now,
     };
   }
 
   // Record → Data 変換
   protected toData(record: ToDoRecord): ToDoData {
     return {
-      id: record.id,
-      terminalId: record.terminalId,  // TerminalIDも含める
-      title: record.title,
-      dueDate: record.dueDate,
-      priority: record.priority,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
+      id: record.ID,
+      terminalId: record.TerminalID,  // TerminalIDも含める
+      title: record.Title,
+      dueDate: record.DueDate,
+      priority: record.Priority,
+      createdAt: new Date(record.Create).toISOString(),
+      updatedAt: new Date(record.Update).toISOString(),
     };
   }
 
@@ -505,13 +529,12 @@ self.addEventListener('push', function (event) {
 
 **処理フロー:**
 ```typescript
-// server/batch/todo-notification/index.ts
+// server/todo-notification-batch/index.ts
 import { Handler } from 'aws-lambda';
-import ToDoService from '@typescript-common/common/services/ToDoService';
+import ToDoService from '@tools/services/ToDoService';
 import NotificationService from '@typescript-common/common/services/NotificationService';
-import NotificationSettingAccessor from '@typescript-common/common/services/NotificationSettingAccessor';
+import NotificationSettingAccessor from '@tools/services/NotificationSettingAccessor';
 import DateUtil from '@typescript-common/common/utils/DateUtil';
-import TimeUtil from '@typescript-common/common/utils/TimeUtil';
 
 export const handler: Handler = async (event) => {
   try {
@@ -535,7 +558,7 @@ export const handler: Handler = async (event) => {
       const settings = await notificationSettingAccessor.get(terminalId);
       
       // 通知有効 かつ 設定された時刻の場合
-      if (settings.enabled && settings.notificationHour === currentHour) {
+      if (settings.Enabled && settings.NotificationHour === currentHour) {
         // 複数ToDoがある場合はまとめて通知
         const todoTitles = todos.map(t => `- ${t.title}`).join('\n');
         await notificationService.sendPushNotification(
@@ -820,10 +843,8 @@ function getTableName(): string {
   switch (env) {
     case 'production':
       return 'Tools';
-    case 'development':
+    default:  // development, local
       return 'DevTools';
-    default:
-      return 'LocalTools';
   }
 }
 ```
@@ -1121,15 +1142,8 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 
 ### バックエンド
 
-- DynamoDB の GSI 活用
 - バッチ処理の効率化（並列処理）
 - API レスポンスのキャッシュ
-
-### データベース
-
-- DueDate GSI による効率的なクエリ
-- TerminalID GSI によるパーティション最適化
-- TTL設定（将来的な自動削除）
 
 ## 関連ドキュメント
 
