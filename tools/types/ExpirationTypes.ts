@@ -33,15 +33,13 @@ export interface RecordTypeBase {
  * 
  * Used by client components and business logic for managing expiration data.
  * This represents food/product expiration information.
+ * 
+ * Inherits from DataTypeBase: id, terminalId, create, update
  */
 export interface ExpirationData extends DataTypeBase {
-  id: string;              // UID (auto-generated)
-  terminalId: string;      // TerminalID (device identifier)
   title: string;           // Product title
   expirationDate: string;  // Expiration date (YYYY-MM-DD format)
   memo?: string;           // Optional memo
-  create: number;          // Creation timestamp (Unix timestamp)
-  update: number;          // Update timestamp (Unix timestamp)
 }
 
 /**
@@ -65,14 +63,12 @@ export interface ExpirationRecord extends RecordTypeBase {
  * ExpirationSettingsData - Settings data layer interface
  * 
  * Used for managing user notification settings.
+ * 
+ * Inherits from DataTypeBase: id, terminalId, create, update
  */
 export interface ExpirationSettingsData extends DataTypeBase {
-  id: string;              // UID (based on TerminalID)
-  terminalId: string;      // TerminalID
   notificationHour: number; // Notification time (0-23)
   daysBeforeNotify: number; // Days before expiration to notify (default: 3)
-  create: number;          // Creation timestamp
-  update: number;          // Update timestamp
 }
 
 /**
