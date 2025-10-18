@@ -8,6 +8,8 @@
 
 ### システム構成
 
+#### 設定管理の構成
+
 ```mermaid
 graph TB
     subgraph Client["Client (Next.js)"]
@@ -18,14 +20,9 @@ graph TB
         Settings["設定画面<br/>- 通知時間設定<br/>- 事前通知日数設定"]
     end
     
-    subgraph Notification["通知システム"]
-        NotifPerm["通知許可管理<br/>- Push通知登録"]
-    end
-    
     subgraph API["Next.js API Routes"]
         ExpirationAPI["/api/expiration<br/>- CRUD operations"]
         SettingsAPI["/api/expiration/settings<br/>- 設定管理"]
-        NotifAPI["/api/notification/subscribe<br/>- 通知登録"]
     end
     
     subgraph Backend["Backend Services"]
@@ -40,18 +37,45 @@ graph TB
     
     subgraph AWS["AWS Services"]
         DynamoDB["DynamoDB<br/>- 賞味期限データ<br/>- 設定データ"]
-        EventBridge["EventBridge<br/>- 1時間周期実行"]
-        Lambda["Lambda Function<br/>- 通知バッチ処理"]
     end
     
     Client --> API
     API --> Backend
     Backend --> DataLayer
     DataLayer --> DynamoDB
+```
+
+#### 通知システムの構成
+
+```mermaid
+graph TB
+    subgraph Client["Client (Next.js)"]
+        NotifPerm["通知許可管理<br/>- Push通知登録"]
+    end
+    
+    subgraph API["Next.js API Routes"]
+        NotifAPI["/api/notification/subscribe<br/>- 通知登録"]
+    end
+    
+    subgraph Batch["Batch Processing"]
+        EventBridge["EventBridge<br/>- 1時間周期実行"]
+        Lambda["Lambda Function<br/>- 通知バッチ処理"]
+    end
+    
+    subgraph DataLayer["Data Access Layer"]
+        ExpirationAccessor["ExpirationDataAccessor<br/>- DynamoDB操作"]
+        SettingsAccessor["SettingsDataAccessor<br/>- 設定データ操作"]
+    end
+    
+    subgraph AWS["AWS Services"]
+        DynamoDB["DynamoDB<br/>- 賞味期限データ<br/>- 設定データ"]
+    end
+    
+    Client --> API
     EventBridge -->|Trigger| Lambda
     Lambda --> DataLayer
-    Lambda -->|Push Notification| Notification
-    Notification -->|Notify| Client
+    DataLayer --> DynamoDB
+    Lambda -->|Push Notification| Client
 ```
 
 ### ディレクトリ構造
@@ -84,11 +108,9 @@ tools/
 └── consts/
     └── ExpirationConsts.ts                  # 定数定義
 
-server/
-└── functions/
-    └── freshness-notification-batch/
-        ├── handler.ts                       # Lambda ハンドラー
-        └── ExpirationNotificationService.ts # 通知ロジック
+freshness-notification-batch/
+├── handler.ts                               # Lambda ハンドラー
+└── ExpirationNotificationService.ts         # 通知ロジック
 ```
 
 ## データモデル
