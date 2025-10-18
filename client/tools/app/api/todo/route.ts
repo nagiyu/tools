@@ -5,6 +5,29 @@ import { ToDoData } from '@tools/interfaces/ToDoData';
 import APIUtil from '@client-common/utils/APIUtil';
 import IdentifierUtil from '@common/utils/IdentifierUtil.server';
 
+// Constants for validation
+const VALID_PRIORITIES = ['Must', 'Should', 'Could'] as const;
+const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Validate if a date string is a valid date in YYYY-MM-DD format
+ * @param dateString - The date string to validate
+ * @returns true if valid, false otherwise
+ */
+function isValidDate(dateString: string): boolean {
+  if (!DATE_FORMAT_REGEX.test(dateString)) {
+    return false;
+  }
+  
+  const date = new Date(dateString);
+  // Check if date is valid and matches the input string
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return dateString === `${year}-${month}-${day}`;
+}
+
 /**
  * GET /api/todo
  * Retrieve ToDo list for a specific terminal
@@ -75,15 +98,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate priority
-    const validPriorities = ['Must', 'Should', 'Could'];
-    if (!validPriorities.includes(priority)) {
+    if (!VALID_PRIORITIES.includes(priority)) {
       return APIUtil.ReturnBadRequest('Invalid priority. Must be one of: Must, Should, Could');
     }
 
-    // Validate dueDate format (YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(dueDate)) {
-      return APIUtil.ReturnBadRequest('Invalid dueDate format. Expected YYYY-MM-DD');
+    // Validate dueDate
+    if (!isValidDate(dueDate)) {
+      return APIUtil.ReturnBadRequest('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
     }
 
     // Create new todo
@@ -138,15 +159,13 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate priority
-    const validPriorities = ['Must', 'Should', 'Could'];
-    if (!validPriorities.includes(priority)) {
+    if (!VALID_PRIORITIES.includes(priority)) {
       return APIUtil.ReturnBadRequest('Invalid priority. Must be one of: Must, Should, Could');
     }
 
-    // Validate dueDate format (YYYY-MM-DD)
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(dueDate)) {
-      return APIUtil.ReturnBadRequest('Invalid dueDate format. Expected YYYY-MM-DD');
+    // Validate dueDate
+    if (!isValidDate(dueDate)) {
+      return APIUtil.ReturnBadRequest('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
     }
 
     // Check if todo exists and belongs to the specified terminal
