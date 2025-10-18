@@ -3,9 +3,9 @@ import {
   ExpirationRecord,
   ExpirationSettingsData,
   ExpirationSettingsRecord,
-  DataTypeBase,
-  RecordTypeBase,
 } from '@tools/types/ExpirationTypes';
+import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
+import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 import {
   EXPIRATION_DATA_TYPE,
   EXPIRATION_SETTINGS_DATA_TYPE,
@@ -68,7 +68,6 @@ describe('ExpirationTypes', () => {
 
       const base: DataTypeBase = data;
       expect(base.id).toBe('test-id');
-      expect(base.terminalId).toBe('terminal-id');
       expect(base.create).toBe(1697000000);
       expect(base.update).toBe(1697000000);
     });
@@ -126,7 +125,6 @@ describe('ExpirationTypes', () => {
       const base: RecordTypeBase = record;
       expect(base.ID).toBe('test-id');
       expect(base.DataType).toBe('Expiration');
-      expect(base.TerminalID).toBe('terminal-id');
       expect(base.Create).toBe(1697000000);
       expect(base.Update).toBe(1697000000);
     });
@@ -177,7 +175,6 @@ describe('ExpirationTypes', () => {
 
       const base: DataTypeBase = data;
       expect(base.id).toBe('settings-id');
-      expect(base.terminalId).toBe('terminal-id');
       expect(base.create).toBe(1697000000);
       expect(base.update).toBe(1697000000);
     });
@@ -218,7 +215,6 @@ describe('ExpirationTypes', () => {
       const base: RecordTypeBase = record;
       expect(base.ID).toBe('settings-id');
       expect(base.DataType).toBe('ExpirationSettings');
-      expect(base.TerminalID).toBe('terminal-id');
       expect(base.Create).toBe(1697000000);
       expect(base.Update).toBe(1697000000);
     });

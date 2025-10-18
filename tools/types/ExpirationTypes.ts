@@ -5,28 +5,8 @@
  * It defines both the data layer types used in the application and the DynamoDB record types.
  */
 
-/**
- * Base interface for data types
- * Used for client and business logic layer
- */
-export interface DataTypeBase {
-  id: string;
-  terminalId: string;
-  create: number;
-  update: number;
-}
-
-/**
- * Base interface for DynamoDB record types
- * Used for data access layer
- */
-export interface RecordTypeBase {
-  ID: string;
-  DataType: string;
-  TerminalID: string;
-  Create: number;
-  Update: number;
-}
+import { DataTypeBase } from '@common/interfaces/data/DataTypeBase';
+import { RecordTypeBase } from '@common/interfaces/record/RecordTypeBase';
 
 /**
  * ExpirationData - Data layer interface
@@ -34,9 +14,10 @@ export interface RecordTypeBase {
  * Used by client components and business logic for managing expiration data.
  * This represents food/product expiration information.
  * 
- * Inherits from DataTypeBase: id, terminalId, create, update
+ * Inherits from DataTypeBase: id, create, update
  */
 export interface ExpirationData extends DataTypeBase {
+  terminalId: string;      // TerminalID (device identifier)
   title: string;           // Product title
   expirationDate: string;  // Expiration date (YYYY-MM-DD format)
   memo?: string;           // Optional memo
@@ -47,6 +28,8 @@ export interface ExpirationData extends DataTypeBase {
  * 
  * This is the actual record type stored in DynamoDB.
  * Field names follow DynamoDB naming conventions (PascalCase).
+ * 
+ * Inherits from RecordTypeBase: ID, DataType, Create, Update (made required)
  */
 export interface ExpirationRecord extends RecordTypeBase {
   ID: string;              // UID, Partition Key
@@ -64,9 +47,10 @@ export interface ExpirationRecord extends RecordTypeBase {
  * 
  * Used for managing user notification settings.
  * 
- * Inherits from DataTypeBase: id, terminalId, create, update
+ * Inherits from DataTypeBase: id, create, update
  */
 export interface ExpirationSettingsData extends DataTypeBase {
+  terminalId: string;      // TerminalID
   notificationHour: number; // Notification time (0-23)
   daysBeforeNotify: number; // Days before expiration to notify (default: 3)
 }
@@ -75,6 +59,8 @@ export interface ExpirationSettingsData extends DataTypeBase {
  * ExpirationSettingsRecord - Settings DynamoDB record interface
  * 
  * DynamoDB record type for expiration settings.
+ * 
+ * Inherits from RecordTypeBase: ID, DataType, Create, Update (made required)
  */
 export interface ExpirationSettingsRecord extends RecordTypeBase {
   ID: string;              // UID, Partition Key
