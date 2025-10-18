@@ -910,7 +910,7 @@ function getTableName(): string {
 
 ### Phase 1: 基本機能実装
 
-- [ ] データモデル設計
+- [x] データモデル設計
 - [ ] DynamoDB テーブル設計
 - [ ] DataAccessor 実装
 - [ ] Service 実装
