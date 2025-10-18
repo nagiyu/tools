@@ -4,6 +4,9 @@
       "@tools*": [
         "./*"
       ],
+      "@tools-mock/*": [
+        "./tests/mock/*"
+      ],
       "@common/*": [
         "../typescript-common/common/*"
       ],
