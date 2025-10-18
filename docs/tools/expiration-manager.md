@@ -911,9 +911,9 @@ function getTableName(): string {
 ### Phase 1: 基本機能実装
 
 - [x] データモデル設計
-- [ ] DynamoDB テーブル設計
-- [ ] DataAccessor 実装
-- [ ] Service 実装
+- [x] DynamoDB テーブル設計
+- [x] DataAccessor 実装
+- [x] Service 実装
 - [ ] API Routes 実装
 - [ ] UI コンポーネント実装
 - [ ] AdminManagement 統合
