@@ -55,8 +55,6 @@ describe('ToDoTypes', () => {
         title: 'Test Task',
         dueDate: '2024-10-20',
         priority: 'Should',
-        createdAt: new Date(now).toISOString(),
-        updatedAt: new Date(now).toISOString(),
         create: now,
         update: now,
       };
@@ -66,8 +64,6 @@ describe('ToDoTypes', () => {
       expect(data.title).toBe('Test Task');
       expect(data.dueDate).toBe('2024-10-20');
       expect(data.priority).toBe('Should');
-      expect(typeof data.createdAt).toBe('string');
-      expect(typeof data.updatedAt).toBe('string');
       expect(typeof data.create).toBe('number');
       expect(typeof data.update).toBe('number');
     });
@@ -122,8 +118,6 @@ describe('ToDoTypes', () => {
         enabled: false,
         notificationHour: 18,
         timezone: 'America/New_York',
-        createdAt: new Date(now).toISOString(),
-        updatedAt: new Date(now).toISOString(),
         create: now,
         update: now,
       };
@@ -133,8 +127,6 @@ describe('ToDoTypes', () => {
       expect(data.enabled).toBe(false);
       expect(data.notificationHour).toBe(18);
       expect(data.timezone).toBe('America/New_York');
-      expect(typeof data.createdAt).toBe('string');
-      expect(typeof data.updatedAt).toBe('string');
       expect(typeof data.create).toBe('number');
       expect(typeof data.update).toBe('number');
     });

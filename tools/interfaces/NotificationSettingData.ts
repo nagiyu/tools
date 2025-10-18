@@ -9,6 +9,4 @@ export interface NotificationSettingData extends DataTypeBase {
   enabled: boolean;
   notificationHour: number;      // 0-23
   timezone: string;              // 例: "Asia/Tokyo"
-  createdAt: string;             // ISO 8601形式
-  updatedAt: string;             // ISO 8601形式
 }

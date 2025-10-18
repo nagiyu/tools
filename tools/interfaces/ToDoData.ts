@@ -10,6 +10,4 @@ export interface ToDoData extends DataTypeBase {
   title: string;
   dueDate: string;               // YYYY-MM-DD形式
   priority: PriorityType;        // 'Must' | 'Should' | 'Could'
-  createdAt: string;             // ISO 8601形式
-  updatedAt: string;             // ISO 8601形式
 }
