@@ -1,4 +1,5 @@
 import CRUDServiceBase from '@common/services/CRUDServiceBase';
+import ErrorUtil from '@common/utils/ErrorUtil';
 import ToDoDataAccessor from '@tools/services/ToDoDataAccessor';
 import { ToDoData } from '@tools/interfaces/ToDoData';
 import { ToDoRecord } from '@tools/interfaces/ToDoRecord';
@@ -44,13 +45,13 @@ export default class ToDoService extends CRUDServiceBase<ToDoData, ToDoRecord> {
   protected recordToData(record: ToDoRecord): ToDoData {
     // Ensure required fields are present
     if (!record.ID) {
-      throw new Error('Record ID is required but missing');
+      ErrorUtil.throwError('Record ID is required but missing');
     }
     if (record.Create === null || record.Create === undefined) {
-      throw new Error('Record Create timestamp is required but missing');
+      ErrorUtil.throwError('Record Create timestamp is required but missing');
     }
     if (record.Update === null || record.Update === undefined) {
-      throw new Error('Record Update timestamp is required but missing');
+      ErrorUtil.throwError('Record Update timestamp is required but missing');
     }
 
     return {
