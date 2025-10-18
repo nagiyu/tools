@@ -42,6 +42,17 @@ export default class ToDoService extends CRUDServiceBase<ToDoData, ToDoRecord> {
    * @returns ToDo data for application layer
    */
   protected recordToData(record: ToDoRecord): ToDoData {
+    // Ensure required fields are present
+    if (!record.ID) {
+      throw new Error('Record ID is required but missing');
+    }
+    if (record.Create === null || record.Create === undefined) {
+      throw new Error('Record Create timestamp is required but missing');
+    }
+    if (record.Update === null || record.Update === undefined) {
+      throw new Error('Record Update timestamp is required but missing');
+    }
+
     return {
       id: record.ID,
       terminalId: record.TerminalID,
