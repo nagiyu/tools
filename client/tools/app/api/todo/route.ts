@@ -3,11 +3,20 @@ import { NextRequest } from 'next/server';
 import ToDoService from '@tools/services/ToDoService';
 import { ToDoData } from '@tools/interfaces/ToDoData';
 import APIUtil from '@client-common/utils/APIUtil';
-import IdentifierUtil from '@common/utils/IdentifierUtil.server';
 
 // Constants for validation
 const VALID_PRIORITIES = ['Must', 'Should', 'Could'];
 const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Validate if a string is a valid UUID (v4 format)
+ * @param uuid - The UUID string to validate
+ * @returns true if valid UUID format, false otherwise
+ */
+function isValidUUID(uuid: string): boolean {
+  return UUID_REGEX.test(uuid);
+}
 
 /**
  * Validate if a date string is a valid date in YYYY-MM-DD format
@@ -56,7 +65,7 @@ export async function GET(request: NextRequest) {
       return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
-    if (!IdentifierUtil.validateTerminalId(terminalId)) {
+    if (!isValidUUID(terminalId)) {
       return APIUtil.ReturnBadRequest('Invalid terminalId format');
     }
 
@@ -99,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate terminalId format
-    if (!IdentifierUtil.validateTerminalId(terminalId)) {
+    if (!isValidUUID(terminalId)) {
       return APIUtil.ReturnBadRequest('Invalid terminalId format');
     }
 
@@ -160,7 +169,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate terminalId format
-    if (!IdentifierUtil.validateTerminalId(terminalId)) {
+    if (!isValidUUID(terminalId)) {
       return APIUtil.ReturnBadRequest('Invalid terminalId format');
     }
 
@@ -229,7 +238,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Validate terminalId format
-    if (!IdentifierUtil.validateTerminalId(terminalId)) {
+    if (!isValidUUID(terminalId)) {
       return APIUtil.ReturnBadRequest('Invalid terminalId format');
     }
 
