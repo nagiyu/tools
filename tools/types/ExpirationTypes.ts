@@ -29,17 +29,13 @@ export interface ExpirationData extends DataTypeBase {
  * This is the actual record type stored in DynamoDB.
  * Field names follow DynamoDB naming conventions (PascalCase).
  * 
- * Inherits from RecordTypeBase: ID, DataType, Create, Update (made required)
+ * Inherits from RecordTypeBase: ID, DataType, Create, Update
  */
 export interface ExpirationRecord extends RecordTypeBase {
-  ID: string;              // UID, Partition Key
-  DataType: string;        // 'Expiration', Sort Key
   TerminalID: string;      // TerminalID
   Title: string;           // Product title
   ExpirationDate: string;  // Expiration date (YYYY-MM-DD)
   Memo?: string;           // Optional memo
-  Create: number;          // Creation timestamp
-  Update: number;          // Update timestamp
 }
 
 /**
@@ -60,14 +56,10 @@ export interface ExpirationSettingsData extends DataTypeBase {
  * 
  * DynamoDB record type for expiration settings.
  * 
- * Inherits from RecordTypeBase: ID, DataType, Create, Update (made required)
+ * Inherits from RecordTypeBase: ID, DataType, Create, Update
  */
 export interface ExpirationSettingsRecord extends RecordTypeBase {
-  ID: string;              // UID, Partition Key
-  DataType: string;        // 'ExpirationSettings', Sort Key
   TerminalID: string;      // TerminalID
   NotificationHour: number; // Notification time (0-23)
   DaysBeforeNotify: number; // Days before expiration to notify
-  Create: number;          // Creation timestamp
-  Update: number;          // Update timestamp
 }
