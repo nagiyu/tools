@@ -1049,8 +1049,8 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 
 ### Phase 1: 基本機能実装 (v1.0)
 
-- [ ] アーキテクチャ設計
-- [ ] データモデル定義
+- [x] アーキテクチャ設計
+- [x] データモデル定義
 - [ ] ToDoDataAccessor実装
 - [ ] ToDoService実装
 - [ ] API実装（CRUD）
