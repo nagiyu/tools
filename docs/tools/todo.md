@@ -93,9 +93,8 @@ tools/
 └── interfaces/
     └── ToDoType.ts                      # ToDoインターフェース
 
-server/
-└── todo-notification-batch/
-    └── index.ts                         # バッチ通知Lambda
+todo-notification-batch/
+└── index.ts                             # バッチ通知Lambda
 ```
 
 ## データモデル
@@ -109,13 +108,17 @@ server/
 #### ToDoレコード
 
 ```typescript
+// 優先度の定義
+const PRIORITY_LEVELS = ['Must', 'Should', 'Could'] as const;
+type PriorityType = typeof PRIORITY_LEVELS[number];
+
 interface ToDoRecord extends RecordTypeBase {
   ID: string;                    // PK: UUID（ToDo固有のID）
   DataType: string;              // SK: "ToDo"
   TerminalID: string;            // TerminalID（デバイス識別子）
   Title: string;                 // ToDoタイトル
   DueDate: string;               // 期日 (YYYY-MM-DD形式)
-  Priority: 'Must' | 'Should' | 'Could';  // 優先度
+  Priority: PriorityType;        // 優先度
   Create: number;                // 作成日時 (Unixタイムスタンプ)
   Update: number;                // 更新日時 (Unixタイムスタンプ)
 }
@@ -175,7 +178,7 @@ interface ToDoData {
   terminalId: string;  // TerminalID（フロントエンドで必要）
   title: string;
   dueDate: string;
-  priority: 'Must' | 'Should' | 'Could';
+  priority: PriorityType;  // 'Must' | 'Should' | 'Could'
   createdAt: string;
   updatedAt: string;
 }
@@ -190,7 +193,7 @@ interface ToDoData {
   terminalId: string;
   title: string;
   dueDate: string;
-  priority: 'Must' | 'Should' | 'Could';
+  priority: PriorityType;  // 'Must' | 'Should' | 'Could'
 }
 ```
 
@@ -211,7 +214,7 @@ ToDoを更新します。
   terminalId: string;
   title: string;
   dueDate: string;
-  priority: 'Must' | 'Should' | 'Could';
+  priority: PriorityType;  // 'Must' | 'Should' | 'Could'
 }
 ```
 
@@ -529,7 +532,7 @@ self.addEventListener('push', function (event) {
 
 **処理フロー:**
 ```typescript
-// server/todo-notification-batch/index.ts
+// todo-notification-batch/index.ts
 import { Handler } from 'aws-lambda';
 import ToDoService from '@tools/services/ToDoService';
 import NotificationService from '@typescript-common/common/services/NotificationService';
@@ -1125,12 +1128,6 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 - API エンドポイントのテスト
 - DynamoDB との統合テスト
 - プッシュ通知のテスト
-
-### E2E テスト
-
-- ToDo CRUD フロー
-- 通知設定フロー
-- バッチ通知処理
 
 ## パフォーマンス最適化
 
