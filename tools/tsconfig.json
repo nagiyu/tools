@@ -4,8 +4,14 @@
       "@tools*": [
         "./*"
       ],
+      "@tools-mock/*": [
+        "./tests/mock/*"
+      ],
       "@common/*": [
         "../typescript-common/common/*"
+      ],
+      "@common-mock/*": [
+        "../typescript-common/tests/mock/*"
       ]
     }
   }
