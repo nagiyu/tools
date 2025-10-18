@@ -6,7 +6,7 @@ import APIUtil from '@client-common/utils/APIUtil';
 import IdentifierUtil from '@common/utils/IdentifierUtil.server';
 
 // Constants for validation
-const VALID_PRIORITIES = ['Must', 'Should', 'Could'] as const;
+const VALID_PRIORITIES = ['Must', 'Should', 'Could'];
 const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
@@ -19,11 +19,17 @@ function isValidDate(dateString: string): boolean {
     return false;
   }
   
-  const date = new Date(dateString);
-  // Check if date is valid and matches the input string
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const date = new Date(dateString + 'T00:00:00.000Z'); // Use UTC to avoid timezone issues
+  
+  // Check for Invalid Date
+  if (isNaN(date.getTime())) {
+    return false;
+  }
+  
+  // Check if date matches the input string (prevents dates like 2023-02-30)
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   
   return dateString === `${year}-${month}-${day}`;
 }
