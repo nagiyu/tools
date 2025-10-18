@@ -914,7 +914,7 @@ function getTableName(): string {
 - [x] DynamoDB テーブル設計
 - [x] DataAccessor 実装
 - [x] Service 実装
-- [ ] API Routes 実装
+- [x] API Routes 実装
 - [ ] UI コンポーネント実装
 - [ ] AdminManagement 統合
 - [ ] 色分け表示実装
