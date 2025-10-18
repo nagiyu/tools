@@ -1052,7 +1052,7 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 - [x] アーキテクチャ設計
 - [x] データモデル定義
 - [x] ToDoDataAccessor実装
-- [ ] ToDoService実装
+- [x] ToDoService実装
 - [ ] API実装（CRUD）
 - [ ] フロントエンド実装
   - [ ] ToDoページ作成
