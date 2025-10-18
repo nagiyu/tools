@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server';
 import ExpirationService from '@tools/services/ExpirationService';
 import { ExpirationData } from '@tools/types/ExpirationTypes';
 import APIUtil from '@client-common/utils/APIUtil';
-import IdentifierUtil from '@client-common/utils/IdentifierUtil.server';
 
 /**
  * GET /api/expiration
