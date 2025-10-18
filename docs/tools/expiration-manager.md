@@ -1,4 +1,4 @@
-# 賞味期限管理ツール (Expiration Manager)
+# 賞味期限管理ツール (Freshness Manager)
 
 ## 概要
 
@@ -11,11 +11,14 @@
 ```mermaid
 graph TB
     subgraph Client["Client (Next.js)"]
-        subgraph Page["Expiration Manager Page (/expiration-manager)"]
+        subgraph Page["Freshness Manager Page (/freshness-manager)"]
             AdminMgmt["AdminManagement<br/>- CRUD管理<br/>- テーブル表示"]
             ColorTable["色分けテーブル<br/>- 期限切れ: 赤<br/>- 期限間近: 黄<br/>- 通常: 白"]
         end
         Settings["設定画面<br/>- 通知時間設定<br/>- 事前通知日数設定"]
+    end
+    
+    subgraph Notification["通知システム"]
         NotifPerm["通知許可管理<br/>- Push通知登録"]
     end
     
@@ -47,7 +50,8 @@ graph TB
     DataLayer --> DynamoDB
     EventBridge -->|Trigger| Lambda
     Lambda --> DataLayer
-    Lambda -->|Push Notification| Client
+    Lambda -->|Push Notification| Notification
+    Notification -->|Notify| Client
 ```
 
 ### ディレクトリ構造
@@ -55,7 +59,7 @@ graph TB
 ```
 client/tools/
 ├── app/
-│   ├── expiration-manager/
+│   ├── freshness-manager/
 │   │   └── page.tsx                         # 賞味期限管理ページ
 │   ├── api/
 │   │   └── expiration/
@@ -82,7 +86,7 @@ tools/
 
 server/
 └── functions/
-    └── expiration-notification/
+    └── freshness-notification-batch/
         ├── handler.ts                       # Lambda ハンドラー
         └── ExpirationNotificationService.ts # 通知ロジック
 ```
@@ -397,7 +401,7 @@ interface UpdateSettingsResponse {
 ```mermaid
 sequenceDiagram
     actor User as ユーザー
-    participant UI as Expiration Manager
+    participant UI as Freshness Manager
     participant API as API Route
     participant Service as ExpirationService
     participant Accessor as ExpirationDataAccessor
@@ -587,8 +591,7 @@ class ExpirationNotificationService {
 ### EventBridge 設定
 
 **トリガー設定:**
-- スケジュール式: `cron(0 * * * ? *)` (毎時0分)
-- または: `rate(1 hour)` (1時間ごと)
+- スケジュール式: `rate(1 hour)` (1時間ごと)
 
 **環境変数:**
 - `TABLE_NAME`: DynamoDB テーブル名
@@ -722,7 +725,10 @@ import { ExpirationData } from '@tools/types/ExpirationTypes';
 
 ### DynamoDB テーブル設計
 
-**GSI (Global Secondary Index) - TerminalID検索用:**
+**GSI (Global Secondary Index) - TerminalID検索用 (今後の課題):**
+
+> **Note**: GSI は今後の課題とし、現時点では実装しません。当面は Scan 操作でデータを取得します。
+
 ```
 IndexName: TerminalID-DataType-index
 Partition Key: TerminalID
@@ -821,9 +827,9 @@ function getTableName(): string {
 
 ### アクセス方法
 
-- ホーム画面の「Expiration Manager」ボタンから
-- メニューの「Expiration Manager」リンクから
-- 直接URL: `/expiration-manager`
+- ホーム画面の「Freshness Manager」ボタンから
+- メニューの「Freshness Manager」リンクから
+- 直接URL: `/freshness-manager`
 
 ### 基本的な使い方
 
@@ -870,7 +876,9 @@ function getTableName(): string {
 - DynamoDB 統合テスト
 - 通知バッチ処理のテスト
 
-### E2E テスト
+### E2E テスト (今後の課題)
+
+> **Note**: E2E テストは今後の課題とし、現時点では考慮しません。
 
 - CRUD フロー
 - 色分け表示
