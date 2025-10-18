@@ -1,4 +1,9 @@
-import { PRIORITY_LEVELS, PriorityType, ToDoRecord, ToDoData, NotificationSettingRecord, NotificationSettingData } from '@tools/types/ToDoTypes';
+import { PRIORITY_LEVELS } from '@tools/consts/ToDoConsts';
+import { PriorityType } from '@tools/types/ToDoTypes';
+import { ToDoRecord } from '@tools/interfaces/ToDoRecord';
+import { ToDoData } from '@tools/interfaces/ToDoData';
+import { NotificationSettingRecord } from '@tools/interfaces/NotificationSettingRecord';
+import { NotificationSettingData } from '@tools/interfaces/NotificationSettingData';
 
 describe('ToDoTypes', () => {
   describe('Priority Levels', () => {
