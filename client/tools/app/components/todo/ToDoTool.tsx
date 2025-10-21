@@ -1,20 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Chip, Typography } from '@mui/material';
 
 import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 import IdentifierUtil from '@client-common/utils/IdentifierUtil.client';
-import BasicDatePicker from '@client-common/components/inputs/Dates/BasicDatePicker';
-import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
-import BasicStack from '@client-common/components/Layout/Stacks/BasicStack';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 import { ToDoData } from '@tools/interfaces/ToDoData';
 import { PRIORITY_LEVELS } from '@tools/consts/ToDoConsts';
 import { PriorityType } from '@tools/types/ToDoTypes';
+import ToDoFetchService from '@/services/ToDoFetchService.client';
+import EditDialogContent from './EditDialogContent';
 
 export default function ToDoTool() {
   const [terminalId, setTerminalId] = useState<string>('');
@@ -69,12 +66,36 @@ export default function ToDoTool() {
       label: '優先度',
       minWidth: 120,
       format: (value: PriorityType) => {
-        const colors = {
-          Must: 'error',
-          Should: 'warning',
-          Could: 'info',
-        } as const;
-        return <Chip label={value} color={colors[value]} size="small" />;
+        const styles: Record<PriorityType, React.CSSProperties> = {
+          Must: { 
+            backgroundColor: '#d32f2f', 
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '16px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            display: 'inline-block'
+          },
+          Should: { 
+            backgroundColor: '#ed6c02', 
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '16px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            display: 'inline-block'
+          },
+          Could: { 
+            backgroundColor: '#0288d1', 
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '16px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            display: 'inline-block'
+          },
+        };
+        return <span style={styles[value]}>{value}</span>;
       },
     },
     {
@@ -87,76 +108,22 @@ export default function ToDoTool() {
 
   // Fetch all ToDo items for this terminal
   const fetchData = async (): Promise<ToDoData[]> => {
-    if (!terminalId) {
-      return [];
-    }
-
-    const response = await fetch(`/api/todo?terminalId=${terminalId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch ToDo items');
-    }
-    
-    const { todos } = await response.json();
-    return todos;
+    return await ToDoFetchService.fetchTodos(terminalId);
   };
 
   // Create a new ToDo item
   const onCreate = async (item: ToDoData): Promise<ToDoData> => {
-    const response = await fetch('/api/todo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        terminalId,
-        title: item.title,
-        dueDate: item.dueDate,
-        priority: item.priority,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create ToDo item');
-    }
-
-    const { todo } = await response.json();
-    return todo;
+    return await ToDoFetchService.createTodo(terminalId, item);
   };
 
   // Update an existing ToDo item
   const onUpdate = async (item: ToDoData): Promise<ToDoData> => {
-    const response = await fetch('/api/todo', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: item.id,
-        terminalId,
-        title: item.title,
-        dueDate: item.dueDate,
-        priority: item.priority,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update ToDo item');
-    }
-
-    const { todo } = await response.json();
-    return todo;
+    return await ToDoFetchService.updateTodo(terminalId, item);
   };
 
   // Delete a ToDo item
   const onDelete = async (id: string): Promise<void> => {
-    const response = await fetch('/api/todo', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id,
-        terminalId,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete ToDo item');
-    }
+    await ToDoFetchService.deleteTodo(terminalId, id);
   };
 
   // Validate ToDo item before save
@@ -174,14 +141,12 @@ export default function ToDoTool() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: '0 auto', padding: 2 }}>
-      <Typography variant="h4" gutterBottom align="center">
-        ToDo 管理
-      </Typography>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '16px' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>ToDo 管理</h1>
       
-      <Typography variant="body1" gutterBottom align="center" color="text.secondary" sx={{ mb: 3 }}>
+      <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>
         タスクを管理して期日通りに完了させましょう
-      </Typography>
+      </p>
 
       {terminalId ? (
         <AdminManagement
@@ -195,38 +160,18 @@ export default function ToDoTool() {
           onDelete={onDelete}
         >
           {(item, _state, onItemChange) => (
-            <BasicStack spacing={2}>
-              <BasicTextField
-                label="タイトル"
-                value={item.title}
-                onChange={(e) => onItemChange({ ...item, title: e.target.value })}
-              />
-              <BasicDatePicker
-                label="期日"
-                value={item.dueDate ? new Date(item.dueDate + 'T00:00:00.000Z') : null}
-                onChange={(date) => {
-                  if (date) {
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    onItemChange({ ...item, dueDate: `${year}-${month}-${day}` });
-                  }
-                }}
-              />
-              <BasicSelect
-                label="優先度"
-                value={item.priority}
-                onChange={(value) => onItemChange({ ...item, priority: value as PriorityType })}
-                options={priorityOptions}
-              />
-            </BasicStack>
+            <EditDialogContent
+              item={item}
+              onItemChange={onItemChange}
+              priorityOptions={priorityOptions}
+            />
           )}
         </AdminManagement>
       ) : (
-        <Typography align="center" color="text.secondary">
+        <p style={{ textAlign: 'center', color: '#666' }}>
           Loading...
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   );
 }
