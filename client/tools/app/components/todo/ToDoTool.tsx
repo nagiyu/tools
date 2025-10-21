@@ -47,17 +47,17 @@ export default function ToDoTool() {
   };
 
   // Column definitions for the table
-  const columns: Column<ToDoData>[] = [
+  const columns: Column<ToDoData & { action: React.ReactNode }>[] = [
     {
-      field: 'title',
-      headerName: 'タイトル',
-      width: 300,
+      id: 'title',
+      label: 'タイトル',
+      minWidth: 300,
     },
     {
-      field: 'dueDate',
-      headerName: '期日',
-      width: 150,
-      valueFormatter: (value) => {
+      id: 'dueDate',
+      label: '期日',
+      minWidth: 150,
+      format: (value) => {
         if (!value) return '';
         // Format date as YYYY年MM月DD日
         const date = new Date(value + 'T00:00:00.000Z');
@@ -65,10 +65,10 @@ export default function ToDoTool() {
       },
     },
     {
-      field: 'priority',
-      headerName: '優先度',
-      width: 120,
-      cellRenderer: (value: PriorityType) => {
+      id: 'priority',
+      label: '優先度',
+      minWidth: 120,
+      format: (value: PriorityType) => {
         const colors = {
           Must: 'error',
           Should: 'warning',
@@ -76,6 +76,12 @@ export default function ToDoTool() {
         } as const;
         return <Chip label={value} color={colors[value]} size="small" />;
       },
+    },
+    {
+      id: 'action',
+      label: '操作',
+      minWidth: 200,
+      align: 'center',
     },
   ];
 
