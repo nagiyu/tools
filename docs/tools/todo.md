@@ -1054,10 +1054,10 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 - [x] ToDoDataAccessor実装
 - [x] ToDoService実装
 - [x] API実装（CRUD）
-- [ ] フロントエンド実装
-  - [ ] ToDoページ作成
-  - [ ] AdminManagement統合
-  - [ ] TerminalID管理統合
+- [x] フロントエンド実装
+  - [x] ToDoページ作成
+  - [x] AdminManagement統合
+  - [x] TerminalID管理統合
 - [ ] 通知設定機能
   - [ ] NotificationSettingAccessor実装
   - [ ] 通知設定API実装
@@ -1152,3 +1152,21 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 - [AWS DynamoDB Documentation](https://docs.aws.amazon.com/dynamodb/)
 - [Web Push API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Push_API)
 - [Next.js Documentation](https://nextjs.org/docs)
+
+## 実装履歴
+
+### 2025-10-21: Phase 1 フロントエンド実装完了
+- ToDoページ (`/client/tools/app/todo/page.tsx`) を作成
+- ToDoToolコンポーネント (`/client/tools/app/components/todo/ToDoTool.tsx`) を実装
+  - AdminManagementコンポーネントを使用したCRUD操作
+  - TerminalID管理の統合（IdentifierUtil.client.ts使用）
+  - 優先度別の色分け表示（Must=赤、Should=警告、Could=情報）
+  - 日本語形式での日付表示（YYYY年MM月DD日）
+- ホームページにToDoボタンを追加（Checkアイコン使用）
+- 必要な依存関係を追加（@mui/x-date-pickers, dayjs）
+
+実装されたコンポーネント：
+- BasicTextField: タイトル入力
+- BasicDatePicker: 期日選択（日本時間対応）
+- BasicSelect: 優先度選択（Must/Should/Could）
+- AdminManagement: CRUD操作とデータ表示の統一管理

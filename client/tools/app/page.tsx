@@ -6,6 +6,7 @@ import HomePage, { HomePageButton } from '@client-common/pages/HomePage';
 import Train from '@client-common/components/data/icon/Train';
 import SportsEsports from '@client-common/components/data/icon/SportsEsports';
 import SmartToy from '@client-common/components/data/icon/SmartToy';
+import Check from '@client-common/components/data/icon/Check';
 
 export default function Home() {
   const buttons: HomePageButton[] = [
@@ -13,6 +14,11 @@ export default function Home() {
       label: 'AI Chat',
       icon: <SmartToy />,
       url: '/ai-chat',
+    },
+    {
+      label: 'ToDo',
+      icon: <Check />,
+      url: '/todo',
     },
     {
       label: 'Convert Transfer',
