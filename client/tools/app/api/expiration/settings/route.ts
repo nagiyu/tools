@@ -13,10 +13,11 @@ const DEFAULT_DAYS_BEFORE_NOTIFY = 3;
  */
 export async function GET(request: NextRequest) {
   try {
-    const terminalId = request.headers.get('x-terminal-id');
+    const { searchParams } = new URL(request.url);
+    const terminalId = searchParams.get('terminalId');
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
     const service = new ExpirationSettingsService();
@@ -51,14 +52,12 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const terminalId = request.headers.get('x-terminal-id');
+    const body = await request.json();
+    const { terminalId, notificationHour, daysBeforeNotify } = body;
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
-
-    const body = await request.json();
-    const { notificationHour, daysBeforeNotify } = body;
 
     // Validate notificationHour
     if (notificationHour !== undefined && (notificationHour < 0 || notificationHour > 23)) {

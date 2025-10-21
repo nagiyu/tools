@@ -10,11 +10,12 @@ import APIUtil from '@client-common/utils/APIUtil';
  */
 export async function GET(request: NextRequest) {
   try {
-    // Get TerminalID from request headers (set by client)
-    const terminalId = request.headers.get('x-terminal-id');
+    // Get TerminalID from query parameters
+    const { searchParams } = new URL(request.url);
+    const terminalId = searchParams.get('terminalId');
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
     const service = new ExpirationService();
@@ -36,17 +37,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const terminalId = request.headers.get('x-terminal-id');
+    const body = await request.json();
+    const { terminalId, title, expirationDate, memo } = body;
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
-    const body = await request.json();
-    const { title, expirationDate, memo } = body;
-
     if (!title || !expirationDate) {
-      return APIUtil.ReturnBadRequest('Title and expirationDate are required');
+      return APIUtil.ReturnBadRequest('title and expirationDate are required');
     }
 
     const service = new ExpirationService();
@@ -76,17 +75,15 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    const terminalId = request.headers.get('x-terminal-id');
+    const body = await request.json();
+    const { terminalId, id, title, expirationDate, memo } = body;
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
-    const body = await request.json();
-    const { id, title, expirationDate, memo } = body;
-
     if (!id) {
-      return APIUtil.ReturnBadRequest('ID is required');
+      return APIUtil.ReturnBadRequest('id is required');
     }
 
     const service = new ExpirationService();
@@ -120,17 +117,16 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const terminalId = request.headers.get('x-terminal-id');
+    const { searchParams } = new URL(request.url);
+    const terminalId = searchParams.get('terminalId');
+    const id = searchParams.get('id');
     
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID is required');
+      return APIUtil.ReturnBadRequest('terminalId is required');
     }
 
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
     if (!id) {
-      return APIUtil.ReturnBadRequest('ID is required');
+      return APIUtil.ReturnBadRequest('id is required');
     }
 
     const service = new ExpirationService();

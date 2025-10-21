@@ -4,11 +4,10 @@
 
 ## 認証・識別
 
-すべてのエンドポイントは、リクエストヘッダーに `x-terminal-id` を含める必要があります。
+すべてのエンドポイントは、TerminalIDをクエリパラメータまたはリクエストボディに含める必要があります。
 
-```http
-x-terminal-id: <your-terminal-id>
-```
+- **GET, DELETE**: クエリパラメータ `terminalId`
+- **POST, PUT**: リクエストボディに `terminalId`
 
 TerminalIDは、クライアント側で `IdentifierUtil.client.ts` を使用して取得できます。
 
@@ -20,9 +19,13 @@ TerminalIDに紐づく賞味期限データの一覧を取得します。
 
 **リクエスト例:**
 ```http
-GET /api/expiration HTTP/1.1
-x-terminal-id: terminal-123
+GET /api/expiration?terminalId=terminal-123 HTTP/1.1
 ```
+
+**クエリパラメータ:**
+| パラメータ | 型 | 必須 | 説明 |
+|-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 
 **レスポンス例:**
 ```json
@@ -42,7 +45,7 @@ x-terminal-id: terminal-123
 ```
 
 **エラー:**
-- `400 Bad Request`: TerminalIDが指定されていない場合
+- `400 Bad Request`: terminalIdが指定されていない場合
 - `500 Internal Server Error`: サーバーエラー
 
 ---
@@ -54,10 +57,10 @@ x-terminal-id: terminal-123
 **リクエスト例:**
 ```http
 POST /api/expiration HTTP/1.1
-x-terminal-id: terminal-123
 Content-Type: application/json
 
 {
+  "terminalId": "terminal-123",
   "title": "牛乳",
   "expirationDate": "2024-10-20",
   "memo": "開封済み"
@@ -67,6 +70,7 @@ Content-Type: application/json
 **リクエストパラメータ:**
 | フィールド | 型 | 必須 | 説明 |
 |-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 | title | string | ✓ | 商品タイトル |
 | expirationDate | string | ✓ | 賞味期限 (YYYY-MM-DD) |
 | memo | string | - | メモ（オプション） |
@@ -99,10 +103,10 @@ Content-Type: application/json
 **リクエスト例:**
 ```http
 PUT /api/expiration HTTP/1.1
-x-terminal-id: terminal-123
 Content-Type: application/json
 
 {
+  "terminalId": "terminal-123",
   "id": "uuid-1234",
   "title": "牛乳（低脂肪）",
   "expirationDate": "2024-10-21",
@@ -113,6 +117,7 @@ Content-Type: application/json
 **リクエストパラメータ:**
 | フィールド | 型 | 必須 | 説明 |
 |-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 | id | string | ✓ | 更新対象のID |
 | title | string | - | 商品タイトル |
 | expirationDate | string | - | 賞味期限 (YYYY-MM-DD) |
@@ -134,7 +139,7 @@ Content-Type: application/json
 ```
 
 **エラー:**
-- `400 Bad Request`: IDが指定されていない場合
+- `400 Bad Request`: 必須フィールドが指定されていない場合
 - `404 Not Found`: 指定されたIDのデータが存在しない、または別のTerminalIDのデータの場合
 - `500 Internal Server Error`: サーバーエラー
 
@@ -146,13 +151,13 @@ Content-Type: application/json
 
 **リクエスト例:**
 ```http
-DELETE /api/expiration?id=uuid-1234 HTTP/1.1
-x-terminal-id: terminal-123
+DELETE /api/expiration?terminalId=terminal-123&id=uuid-1234 HTTP/1.1
 ```
 
 **クエリパラメータ:**
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 | id | string | ✓ | 削除対象のID |
 
 **レスポンス例:**
@@ -163,7 +168,7 @@ x-terminal-id: terminal-123
 ```
 
 **エラー:**
-- `400 Bad Request`: IDが指定されていない場合
+- `400 Bad Request`: 必須パラメータが指定されていない場合
 - `404 Not Found`: 指定されたIDのデータが存在しない、または別のTerminalIDのデータの場合
 - `500 Internal Server Error`: サーバーエラー
 
@@ -175,9 +180,13 @@ TerminalIDに紐づく通知設定を取得します。設定が存在しない�
 
 **リクエスト例:**
 ```http
-GET /api/expiration/settings HTTP/1.1
-x-terminal-id: terminal-123
+GET /api/expiration/settings?terminalId=terminal-123 HTTP/1.1
 ```
+
+**クエリパラメータ:**
+| パラメータ | 型 | 必須 | 説明 |
+|-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 
 **レスポンス例:**
 ```json
@@ -198,7 +207,7 @@ x-terminal-id: terminal-123
 - `daysBeforeNotify`: 3 (3日前)
 
 **エラー:**
-- `400 Bad Request`: TerminalIDが指定されていない場合
+- `400 Bad Request`: terminalIdが指定されていない場合
 - `500 Internal Server Error`: サーバーエラー
 
 ---
@@ -210,10 +219,10 @@ x-terminal-id: terminal-123
 **リクエスト例:**
 ```http
 PUT /api/expiration/settings HTTP/1.1
-x-terminal-id: terminal-123
 Content-Type: application/json
 
 {
+  "terminalId": "terminal-123",
   "notificationHour": 10,
   "daysBeforeNotify": 5
 }
@@ -222,6 +231,7 @@ Content-Type: application/json
 **リクエストパラメータ:**
 | フィールド | 型 | 必須 | 説明 |
 |-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
 | notificationHour | number | - | 通知時間 (0-23) |
 | daysBeforeNotify | number | - | 何日前から通知するか (0以上) |
 
@@ -241,7 +251,7 @@ Content-Type: application/json
 
 **エラー:**
 - `400 Bad Request`: 
-  - TerminalIDが指定されていない場合
+  - terminalIdが指定されていない場合
   - notificationHourが0-23の範囲外の場合
   - daysBeforeNotifyが負の値の場合
 - `500 Internal Server Error`: サーバーエラー
@@ -257,11 +267,8 @@ import IdentifierUtil from '@client-common/utils/IdentifierUtil.client';
 
 const terminalId = await IdentifierUtil.getTerminalId();
 
-const response = await fetch('/api/expiration', {
+const response = await fetch(`/api/expiration?terminalId=${terminalId}`, {
   method: 'GET',
-  headers: {
-    'x-terminal-id': terminalId,
-  },
 });
 
 const data = await response.json();
@@ -277,9 +284,9 @@ const response = await fetch('/api/expiration', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'x-terminal-id': terminalId,
   },
   body: JSON.stringify({
+    terminalId,
     title: '牛乳',
     expirationDate: '2024-10-20',
     memo: '開封済み',
@@ -299,9 +306,9 @@ const response = await fetch('/api/expiration', {
   method: 'PUT',
   headers: {
     'Content-Type': 'application/json',
-    'x-terminal-id': terminalId,
   },
   body: JSON.stringify({
+    terminalId,
     id: 'uuid-1234',
     title: '牛乳（低脂肪）',
     memo: 'まだ新しい',
@@ -317,11 +324,8 @@ console.log(data.expiration);
 ```typescript
 const terminalId = await IdentifierUtil.getTerminalId();
 
-const response = await fetch('/api/expiration?id=uuid-1234', {
+const response = await fetch(`/api/expiration?terminalId=${terminalId}&id=uuid-1234`, {
   method: 'DELETE',
-  headers: {
-    'x-terminal-id': terminalId,
-  },
 });
 
 const data = await response.json();
@@ -333,11 +337,8 @@ console.log(data.success);
 ```typescript
 const terminalId = await IdentifierUtil.getTerminalId();
 
-const response = await fetch('/api/expiration/settings', {
+const response = await fetch(`/api/expiration/settings?terminalId=${terminalId}`, {
   method: 'GET',
-  headers: {
-    'x-terminal-id': terminalId,
-  },
 });
 
 const data = await response.json();
@@ -353,9 +354,9 @@ const response = await fetch('/api/expiration/settings', {
   method: 'PUT',
   headers: {
     'Content-Type': 'application/json',
-    'x-terminal-id': terminalId,
   },
   body: JSON.stringify({
+    terminalId,
     notificationHour: 10,
     daysBeforeNotify: 5,
   }),
