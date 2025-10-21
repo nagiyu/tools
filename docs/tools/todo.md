@@ -1058,10 +1058,10 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
   - [x] ToDoページ作成
   - [x] AdminManagement統合
   - [x] TerminalID管理統合
-- [ ] 通知設定機能
-  - [ ] NotificationSettingAccessor実装
-  - [ ] 通知設定API実装
-  - [ ] 通知設定UI実装
+- [x] 通知設定機能
+  - [x] NotificationSettingAccessor実装
+  - [x] 通知設定API実装
+  - [x] 通知設定UI実装
 - [ ] プッシュ通知機能
   - [ ] サービスワーカー実装
   - [ ] プッシュ購読管理
