@@ -20,6 +20,10 @@ const menuItems: MenuItemData[] = [
     url: '/ai-chat'
   },
   {
+    title: 'ToDo',
+    url: '/todo'
+  },
+  {
     title: 'Convert Transfer',
     url: '/convert-transfer'
   },
