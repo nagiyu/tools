@@ -416,6 +416,19 @@ interface UpdateSettingsResponse {
 }
 ```
 
+### DELETE /api/expiration/settings
+
+設定を削除します。
+
+**リクエスト:** クエリパラメータに `terminalId` を指定
+
+**レスポンス:**
+```typescript
+interface DeleteSettingsResponse {
+  success: boolean;
+}
+```
+
 ## データフロー
 
 ### CRUD 操作フロー
@@ -914,7 +927,7 @@ function getTableName(): string {
 - [x] DynamoDB テーブル設計
 - [x] DataAccessor 実装
 - [x] Service 実装
-- [ ] API Routes 実装
+- [x] API Routes 実装
 - [ ] UI コンポーネント実装
 - [ ] AdminManagement 統合
 - [ ] 色分け表示実装
