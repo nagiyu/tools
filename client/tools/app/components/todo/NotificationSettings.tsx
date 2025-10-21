@@ -12,7 +12,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { BasicSelect } from '@client-common/components/form/BasicSelect';
+import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 
 interface NotificationSettingsProps {
@@ -145,10 +145,9 @@ export default function NotificationSettings({ terminalId }: NotificationSetting
           <BasicSelect
             label="通知時間"
             value={settings.notificationHour.toString()}
-            onChange={(value) => setSettings({ ...settings, notificationHour: parseInt(value, 10) })}
+            onChange={(value: string) => setSettings({ ...settings, notificationHour: parseInt(value, 10) })}
             options={hourOptions}
             disabled={!settings.enabled}
-            required
           />
         </Box>
 
