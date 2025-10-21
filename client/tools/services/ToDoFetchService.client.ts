@@ -14,11 +14,11 @@ export default class ToDoFetchService {
 
         try {
             const response = await fetch(`/api/todo?terminalId=${terminalId}`);
-            
+
             if (!response.ok) {
                 ErrorUtil.throwError('Failed to fetch ToDo items');
             }
-            
+
             const { todos } = await response.json();
             return todos;
         } catch (error) {
