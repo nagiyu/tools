@@ -416,6 +416,19 @@ interface UpdateSettingsResponse {
 }
 ```
 
+### DELETE /api/expiration/settings
+
+設定を削除します。
+
+**リクエスト:** クエリパラメータに `terminalId` を指定
+
+**レスポンス:**
+```typescript
+interface DeleteSettingsResponse {
+  success: boolean;
+}
+```
+
 ## データフロー
 
 ### CRUD 操作フロー

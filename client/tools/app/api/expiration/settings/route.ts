@@ -107,3 +107,35 @@ export async function PUT(request: NextRequest) {
     return APIUtil.ReturnInternalServerErrorWithError(error);
   }
 }
+
+/**
+ * DELETE /api/expiration/settings
+ * Delete settings for the user's TerminalID
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const terminalId = searchParams.get('terminalId');
+    
+    if (!terminalId) {
+      return APIUtil.ReturnBadRequest('terminalId is required');
+    }
+
+    const service = new ExpirationSettingsService();
+    const allSettings = await service.get();
+    
+    // Find settings for this terminal
+    const settings = allSettings.find(s => s.terminalId === terminalId);
+    
+    if (!settings) {
+      return APIUtil.ReturnNotFound('Settings not found');
+    }
+
+    await service.delete(settings.id);
+    
+    return APIUtil.ReturnSuccessWithObject({ success: true });
+  } catch (error) {
+    console.error('Error in DELETE /api/expiration/settings:', error);
+    return APIUtil.ReturnInternalServerErrorWithError(error);
+  }
+}

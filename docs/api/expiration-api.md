@@ -258,6 +258,34 @@ Content-Type: application/json
 
 ---
 
+### 7. DELETE /api/expiration/settings
+
+通知設定を削除します。設定を削除すると、次回取得時はデフォルト値が返されます。
+
+**リクエスト例:**
+```http
+DELETE /api/expiration/settings?terminalId=terminal-123 HTTP/1.1
+```
+
+**クエリパラメータ:**
+| パラメータ | 型 | 必須 | 説明 |
+|-----------|------|------|------|
+| terminalId | string | ✓ | TerminalID |
+
+**レスポンス例:**
+```json
+{
+  "success": true
+}
+```
+
+**エラー:**
+- `400 Bad Request`: terminalIdが指定されていない場合
+- `404 Not Found`: 設定が存在しない場合
+- `500 Internal Server Error`: サーバーエラー
+
+---
+
 ## 使用例 (クライアント側)
 
 ### 賞味期限データの取得
@@ -364,6 +392,19 @@ const response = await fetch('/api/expiration/settings', {
 
 const data = await response.json();
 console.log(data.settings);
+```
+
+### 設定の削除
+
+```typescript
+const terminalId = await IdentifierUtil.getTerminalId();
+
+const response = await fetch(`/api/expiration/settings?terminalId=${terminalId}`, {
+  method: 'DELETE',
+});
+
+const data = await response.json();
+console.log(data.success);
 ```
 
 ---
