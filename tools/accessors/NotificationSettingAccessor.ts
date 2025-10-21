@@ -30,4 +30,17 @@ export default class NotificationSettingAccessor extends DataAccessorBase<Notifi
         return 'DevTools';
     }
   }
+
+  /**
+   * Get notification setting by TerminalID
+   * Retrieves notification setting for a specific device/terminal
+   * 
+   * @param terminalId - The TerminalID to filter by
+   * @returns Promise<NotificationSettingRecord | null> - Notification setting record for the specified terminal or null if not found
+   */
+  public async getByTerminalId(terminalId: string): Promise<NotificationSettingRecord | null> {
+    const allRecords = await this.get();
+    const filtered = allRecords.filter(record => record.TerminalID === terminalId);
+    return filtered.length > 0 ? filtered[0] : null;
+  }
 }

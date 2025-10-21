@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     // Get notification settings for the specified terminal
     const accessor = new NotificationSettingAccessor();
-    const setting = await accessor.getById(terminalId);
+    const setting = await accessor.getByTerminalId(terminalId);
 
     // If no settings exist, return defaults
     if (!setting) {
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     // Create or update notification settings
     const accessor = new NotificationSettingAccessor();
-    const existingSetting = await accessor.getById(terminalId);
+    const existingSetting = await accessor.getByTerminalId(terminalId);
 
     const settingData: Partial<NotificationSettingRecord> = {
       ID: terminalId,

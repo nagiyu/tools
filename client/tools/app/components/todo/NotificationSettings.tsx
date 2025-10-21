@@ -1,19 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Switch, 
-  FormControlLabel,
-  Button,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
+import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
+import LoadingContent from '@client-common/components/content/LoadingContent';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
+import ToDoNotificationFetchService from '@/services/ToDoNotificationFetchService.client';
 
 interface NotificationSettingsProps {
   terminalId: string;
@@ -32,8 +24,7 @@ export default function NotificationSettings({ terminalId }: NotificationSetting
     timezone: 'Asia/Tokyo',
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   // Hour options (0-23)
   const hourOptions: SelectOptionType[] = Array.from({ length: 24 }, (_, i) => ({
@@ -48,19 +39,10 @@ export default function NotificationSettings({ terminalId }: NotificationSetting
 
       try {
         setLoading(true);
-        const response = await fetch(`/api/todo/notification?terminalId=${terminalId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch notification settings');
-        }
-        const data = await response.json();
-        setSettings({
-          enabled: data.enabled,
-          notificationHour: data.notificationHour,
-          timezone: data.timezone,
-        });
+        const data = await ToDoNotificationFetchService.fetchNotificationSettings(terminalId);
+        setSettings(data);
       } catch (error) {
-        console.error('Error fetching notification settings:', error);
-        setMessage({ type: 'error', text: '通知設定の取得に失敗しました' });
+        setMessage('通知設定の取得に失敗しました');
       } finally {
         setLoading(false);
       }
@@ -69,104 +51,90 @@ export default function NotificationSettings({ terminalId }: NotificationSetting
     fetchSettings();
   }, [terminalId]);
 
-  // Save notification settings
-  const handleSave = async () => {
-    if (!terminalId) return;
-
-    try {
-      setSaving(true);
-      setMessage(null);
-
-      const response = await fetch('/api/todo/notification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          terminalId,
-          enabled: settings.enabled,
-          notificationHour: settings.notificationHour,
-          timezone: settings.timezone,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save notification settings');
-      }
-
-      setMessage({ type: 'success', text: '通知設定を保存しました' });
-    } catch (error) {
-      console.error('Error saving notification settings:', error);
-      setMessage({ type: 'error', text: '通知設定の保存に失敗しました' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" p={3}>
-        <CircularProgress />
-      </Box>
+      <LoadingContent>
+        {(isLoading) => (
+          isLoading ? <div style={{ textAlign: 'center', padding: '24px' }}>読み込み中...</div> : null
+        )}
+      </LoadingContent>
     );
   }
 
   return (
-    <Card sx={{ mt: 3 }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          通知設定
-        </Typography>
-        
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          期日が今日のToDoについて、指定した時間に通知を受け取ることができます
-        </Typography>
+    <LoadingContent>
+      {(saving, runWithLoading) => (
+        <div style={{ 
+          marginTop: '24px', 
+          padding: '24px', 
+          border: '1px solid #ddd',
+          borderRadius: '8px',
+          backgroundColor: '#fff'
+        }}>
+          <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '20px' }}>
+            通知設定
+          </h2>
+          
+          <p style={{ color: '#666', marginBottom: '24px', fontSize: '14px' }}>
+            期日が今日のToDoについて、指定した時間に通知を受け取ることができます
+          </p>
 
-        {message && (
-          <Alert severity={message.type} sx={{ mb: 2 }} onClose={() => setMessage(null)}>
-            {message.text}
-          </Alert>
-        )}
+          {message && (
+            <div style={{
+              padding: '12px 16px',
+              marginBottom: '16px',
+              backgroundColor: message.includes('失敗') ? '#fee' : '#efe',
+              border: `1px solid ${message.includes('失敗') ? '#fcc' : '#cfc'}`,
+              borderRadius: '4px',
+              fontSize: '14px'
+            }}>
+              {message}
+            </div>
+          )}
 
-        <Box sx={{ mb: 2 }}>
-          <FormControlLabel
-            control={
-              <Switch
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
                 checked={settings.enabled}
                 onChange={(e) => setSettings({ ...settings, enabled: e.target.checked })}
-                color="primary"
+                style={{ marginRight: '8px', width: '16px', height: '16px' }}
               />
-            }
-            label="通知を有効にする"
+              <span>通知を有効にする</span>
+            </label>
+          </div>
+
+          <div style={{ marginBottom: '24px', maxWidth: '300px' }}>
+            <BasicSelect
+              label="通知時間"
+              value={settings.notificationHour.toString()}
+              onChange={(value: string) => setSettings({ ...settings, notificationHour: parseInt(value, 10) })}
+              options={hourOptions}
+              disabled={!settings.enabled}
+            />
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>
+              タイムゾーン: {settings.timezone}
+            </p>
+          </div>
+
+          <ContainedButton
+            label={saving ? '保存中...' : '保存'}
+            disabled={saving}
+            onClick={() => runWithLoading(async () => {
+              try {
+                setMessage(null);
+                await ToDoNotificationFetchService.saveNotificationSettings(terminalId, settings);
+                setMessage('通知設定を保存しました');
+              } catch (error) {
+                setMessage('通知設定の保存に失敗しました');
+              }
+            })}
           />
-        </Box>
-
-        <Box sx={{ mb: 3, maxWidth: 300 }}>
-          <BasicSelect
-            label="通知時間"
-            value={settings.notificationHour.toString()}
-            onChange={(value: string) => setSettings({ ...settings, notificationHour: parseInt(value, 10) })}
-            options={hourOptions}
-            disabled={!settings.enabled}
-          />
-        </Box>
-
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="caption" color="text.secondary">
-            タイムゾーン: {settings.timezone}
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          disabled={saving}
-          sx={{ mt: 1 }}
-        >
-          {saving ? '保存中...' : '保存'}
-        </Button>
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </LoadingContent>
   );
 }

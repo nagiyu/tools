@@ -13,6 +13,7 @@ jest.mock('@common/services/DataAccessorBase', () => {
     default: class DataAccessorBaseMock {
       private tableName: string;
       private dataType: string;
+      private mockRecords: any[] = [];
 
       constructor(tableName: string, dataType: string) {
         this.tableName = tableName;
@@ -28,8 +29,13 @@ jest.mock('@common/services/DataAccessorBase', () => {
       }
 
       async get(): Promise<any[]> {
-        return [];
+        return this.mockRecords;
       }
+      
+      setMockRecords(records: any[]): void {
+        this.mockRecords = records;
+      }
+      
       async getById(id: string): Promise<any | null> {
         return null;
       }
@@ -103,6 +109,63 @@ describe('NotificationSettingAccessor', () => {
       
       const localAccessor = new NotificationSettingAccessor();
       expect(localAccessor.getTableName()).toBe('DevTools');
+    });
+  });
+
+  describe('getByTerminalId', () => {
+    it('should return notification setting for a specific terminal ID', async () => {
+      const mockSetting: NotificationSettingRecord = {
+        ID: 'terminal-123',
+        DataType: 'NotificationSetting',
+        TerminalID: 'terminal-123',
+        Enabled: true,
+        NotificationHour: 9,
+        Timezone: 'Asia/Tokyo',
+        Create: Date.now(),
+        Update: Date.now(),
+      };
+
+      // Mock the get method to return test data
+      jest.spyOn(accessor as any, 'get').mockResolvedValue([mockSetting]);
+
+      const result = await accessor.getByTerminalId('terminal-123');
+      expect(result).toEqual(mockSetting);
+    });
+
+    it('should return null when no setting exists for the terminal ID', async () => {
+      jest.spyOn(accessor as any, 'get').mockResolvedValue([]);
+
+      const result = await accessor.getByTerminalId('non-existent');
+      expect(result).toBeNull();
+    });
+
+    it('should return the first matching setting when multiple exist', async () => {
+      const mockSetting1: NotificationSettingRecord = {
+        ID: 'terminal-123',
+        DataType: 'NotificationSetting',
+        TerminalID: 'terminal-123',
+        Enabled: true,
+        NotificationHour: 9,
+        Timezone: 'Asia/Tokyo',
+        Create: Date.now(),
+        Update: Date.now(),
+      };
+
+      const mockSetting2: NotificationSettingRecord = {
+        ID: 'terminal-456',
+        DataType: 'NotificationSetting',
+        TerminalID: 'terminal-456',
+        Enabled: false,
+        NotificationHour: 12,
+        Timezone: 'America/New_York',
+        Create: Date.now(),
+        Update: Date.now(),
+      };
+
+      jest.spyOn(accessor as any, 'get').mockResolvedValue([mockSetting1, mockSetting2]);
+
+      const result = await accessor.getByTerminalId('terminal-123');
+      expect(result).toEqual(mockSetting1);
     });
   });
 });
