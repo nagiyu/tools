@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import LoadingContent from '@client-common/components/content/LoadingContent';
+import LoadingPage from '@client-common/pages/LoadingPage';
 import { SelectOptionType } from '@client-common/interfaces/SelectOptionType';
 import ToDoNotificationFetchService from '@/services/ToDoNotificationFetchService.client';
 
@@ -52,13 +53,7 @@ export default function NotificationSettings({ terminalId }: NotificationSetting
   }, [terminalId]);
 
   if (loading) {
-    return (
-      <LoadingContent>
-        {(isLoading) => (
-          isLoading ? <div style={{ textAlign: 'center', padding: '24px' }}>読み込み中...</div> : null
-        )}
-      </LoadingContent>
-    );
+    return <LoadingPage />;
   }
 
   return (
