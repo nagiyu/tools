@@ -53,10 +53,6 @@ function getStatusColor(status: 'expired' | 'soon' | 'normal'): string {
   }
 }
 
-interface ExpirationDataWithStatus extends ExpirationData {
-  statusBadge: React.ReactNode;
-}
-
 export default function ExpirationManagementContainer() {
   const [terminalId, setTerminalId] = useState<string>('');
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
