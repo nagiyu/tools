@@ -1,5 +1,5 @@
 import ErrorUtil from '@common/utils/ErrorUtil';
-import { ExpirationData } from '@tools/types/ExpirationTypes';
+import { ExpirationData, ExpirationSettingsData } from '@tools/types/ExpirationTypes';
 
 export default class ExpirationFetchService {
   /**
@@ -104,6 +104,68 @@ export default class ExpirationFetchService {
       }
     } catch (error) {
       ErrorUtil.throwError('Error deleting expiration item', error);
+    }
+  }
+
+  /**
+   * Fetch settings for a specific terminal
+   * @param terminalId The terminal ID to fetch settings for
+   * @returns Promise with settings data
+   */
+  public static async fetchSettings(terminalId: string): Promise<ExpirationSettingsData> {
+    if (!terminalId) {
+      throw new Error('terminalId is required');
+    }
+
+    try {
+      const response = await fetch(`/api/expiration/settings?terminalId=${terminalId}`);
+
+      if (!response.ok) {
+        ErrorUtil.throwError('Failed to fetch settings');
+      }
+
+      const { settings } = await response.json();
+      return settings;
+    } catch (error) {
+      ErrorUtil.throwError('Error fetching settings', error);
+    }
+  }
+
+  /**
+   * Update settings for a specific terminal
+   * @param terminalId The terminal ID
+   * @param notificationHour The notification hour (0-23)
+   * @param daysBeforeNotify Days before expiration to notify
+   * @returns Promise with updated settings data
+   */
+  public static async updateSettings(
+    terminalId: string,
+    notificationHour: number,
+    daysBeforeNotify: number
+  ): Promise<ExpirationSettingsData> {
+    if (!terminalId) {
+      throw new Error('terminalId is required');
+    }
+
+    try {
+      const response = await fetch('/api/expiration/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          terminalId,
+          notificationHour,
+          daysBeforeNotify,
+        }),
+      });
+
+      if (!response.ok) {
+        ErrorUtil.throwError('Failed to update settings');
+      }
+
+      const { settings } = await response.json();
+      return settings;
+    } catch (error) {
+      ErrorUtil.throwError('Error updating settings', error);
     }
   }
 }

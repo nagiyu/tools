@@ -5,11 +5,14 @@ import React, { useState } from 'react';
 import AdminManagement from '@client-common/components/admin/AdminManagement';
 import { Column } from '@client-common/components/data/table/BasicTable';
 import IdentifierUtil from '@client-common/utils/IdentifierUtil.client';
+import BasicDialog from '@client-common/components/feedback/dialog/BasicDialog';
+import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 
 import { ExpirationData } from '@tools/types/ExpirationTypes';
 import { DEFAULT_DAYS_BEFORE_NOTIFY } from '@tools/consts/ExpirationConsts';
 import ExpirationFetchService from '@/services/ExpirationFetchService.client';
 import ExpirationForm from './ExpirationForm';
+import ExpirationSettings from './ExpirationSettings';
 
 /**
  * Get the status of an expiration item based on the expiration date
@@ -56,6 +59,7 @@ interface ExpirationDataWithStatus extends ExpirationData {
 
 export default function ExpirationManagementContainer() {
   const [terminalId, setTerminalId] = useState<string>('');
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
 
   // Initialize terminal ID on mount
   React.useEffect(() => {
@@ -186,23 +190,44 @@ export default function ExpirationManagementContainer() {
       </p>
 
       {terminalId ? (
-        <AdminManagement
-          columns={columns}
-          fetchData={fetchData}
-          itemName="Expiration"
-          defaultItem={defaultExpiration}
-          validateItem={validateItem}
-          onCreate={onCreate}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-        >
-          {(item, _state, onItemChange) => (
-            <ExpirationForm
-              item={item}
-              onItemChange={onItemChange}
-            />
-          )}
-        </AdminManagement>
+        <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <ContainedButton onClick={() => setSettingsDialogOpen(true)}>
+              通知設定
+            </ContainedButton>
+          </div>
+
+          <AdminManagement
+            columns={columns}
+            fetchData={fetchData}
+            itemName="Expiration"
+            defaultItem={defaultExpiration}
+            validateItem={validateItem}
+            onCreate={onCreate}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          >
+            {(item, _state, onItemChange) => (
+              <ExpirationForm
+                item={item}
+                onItemChange={onItemChange}
+              />
+            )}
+          </AdminManagement>
+
+          <BasicDialog
+            open={settingsDialogOpen}
+            title="通知設定"
+            onClose={() => setSettingsDialogOpen(false)}
+          >
+            {() => (
+              <ExpirationSettings
+                terminalId={terminalId}
+                onClose={() => setSettingsDialogOpen(false)}
+              />
+            )}
+          </BasicDialog>
+        </>
       ) : (
         <p style={{ textAlign: 'center', color: '#666' }}>
           Loading...
