@@ -12,6 +12,7 @@ import { PRIORITY_LEVELS } from '@tools/consts/ToDoConsts';
 import { PriorityType } from '@tools/types/ToDoTypes';
 import ToDoFetchService from '@/services/ToDoFetchService.client';
 import EditDialogContent from './EditDialogContent';
+import NotificationSettings from './NotificationSettings';
 
 export default function ToDoTool() {
   const [terminalId, setTerminalId] = useState<string>('');
@@ -149,24 +150,28 @@ export default function ToDoTool() {
       </p>
 
       {terminalId ? (
-        <AdminManagement
-          columns={columns}
-          fetchData={fetchData}
-          itemName="ToDo"
-          defaultItem={defaultToDo}
-          validateItem={validateItem}
-          onCreate={onCreate}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-        >
-          {(item, _state, onItemChange) => (
-            <EditDialogContent
-              item={item}
-              onItemChange={onItemChange}
-              priorityOptions={priorityOptions}
-            />
-          )}
-        </AdminManagement>
+        <>
+          <AdminManagement
+            columns={columns}
+            fetchData={fetchData}
+            itemName="ToDo"
+            defaultItem={defaultToDo}
+            validateItem={validateItem}
+            onCreate={onCreate}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          >
+            {(item, _state, onItemChange) => (
+              <EditDialogContent
+                item={item}
+                onItemChange={onItemChange}
+                priorityOptions={priorityOptions}
+              />
+            )}
+          </AdminManagement>
+
+          <NotificationSettings terminalId={terminalId} />
+        </>
       ) : (
         <p style={{ textAlign: 'center', color: '#666' }}>
           Loading...

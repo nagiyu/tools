@@ -2,12 +2,19 @@ import { NextRequest } from 'next/server';
 
 import ToDoService from '@tools/services/ToDoService';
 import { ToDoData } from '@tools/interfaces/ToDoData';
-import APIUtil from '@client-common/utils/APIUtil';
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+import { ROOT_FEATURE, ToolsFeature } from '@tools/consts/ToolsConsts';
+import { BadRequestError, NotFoundError } from '@common/errors';
 
 // Constants for validation
 const VALID_PRIORITIES = ['Must', 'Should', 'Could'];
 const DATE_FORMAT_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const options: APIResponseOptions = {
+  rootFeature: ROOT_FEATURE,
+  feature: ToolsFeature.TODO,
+};
 
 /**
  * Validate if a string is a valid UUID (v4 format)
@@ -27,19 +34,19 @@ function isValidDate(dateString: string): boolean {
   if (!DATE_FORMAT_REGEX.test(dateString)) {
     return false;
   }
-  
+
   const date = new Date(dateString + 'T00:00:00.000Z'); // Use UTC to avoid timezone issues
-  
+
   // Check for Invalid Date
   if (isNaN(date.getTime())) {
     return false;
   }
-  
+
   // Check if date matches the input string (prevents dates like 2023-02-30)
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');
-  
+
   return dateString === `${year}-${month}-${day}`;
 }
 
@@ -56,28 +63,25 @@ function isValidDate(dateString: string): boolean {
  * }
  */
 export async function GET(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const { searchParams } = new URL(request.url);
     const terminalId = searchParams.get('terminalId');
 
     // Validate terminalId
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('terminalId is required');
+      throw new BadRequestError('terminalId is required');
     }
 
     if (!isValidUUID(terminalId)) {
-      return APIUtil.ReturnBadRequest('Invalid terminalId format');
+      throw new BadRequestError('Invalid terminalId format');
     }
 
     // Get todos for the specified terminal
     const service = new ToDoService();
     const todos = await service.getByTerminalId(terminalId);
 
-    return APIUtil.ReturnSuccessWithObject({ todos });
-  } catch (error) {
-    console.error('Error in GET /api/todo:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return { todos };
+  }, options);
 }
 
 /**
@@ -98,28 +102,28 @@ export async function GET(request: NextRequest) {
  * }
  */
 export async function POST(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const body = await request.json();
     const { terminalId, title, dueDate, priority } = body;
 
     // Validate required fields
     if (!terminalId || !title || !dueDate || !priority) {
-      return APIUtil.ReturnBadRequest('Missing required fields: terminalId, title, dueDate, priority');
+      throw new BadRequestError('Missing required fields: terminalId, title, dueDate, priority');
     }
 
     // Validate terminalId format
     if (!isValidUUID(terminalId)) {
-      return APIUtil.ReturnBadRequest('Invalid terminalId format');
+      throw new BadRequestError('Invalid terminalId format');
     }
 
     // Validate priority
     if (!VALID_PRIORITIES.includes(priority)) {
-      return APIUtil.ReturnBadRequest('Invalid priority. Must be one of: Must, Should, Could');
+      throw new BadRequestError('Invalid priority. Must be one of: Must, Should, Could');
     }
 
     // Validate dueDate
     if (!isValidDate(dueDate)) {
-      return APIUtil.ReturnBadRequest('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
+      throw new BadRequestError('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
     }
 
     // Create new todo
@@ -133,11 +137,8 @@ export async function POST(request: NextRequest) {
 
     const todo = await service.create(newTodo);
 
-    return APIUtil.ReturnSuccessWithObject({ todo });
-  } catch (error) {
-    console.error('Error in POST /api/todo:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return { todo };
+  }, options);
 }
 
 /**
@@ -159,40 +160,40 @@ export async function POST(request: NextRequest) {
  * }
  */
 export async function PUT(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const body = await request.json();
     const { id, terminalId, title, dueDate, priority } = body;
 
     // Validate required fields
     if (!id || !terminalId || !title || !dueDate || !priority) {
-      return APIUtil.ReturnBadRequest('Missing required fields: id, terminalId, title, dueDate, priority');
+      throw new BadRequestError('Missing required fields: id, terminalId, title, dueDate, priority');
     }
 
     // Validate terminalId format
     if (!isValidUUID(terminalId)) {
-      return APIUtil.ReturnBadRequest('Invalid terminalId format');
+      throw new BadRequestError('Invalid terminalId format');
     }
 
     // Validate priority
     if (!VALID_PRIORITIES.includes(priority)) {
-      return APIUtil.ReturnBadRequest('Invalid priority. Must be one of: Must, Should, Could');
+      throw new BadRequestError('Invalid priority. Must be one of: Must, Should, Could');
     }
 
     // Validate dueDate
     if (!isValidDate(dueDate)) {
-      return APIUtil.ReturnBadRequest('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
+      throw new BadRequestError('Invalid dueDate. Expected a valid date in YYYY-MM-DD format');
     }
 
     // Check if todo exists and belongs to the specified terminal
     const service = new ToDoService();
     const existingTodo = await service.getById(id);
-    
+
     if (!existingTodo) {
-      return APIUtil.ReturnNotFound('ToDo not found');
+      throw new NotFoundError('ToDo not found');
     }
 
     if (existingTodo.terminalId !== terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID mismatch. Cannot update ToDo from different terminal');
+      throw new BadRequestError('TerminalID mismatch. Cannot update ToDo from different terminal');
     }
 
     // Update todo
@@ -205,11 +206,8 @@ export async function PUT(request: NextRequest) {
 
     const todo = await service.update(id, updates);
 
-    return APIUtil.ReturnSuccessWithObject({ todo });
-  } catch (error) {
-    console.error('Error in PUT /api/todo:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return { todo };
+  }, options);
 }
 
 /**
@@ -228,38 +226,35 @@ export async function PUT(request: NextRequest) {
  * }
  */
 export async function DELETE(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const body = await request.json();
     const { id, terminalId } = body;
 
     // Validate required fields
     if (!id || !terminalId) {
-      return APIUtil.ReturnBadRequest('Missing required fields: id, terminalId');
+      throw new BadRequestError('Missing required fields: id, terminalId');
     }
 
     // Validate terminalId format
     if (!isValidUUID(terminalId)) {
-      return APIUtil.ReturnBadRequest('Invalid terminalId format');
+      throw new BadRequestError('Invalid terminalId format');
     }
 
     // Check if todo exists and belongs to the specified terminal
     const service = new ToDoService();
     const existingTodo = await service.getById(id);
-    
+
     if (!existingTodo) {
-      return APIUtil.ReturnNotFound('ToDo not found');
+      throw new NotFoundError('ToDo not found');
     }
 
     if (existingTodo.terminalId !== terminalId) {
-      return APIUtil.ReturnBadRequest('TerminalID mismatch. Cannot delete ToDo from different terminal');
+      throw new BadRequestError('TerminalID mismatch. Cannot delete ToDo from different terminal');
     }
 
     // Delete todo
     await service.delete(id);
 
-    return APIUtil.ReturnSuccessWithObject({ success: true });
-  } catch (error) {
-    console.error('Error in DELETE /api/todo:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+    return { success: true };
+  }, options);
 }

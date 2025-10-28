@@ -3,8 +3,12 @@ import { NextRequest } from 'next/server';
 import OpenAIService from '@common/services/OpenAIService';
 import SecretsManagerUtil from '@common/aws/SecretsManagerUtil';
 import EnvironmentalUtil from '@common/utils/EnvironmentalUtil';
+import { BadRequestError } from '@common/errors';
 import { OpenAIChatHistory, OpenAIChatOptions } from '@common/interfaces/OpenAIMessageType';
-import APIUtil from '@client-common/utils/APIUtil';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
+import { ROOT_FEATURE, ToolsFeature } from '@tools/consts/ToolsConsts';
 
 export interface ChatRequest {
     conversationHistory: OpenAIChatHistory;
@@ -17,13 +21,18 @@ export interface ChatResponse {
     updatedHistory: OpenAIChatHistory;
 }
 
+const options: APIResponseOptions = {
+    rootFeature: ROOT_FEATURE,
+    feature: ToolsFeature.CHAT,
+};
+
 export async function POST(request: NextRequest) {
-    try {
+    return APIUtil.apiHandler(async () => {
         const body: ChatRequest = await request.json();
         const { conversationHistory, userMessage, options } = body;
 
         if (!conversationHistory || !userMessage) {
-            return APIUtil.ReturnBadRequest('Missing required fields');
+            throw new BadRequestError('Missing required fields');
         }
 
         // Get OpenAI API key from AWS Secrets Manager
@@ -52,9 +61,6 @@ export async function POST(request: NextRequest) {
             updatedHistory
         };
 
-        return APIUtil.ReturnSuccessWithObject(response);
-    } catch (error) {
-        console.error('Error in chat API:', error);
-        return APIUtil.ReturnInternalServerErrorWithError(error);
-    }
+        return response;
+    }, options);
 }
