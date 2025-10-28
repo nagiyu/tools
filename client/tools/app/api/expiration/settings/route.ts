@@ -1,31 +1,40 @@
 import { NextRequest } from 'next/server';
 
+import { BadRequestError, NotFoundError } from '@common/errors';
+
+import APIUtil, { APIResponseOptions } from '@client-common/utils/APIUtil';
+
 import ExpirationSettingsService from '@tools/services/ExpirationSettingsService';
 import { ExpirationSettingsData } from '@tools/types/ExpirationTypes';
-import APIUtil from '@client-common/utils/APIUtil';
+import { ROOT_FEATURE, ToolsFeature } from '@tools/consts/ToolsConsts';
 
 const DEFAULT_NOTIFICATION_HOUR = 9;
 const DEFAULT_DAYS_BEFORE_NOTIFY = 3;
+
+const options: APIResponseOptions = {
+  rootFeature: ROOT_FEATURE,
+  feature: ToolsFeature.EXPIRATION,
+};
 
 /**
  * GET /api/expiration/settings
  * Retrieve settings for the user's TerminalID
  */
 export async function GET(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const { searchParams } = new URL(request.url);
     const terminalId = searchParams.get('terminalId');
-    
+
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('terminalId is required');
+      throw new BadRequestError('terminalId is required');
     }
 
     const service = new ExpirationSettingsService();
     const allSettings = await service.get();
-    
+
     // Find settings for this terminal
     const settings = allSettings.find(s => s.terminalId === terminalId);
-    
+
     // If no settings exist, return default settings
     if (!settings) {
       const defaultSettings: ExpirationSettingsData = {
@@ -36,14 +45,11 @@ export async function GET(request: NextRequest) {
         create: 0,
         update: 0,
       };
-      return APIUtil.ReturnSuccessWithObject({ settings: defaultSettings });
+      return { settings: defaultSettings };
     }
-    
-    return APIUtil.ReturnSuccessWithObject({ settings });
-  } catch (error) {
-    console.error('Error in GET /api/expiration/settings:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return { settings };
+  }, options);
 }
 
 /**
@@ -51,32 +57,32 @@ export async function GET(request: NextRequest) {
  * Update or create settings for the user's TerminalID
  */
 export async function PUT(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const body = await request.json();
     const { terminalId, notificationHour, daysBeforeNotify } = body;
-    
+
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('terminalId is required');
+      throw new BadRequestError('terminalId is required');
     }
 
     // Validate notificationHour
     if (notificationHour !== undefined && (notificationHour < 0 || notificationHour > 23)) {
-      return APIUtil.ReturnBadRequest('notificationHour must be between 0 and 23');
+      throw new BadRequestError('notificationHour must be between 0 and 23');
     }
 
     // Validate daysBeforeNotify
     if (daysBeforeNotify !== undefined && daysBeforeNotify < 0) {
-      return APIUtil.ReturnBadRequest('daysBeforeNotify must be non-negative');
+      throw new BadRequestError('daysBeforeNotify must be non-negative');
     }
 
     const service = new ExpirationSettingsService();
     const allSettings = await service.get();
-    
+
     // Find existing settings for this terminal
     const existingSettings = allSettings.find(s => s.terminalId === terminalId);
-    
+
     let settings: ExpirationSettingsData;
-    
+
     if (existingSettings) {
       // Update existing settings
       const updates: Partial<ExpirationSettingsData> = {
@@ -100,12 +106,9 @@ export async function PUT(request: NextRequest) {
 
       settings = await service.create(newSettings);
     }
-    
-    return APIUtil.ReturnSuccessWithObject({ settings });
-  } catch (error) {
-    console.error('Error in PUT /api/expiration/settings:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return { settings };
+  }, options);
 }
 
 /**
@@ -113,29 +116,26 @@ export async function PUT(request: NextRequest) {
  * Delete settings for the user's TerminalID
  */
 export async function DELETE(request: NextRequest) {
-  try {
+  return APIUtil.apiHandler(async () => {
     const { searchParams } = new URL(request.url);
     const terminalId = searchParams.get('terminalId');
-    
+
     if (!terminalId) {
-      return APIUtil.ReturnBadRequest('terminalId is required');
+      throw new BadRequestError('terminalId is required');
     }
 
     const service = new ExpirationSettingsService();
     const allSettings = await service.get();
-    
+
     // Find settings for this terminal
     const settings = allSettings.find(s => s.terminalId === terminalId);
-    
+
     if (!settings) {
-      return APIUtil.ReturnNotFound('Settings not found');
+      throw new NotFoundError('Settings not found');
     }
 
     await service.delete(settings.id);
-    
-    return APIUtil.ReturnSuccessWithObject({ success: true });
-  } catch (error) {
-    console.error('Error in DELETE /api/expiration/settings:', error);
-    return APIUtil.ReturnInternalServerErrorWithError(error);
-  }
+
+    return { success: true };
+  }, options);
 }
