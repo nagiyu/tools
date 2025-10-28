@@ -10,6 +10,7 @@ import { ExpirationData } from '@tools/types/ExpirationTypes';
 import { DEFAULT_DAYS_BEFORE_NOTIFY } from '@tools/consts/ExpirationConsts';
 import ExpirationFetchService from '@/services/ExpirationFetchService.client';
 import ExpirationForm from './ExpirationForm';
+import ExpirationSettings from './ExpirationSettings';
 
 /**
  * Get the status of an expiration item based on the expiration date
@@ -186,23 +187,27 @@ export default function ExpirationManagementContainer() {
       </p>
 
       {terminalId ? (
-        <AdminManagement
-          columns={columns}
-          fetchData={fetchData}
-          itemName="Expiration"
-          defaultItem={defaultExpiration}
-          validateItem={validateItem}
-          onCreate={onCreate}
-          onUpdate={onUpdate}
-          onDelete={onDelete}
-        >
-          {(item, _state, onItemChange) => (
-            <ExpirationForm
-              item={item}
-              onItemChange={onItemChange}
-            />
-          )}
-        </AdminManagement>
+        <>
+          <AdminManagement
+            columns={columns}
+            fetchData={fetchData}
+            itemName="Expiration"
+            defaultItem={defaultExpiration}
+            validateItem={validateItem}
+            onCreate={onCreate}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+          >
+            {(item, _state, onItemChange) => (
+              <ExpirationForm
+                item={item}
+                onItemChange={onItemChange}
+              />
+            )}
+          </AdminManagement>
+          
+          <ExpirationSettings terminalId={terminalId} />
+        </>
       ) : (
         <p style={{ textAlign: 'center', color: '#666' }}>
           Loading...
