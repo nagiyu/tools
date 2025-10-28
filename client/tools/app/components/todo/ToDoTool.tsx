@@ -13,6 +13,7 @@ import { PriorityType } from '@tools/types/ToDoTypes';
 import ToDoFetchService from '@/services/ToDoFetchService.client';
 import EditDialogContent from './EditDialogContent';
 import NotificationSettings from './NotificationSettings';
+import PushNotificationManager from './PushNotificationManager';
 
 export default function ToDoTool() {
   const [terminalId, setTerminalId] = useState<string>('');
@@ -169,6 +170,8 @@ export default function ToDoTool() {
               />
             )}
           </AdminManagement>
+
+          <PushNotificationManager />
 
           <NotificationSettings terminalId={terminalId} />
         </>
