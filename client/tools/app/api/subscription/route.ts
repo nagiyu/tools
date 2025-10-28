@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 import { SubscriptionService } from '@common/services/subscription/SubscriptionService';
 import { SubscriptionDataType } from '@common/interfaces/data/SubscriptionDataType';
@@ -15,7 +15,7 @@ const options: APIResponseOptions = {
 };
 
 /**
- * Validate if a string is a valid UUID (v4 format)
+ * Validate if a string is a valid UUID format
  * @param uuid - The UUID string to validate
  * @returns true if valid UUID format, false otherwise
  */
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       return subscription;
     } catch (error) {
       if (error instanceof NotFoundError) {
-        return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
+        throw new NotFoundError('Subscription not found');
       }
       throw error;
     }
