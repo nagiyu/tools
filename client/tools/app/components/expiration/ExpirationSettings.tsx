@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
-import BasicTextField from '@client-common/components/inputs/TextFields/BasicTextField';
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import LoadingContent from '@client-common/components/content/LoadingContent';
 import LoadingPage from '@client-common/pages/LoadingPage';
@@ -31,6 +30,12 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
   const hourOptions: SelectOptionType[] = Array.from({ length: 24 }, (_, i) => ({
     value: i.toString(),
     label: `${i.toString().padStart(2, '0')}:00`,
+  }));
+
+  // Days before notify options (1-14 days)
+  const daysOptions: SelectOptionType[] = Array.from({ length: 14 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `${i + 1}日前`,
   }));
 
   // Fetch settings on mount
@@ -119,16 +124,14 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
           </div>
 
           <div style={{ marginBottom: '24px', maxWidth: '300px' }}>
-            <BasicTextField
+            <BasicSelect
               label="事前通知日数"
-              type="number"
               value={settings.daysBeforeNotify.toString()}
-              onChange={(e) => {
-                const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value >= 0) {
-                  setSettings({ ...settings, daysBeforeNotify: value });
-                }
-              }}
+              onChange={(value: string) => setSettings({ 
+                ...settings, 
+                daysBeforeNotify: parseInt(value, 10) 
+              })}
+              options={daysOptions}
             />
             <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
               賞味期限の何日前から「期限間近」として通知するか設定します
