@@ -1176,15 +1176,11 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
   - `/api/subscription` - プッシュ購読のCRUD操作
   - `/api/notification` - VAPID公開鍵の取得
   - `/api/send-notification` - プッシュ通知送信（テスト用）
-- PushNotificationManagerコンポーネント (`/client/tools/app/components/todo/PushNotificationManager.tsx`) を実装
-  - `useNotificationManager` フックを使用したプッシュ通知管理
-  - 通知の購読・購読解除機能
-  - Service Worker自動登録
-  - ブラウザサポート確認
+- CommonLayoutの `enableNotification` を有効化
+  - layout.tsx にて `enableNotification={true}` を設定
+  - メニューから「Notification Settings」で通知設定が可能
 - Service Workerの改善 (`/client/tools/public/sw.js`)
   - 動的なURLオリジン使用に変更
-- ToDoToolへのプッシュ通知統合
-  - PushNotificationManagerコンポーネントの追加
 
 実装されたサービス：
 - SubscriptionService: プッシュ購読データの管理（typescript-common既存）

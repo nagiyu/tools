@@ -43,6 +43,7 @@ export default function RootLayout({
       title='Tools'
       menuItems={menuItems}
       enableAuthentication={false}
+      enableNotification={true}
       enableAdSense={false}
     >
       {children}
