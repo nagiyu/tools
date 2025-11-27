@@ -934,7 +934,7 @@ function getTableName(): string {
 
 ### Phase 2: 通知機能実装
 
-- [ ] 設定画面実装
+- [x] 設定画面実装
 - [ ] Push通知登録
 - [ ] Lambda Function 実装
 - [ ] EventBridge 設定
