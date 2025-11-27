@@ -83,7 +83,6 @@ export default function PushNotificationManager() {
               onClick={() => runWithLoading(async () => {
                 await unsubscribeFromPush();
               })}
-              color="secondary"
             />
           ) : (
             <ContainedButton
