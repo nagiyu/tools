@@ -142,8 +142,8 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
       }
       const { VAPID_PUBLIC_KEY } = await vapidResponse.json();
 
-      // Convert VAPID key to Uint8Array
-      const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+      // Convert VAPID key to ArrayBuffer for applicationServerKey
+      const urlBase64ToArrayBuffer = (base64String: string): ArrayBuffer => {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)
           .replace(/-/g, '+')
@@ -153,13 +153,13 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
         for (let i = 0; i < rawData.length; ++i) {
           outputArray[i] = rawData.charCodeAt(i);
         }
-        return outputArray;
+        return outputArray.buffer as ArrayBuffer;
       };
 
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToArrayBuffer(VAPID_PUBLIC_KEY),
       });
 
       // Save subscription to server
