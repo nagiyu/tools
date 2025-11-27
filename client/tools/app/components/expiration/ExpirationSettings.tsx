@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import BasicSelect from '@client-common/components/inputs/Selects/BasicSelect';
 import ContainedButton from '@client-common/components/inputs/Buttons/ContainedButton';
 import LoadingContent from '@client-common/components/content/LoadingContent';
@@ -10,8 +10,41 @@ import ExpirationSettingsFetchService from '@/services/ExpirationSettingsFetchSe
 import { ExpirationSettingsData } from '@tools/types/ExpirationTypes';
 import { DEFAULT_NOTIFICATION_HOUR, DEFAULT_DAYS_BEFORE_NOTIFY } from '@tools/consts/ExpirationConsts';
 
+/**
+ * Push notification permission status
+ */
+type NotificationPermissionStatus = 'default' | 'granted' | 'denied' | 'unsupported';
+
 interface ExpirationSettingsProps {
   terminalId: string;
+}
+
+/**
+ * Register service worker for push notifications
+ * @returns ServiceWorkerRegistration or null if not supported
+ */
+async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
+  if (!('serviceWorker' in navigator)) {
+    return null;
+  }
+  
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    return registration;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check current notification permission status
+ * @returns Current permission status
+ */
+function getNotificationPermissionStatus(): NotificationPermissionStatus {
+  if (!('Notification' in window)) {
+    return 'unsupported';
+  }
+  return Notification.permission as NotificationPermissionStatus;
 }
 
 export default function ExpirationSettings({ terminalId }: ExpirationSettingsProps) {
@@ -25,6 +58,8 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
   });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermissionStatus>('default');
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
   // Hour options (0-23)
   const hourOptions: SelectOptionType[] = Array.from({ length: 24 }, (_, i) => ({
@@ -56,6 +91,86 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
 
     fetchSettings();
   }, [terminalId]);
+
+  // Check notification permission on mount
+  useEffect(() => {
+    setNotificationPermission(getNotificationPermissionStatus());
+  }, []);
+
+  /**
+   * Request push notification permission and register subscription
+   */
+  const handleRequestNotificationPermission = useCallback(async () => {
+    // Check if notifications are supported
+    if (!('Notification' in window)) {
+      setMessage('このブラウザはプッシュ通知に対応していません');
+      return;
+    }
+
+    // Check if service worker is supported
+    if (!('serviceWorker' in navigator)) {
+      setMessage('このブラウザはサービスワーカーに対応していません');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setMessage(null);
+
+    try {
+      // Request notification permission
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission as NotificationPermissionStatus);
+
+      if (permission !== 'granted') {
+        setMessage('通知の許可が得られませんでした');
+        return;
+      }
+
+      // Register service worker
+      const registration = await registerServiceWorker();
+      if (!registration) {
+        setMessage('サービスワーカーの登録に失敗しました');
+        return;
+      }
+
+      setMessage('プッシュ通知の登録が完了しました');
+    } catch {
+      setMessage('プッシュ通知の登録に失敗しました');
+    } finally {
+      setIsSubscribing(false);
+    }
+  }, []);
+
+  /**
+   * Get status text for notification permission
+   */
+  const getNotificationStatusText = (): string => {
+    switch (notificationPermission) {
+      case 'granted':
+        return '✓ 通知が許可されています';
+      case 'denied':
+        return '✗ 通知がブロックされています（ブラウザ設定で許可してください）';
+      case 'unsupported':
+        return '✗ このブラウザはプッシュ通知に対応していません';
+      default:
+        return '通知の許可が必要です';
+    }
+  };
+
+  /**
+   * Get status color for notification permission
+   */
+  const getNotificationStatusColor = (): string => {
+    switch (notificationPermission) {
+      case 'granted':
+        return '#4caf50';
+      case 'denied':
+      case 'unsupported':
+        return '#f44336';
+      default:
+        return '#ff9800';
+    }
+  };
 
   const handleSave = async (runWithLoading: (fn: () => Promise<void>) => Promise<void>) => {
     await runWithLoading(async () => {
@@ -136,6 +251,39 @@ export default function ExpirationSettings({ terminalId }: ExpirationSettingsPro
             <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
               賞味期限の何日前から「期限間近」として通知するか設定します
             </p>
+          </div>
+
+          {/* Push notification registration section */}
+          <div style={{
+            marginBottom: '24px',
+            padding: '16px',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '8px',
+            border: '1px solid #e0e0e0'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '8px', fontSize: '16px' }}>
+              プッシュ通知登録
+            </h3>
+            <p style={{ 
+              fontSize: '14px', 
+              color: getNotificationStatusColor(),
+              marginBottom: '12px'
+            }}>
+              {getNotificationStatusText()}
+            </p>
+            {notificationPermission === 'default' && (
+              <ContainedButton
+                label={isSubscribing ? '登録中...' : '通知を許可する'}
+                disabled={isSubscribing}
+                onClick={handleRequestNotificationPermission}
+              />
+            )}
+            {notificationPermission === 'denied' && (
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                ブラウザの設定から通知を許可してください。
+                設定後、ページを再読み込みしてください。
+              </p>
+            )}
           </div>
 
           <ContainedButton
