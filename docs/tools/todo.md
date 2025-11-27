@@ -1062,10 +1062,10 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
   - [x] NotificationSettingAccessor実装
   - [x] 通知設定API実装
   - [x] 通知設定UI実装
-- [ ] プッシュ通知機能
-  - [ ] サービスワーカー実装
-  - [ ] プッシュ購読管理
-  - [ ] NotificationService実装
+- [x] プッシュ通知機能
+  - [x] サービスワーカー実装
+  - [x] プッシュ購読管理
+  - [x] NotificationService実装
 - [ ] バッチ通知処理
   - [ ] Lambda関数実装
   - [ ] EventBridge設定
@@ -1170,3 +1170,23 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
 - BasicDatePicker: 期日選択（日本時間対応）
 - BasicSelect: 優先度選択（Must/Should/Could）
 - AdminManagement: CRUD操作とデータ表示の統一管理
+
+### 2025-10-28: Phase 1 プッシュ通知機能実装完了
+- プッシュ通知API実装
+  - `/api/subscription` - プッシュ購読のCRUD操作
+  - `/api/notification` - VAPID公開鍵の取得
+  - `/api/send-notification` - プッシュ通知送信（テスト用）
+- CommonLayoutの `enableNotification` を有効化
+  - layout.tsx にて `enableNotification={true}` を設定
+  - メニューから「Notification Settings」で通知設定が可能
+- Service Workerの改善 (`/client/tools/public/sw.js`)
+  - 動的なURLオリジン使用に変更
+
+実装されたサービス：
+- SubscriptionService: プッシュ購読データの管理（typescript-common既存）
+- NotificationService: プッシュ通知送信（typescript-common既存）
+- SubscriptionFetchService: クライアント側購読API通信（nextjs-common既存）
+- NotificationUtil: サーバー側通知送信ユーティリティ（nextjs-common既存）
+
+使用されているフック：
+- useNotificationManager: プッシュ通知の購読管理（nextjs-common既存）

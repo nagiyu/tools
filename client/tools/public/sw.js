@@ -19,9 +19,6 @@ self.addEventListener('push', function (event) {
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow('http://localhost:3000')
-
-    // TODO: これでいけるかも？
-    // clients.openWindow(self.location.origin || "http://localhost:3000")
+    clients.openWindow(self.location.origin || 'http://localhost:3000')
   );
 });
