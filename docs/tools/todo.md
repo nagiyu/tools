@@ -1066,8 +1066,8 @@ const vapidPrivateKey = await SecretsManagerUtil.getSecretValue(
   - [x] サービスワーカー実装
   - [x] プッシュ購読管理
   - [x] NotificationService実装
-- [ ] バッチ通知処理
-  - [ ] Lambda関数実装
+- [x] バッチ通知処理
+  - [x] Lambda関数実装
   - [ ] EventBridge設定
   - [ ] DueDate GSI作成
 
