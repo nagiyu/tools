@@ -188,9 +188,10 @@ export default function ExpirationManagementContainer() {
       {terminalId ? (
         <>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-            <ContainedButton onClick={() => setSettingsDialogOpen(true)}>
-              通知設定
-            </ContainedButton>
+            <ContainedButton
+              label="通知設定"
+              onClick={() => setSettingsDialogOpen(true)}
+            />
           </div>
 
           <AdminManagement

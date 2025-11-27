@@ -136,19 +136,16 @@ export default function ExpirationSettings({
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
           {onClose && (
             <ContainedButton
+              label="キャンセル"
               onClick={onClose}
               disabled={saving}
-              color="inherit"
-            >
-              キャンセル
-            </ContainedButton>
+            />
           )}
           <ContainedButton
+            label={saving ? '保存中...' : '保存'}
             onClick={handleSave}
             disabled={saving}
-          >
-            {saving ? '保存中...' : '保存'}
-          </ContainedButton>
+          />
         </div>
       </BasicStack>
     </div>
